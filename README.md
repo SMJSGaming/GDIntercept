@@ -23,7 +23,7 @@ Request manipulation has for the time being been disabled due to security concer
 
 ## Credits
 
-- [RobTop](user:71) - Some UI tips, providing source code and help with determining the sensitive data keys.
+- [RobTop](https://www.youtube.com/@RobTopGames) - Some UI tips, providing source code and help with determining the sensitive data keys.
 - [Alphalaneous](https://github.com/Alphalaneous) - Providing the scaled border fix.
-- [GD Endy](user:5115808) - Helping out with sprite scaling issues.
+- [GD Endy](https://www.youtube.com/@GDEndy) - Helping out with sprite scaling issues.
 - [HJfod](https://github.com/HJfod) - Helping out with issues and geode specific quirks.
