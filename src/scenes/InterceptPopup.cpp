@@ -56,7 +56,7 @@ void InterceptPopup::scene() {
         } else {
             instance = new InterceptPopup();
 
-            if (instance && instance->init(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
+            if (instance && instance->initAnchored(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
                 instance->setID("intercept_popup"_spr);
                 instance->retain();
             } else {
@@ -88,7 +88,7 @@ void InterceptPopup::onClose(CCObject* obj) {
 
 void InterceptPopup::setupList() {
     const float xPosition = InterceptPopup::uiPadding + PADDING;
-    const CCSize listSize({ InterceptPopup::captureCellWidth, this->getPageHeight() });
+    const CCSize listSize(ccp(InterceptPopup::captureCellWidth, this->getPageHeight()));
     BorderFix* captures = BorderFix::create(m_captureList = CaptureList::create(listSize - 2, InterceptPopup::captureCellHeight, [this](HttpInfo* request) {
         this->updateInfo(request);
     }), LIGHTER_BROWN_4B, listSize, { 1, 1 });
@@ -100,7 +100,7 @@ void InterceptPopup::setupList() {
 
 void InterceptPopup::setupSettings() {
     CCNode* info = m_mainLayer->getChildByID("info"_spr);
-    CCSize padding({ PADDING, PADDING });
+    CCSize padding(ccp(PADDING, PADDING));
     const float xPosition = info->getPositionX() + info->getContentWidth() + PADDING;
     const float width = CCDirector::sharedDirector()->getWinSize().width - xPosition - InterceptPopup::uiPadding - PADDING;
     CCScale9Sprite* settingsBg = CCScale9Sprite::create("square02b_001.png");
@@ -166,7 +166,7 @@ void InterceptPopup::setupCodeBlock() {
         label->setScale(0.8f);
         label->setAnchorPoint(CENTER);
         label->setColor(ThemeStyle::getTheme().line);
-        label->setPosition(CCSize({ InterceptPopup::codeBlockButtonWidth / buttonCount, InterceptPopup::codeBlockButtonHeight }) / 2);
+        label->setPosition(ccp(InterceptPopup::codeBlockButtonWidth / buttonCount, InterceptPopup::codeBlockButtonHeight) / 2);
         button->setSizeMult(0);
         buttons.push_back(button);
 
