@@ -14,8 +14,9 @@ jobs:
         - name: Windows
           os: windows-latest
 
-        - name: macOS
-          os: macos-latest
+        # MacOS lacks some essential bindings and is in my eyes not worth the effort considering this issue will persist between updates.
+        # - name: MacOS
+        #   os: macos-latest
 
         - name: Android32
           os: ubuntu-latest
