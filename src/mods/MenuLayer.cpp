@@ -9,10 +9,11 @@ bool ModMenuLayer::init() {
 
     logo->setScale(0.4f);
 
-    CCMenu* menu = CCMenu::createWithItem(CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick)));
+    CCMenuItemSpriteExtra* logoBtn = CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick));
+    CCNode* closeMenu = this->getChildByID("close-menu");
 
-    menu->setPosition({ 18, CCDirector::sharedDirector()->getWinSize().height - 55 });
-    this->addChild(menu);
+    closeMenu->addChild(logoBtn);
+    closeMenu->updateLayout();
 
     return true;
 }

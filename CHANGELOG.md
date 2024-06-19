@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.1.1-alpha.2 (2024-06-20) - Compatibility Update
+
+- Made the mod compatible with other mods on the menu layer
+
 ## v0.1.0-alpha.1 (2024-06-19) - Initial Release
 
 - Added all the basic interface features
