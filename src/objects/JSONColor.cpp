@@ -65,7 +65,7 @@ bool JSONColor::determineCharToken(const char character, const std::string& trun
             return this->checkObjectTerminator(character);
         }
     } else {
-        bool accepted = m_token != TERMINATOR;
+        bool accepted = true;
 
         switch (m_token) {
             case STRING: {
@@ -101,6 +101,9 @@ bool JSONColor::determineCharToken(const char character, const std::string& trun
                 } else {
                     accepted = character == ' ';
                 }
+            } break;
+            default: {
+                accepted = false;
             }
         }
 

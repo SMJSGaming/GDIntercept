@@ -83,7 +83,7 @@ HttpInfo::HttpInfo(CCHttpRequest* request) : m_active(false),
 
     m_body = body ? std::string(request->getRequestData()).substr(0, request->getRequestDataSize()) : "";
     m_bodyContentType = this->determineContentType(m_body, true);
-    request->setResponseCallback(this, callfuncND_selector(HttpInfo::onResponse));
+    request->setResponseCallback(this, httpresponse_selector(HttpInfo::onResponse));
 }
 
 bool HttpInfo::isActive() {

@@ -38,7 +38,7 @@ void JSONCodeBlock::copyCode() {
 void JSONCodeBlock::setCode(const std::pair<HttpInfo::ContentType, std::string>& code) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
     const CCSize& fontSize = CCLabelBMFont::create("0", theme.fontName)->getContentSize() * theme.fontSize;
-    const CCSize& size = this->getContentSize() - CCSize({ this->getPaddingX(), this->getPaddingY() }) * 2;
+    const CCSize& size = this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2;
     const float cellHeight = fontSize.height + theme.lineHeight;
     const float lineNumberWidth = fontSize.width * 4;
     CCArray* cells = CCArray::create();
