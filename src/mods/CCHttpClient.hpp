@@ -5,5 +5,9 @@
 #include "../objects/HttpInfo.hpp"
 
 class $modify(ModCCHttpClient, CCHttpClient) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("CCHttpClient::send", INT_MAX - 1);
+    }
+
     void send(CCHttpRequest* request);
 };
