@@ -14,7 +14,7 @@ else()
     message(STATUS "Found Geode: $ENV{GEODE_SDK}")
 endif()
 
-add_custom_target(clear_cache ALL WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND geode.exe project clear-cache)
+add_custom_target(clear_cache ALL WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND geode project clear-cache)
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
