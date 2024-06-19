@@ -5,9 +5,9 @@ bool ModMenuLayer::init() {
         return false;
     }
 
-    CCNode* logo = createModLogo(Mod::get());
+    CCSprite* logo = CCSprite::create("GDI-round.png"_spr);
 
-    logo->setScale(0.5f);
+    logo->setScale(0.4f);
 
     CCMenu* menu = CCMenu::createWithItem(CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick)));
 

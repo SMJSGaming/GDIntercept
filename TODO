@@ -17,5 +17,7 @@ Release Todo:
   ☐ Add a settings button
   ☐ Add more keybinds
   ☐ Make a proper menu icon
+  ☐ Add a proper transition
+  ☐ Replace the popup init with initAnchored
 Nice To Haves:
   ☐ Custom theme support

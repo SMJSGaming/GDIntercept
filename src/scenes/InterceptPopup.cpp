@@ -56,7 +56,7 @@ void InterceptPopup::scene() {
         } else {
             instance = new InterceptPopup();
 
-            if (instance && instance->initAnchored(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
+            if (instance && instance->init(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
                 instance->setID("intercept_popup"_spr);
                 instance->retain();
             } else {

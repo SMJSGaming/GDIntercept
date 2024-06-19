@@ -3,8 +3,12 @@
   "version": "v0.1.0-alpha.1",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
-  "developer": "SMJS",
+  "developers": [
+    "SMJSGaming",
+    "RobTop"
+  ],
   "description": "A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X HttpClient.",
+  "repository": "https://github.com/SMJSGaming/GD-Intercept",
   "tags": [
     "online",
     "interface",
@@ -36,7 +40,7 @@
       }
     },
     "sprites": [
-      "resources/inverseborder.png"
+      "resources/*.png"
     ]
   },
   "settings": {
