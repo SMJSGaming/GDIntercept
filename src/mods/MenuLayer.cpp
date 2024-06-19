@@ -9,10 +9,9 @@ bool ModMenuLayer::init() {
 
     logo->setScale(0.4f);
 
-    CCMenuItemSpriteExtra* logoBtn = CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick));
     CCNode* closeMenu = this->getChildByID("close-menu");
 
-    closeMenu->addChild(logoBtn);
+    closeMenu->addChild(CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick)));
     closeMenu->updateLayout();
 
     return true;
