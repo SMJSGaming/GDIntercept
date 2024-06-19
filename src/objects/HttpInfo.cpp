@@ -196,7 +196,7 @@ HttpInfo::ContentType HttpInfo::determineContentType(const std::string& content,
 }
 
 void HttpInfo::onResponse(CCHttpClient* client, CCHttpResponse* response) {
-    std::vector<char>* data = response->getResponseData();
+    gd::vector<char>* data = response->getResponseData();
 
     m_response = std::string(data->begin(), data->end());
     m_responseCode = response->getResponseCode();
