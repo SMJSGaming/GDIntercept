@@ -1,0 +1,20 @@
+Beta Todo:
+  ✔ @today Add a RobTop API response parser @done(24-06-16 01:08)
+  ✔ @high Convert json objects to strings @done(24-06-16 01:25)
+  ✔ @critical Add a menu icon @done(24-06-19 12:04)
+  ✔ @low Rescale code block text @done(24-06-16 11:06)
+  ✔ @high Rework the about page @done(24-06-19 12:04)
+  ✔ @high Add an icon @done(24-06-19 12:04)
+  ✔ @high Set a touch priority @done(24-06-16 11:08)
+  ✔ @high Replace the rate limit button with a raw data button @done(24-06-17 18:42)
+  ✔ @high Truncase data per line @done(24-06-17 18:42)
+  ✔ @low Add a copy keybind @done(24-06-19 12:04)
+Release Todo:
+  ☐ Paths overflow in the info section, obscuring the status code
+  ☐ Add inputs to the json code block
+  ☐ Add a format to original in the converters
+  ☐ Add a send button
+  ☐ Add a settings button
+  ☐ Add more keybinds
+Nice To Haves:
+  ☐ Custom theme support

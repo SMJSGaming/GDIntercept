@@ -1,0 +1,73 @@
+{
+  "geode": "3.0.0-beta.1",
+  "version": "v1.0.0-alpha.1",
+  "id": "smjs.gdintercept",
+  "name": "GDIntercept",
+  "developer": "SMJS",
+  "description": "A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X HttpClient.",
+  "tags": [
+    "online",
+    "interface",
+    "utility",
+    "content",
+    "cheats",
+    "developer"
+  ],
+  "gd": {
+    "win": "2.206"
+  },
+  "dependencies": [
+    {
+      "id": "geode.custom-keybinds",
+      "version": "1.6.0-beta.1",
+      "importance": "required",
+      "platforms": [
+        "windows"
+      ]
+    }
+  ],
+  "resources": {
+    "fonts": {
+      "consola": {
+        "path": "resources/consola.ttf",
+        "size": 56
+      }
+    },
+    "sprites": [
+      "resources/inverseborder.png"
+    ]
+  },
+  "settings": {
+    "pause-requests": {
+      "name": "Pause Requests",
+      "description": "Pauses all requests and set their timeout to infinite.",
+      "type": "bool",
+      "default": false
+    },
+    "censor-data": {
+      "name": "Censor Sensitive Data",
+      "description": "Censors all known sensitive keys in GD and some common sensitive keys",
+      "type": "bool",
+      "default": true
+    },
+    "remember-requests": {
+      "name": "Remember Requests",
+      "description": "Remembers all requests made in the current session.",
+      "type": "bool",
+      "default": true
+    },
+    "raw-data": {
+      "name": "Raw Data",
+      "description": "Displays data in its raw state without any manipulation of the text. (WARNING! This can make the game freeze on particularly large requests/responses)",
+      "type": "bool",
+      "default": false
+    },
+    "theme": {
+      "name": "Theme",
+      "description": "The theme of the code block.",
+      "type": "string",
+      "default": "dark",
+      "match": "dark|light"
+    }
+  }
+}
