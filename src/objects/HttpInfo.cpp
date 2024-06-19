@@ -149,7 +149,7 @@ unsigned int HttpInfo::getResponseCode() {
 }
 
 std::string HttpInfo::generateBasicInfo() {
-    return std::format("Method: {}\nProtocol: {}\nHost: {}\nPath: {}\nStatus Code: {}",
+    return fmt::format("Method: {}\nProtocol: {}\nHost: {}\nPath: {}\nStatus Code: {}",
         this->formatMethod(),
         this->formatProtocol(),
         m_host,
