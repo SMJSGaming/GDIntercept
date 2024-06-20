@@ -1,5 +1,11 @@
 # GDIntercept Changelog
 
+## v0.1.2-alpha.3 (2024-06-20) - Bugfix Update
+
+- Fixed some bugs with the parsing of the response data
+- Fixed some UI bugs
+- Added better MacOS support
+
 ## v0.1.1-alpha.2 (2024-06-20) - Compatibility Update
 
 - Made the mod compatible with other mods on the menu layer
