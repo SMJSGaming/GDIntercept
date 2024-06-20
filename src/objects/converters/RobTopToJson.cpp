@@ -2,7 +2,7 @@
 
 const std::unordered_map<std::string, RobTopToJson::Parser> RobTopToJson::parsers({
     // Accounts
-    { "/database/accounts/syncGJAccountNew.php", RobTopToJson::Parser({ "encodedResponse" }) },
+    { "/database/accounts/syncGJAccountNew.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) },
     { "/database/accounts/loginGJAccount.php", RobTopToJson::Parser({ "accountID", "userID" }, ",") },
     // Users
     { "/database/getGJScores20.php", RobTopToJson::Parser(":", "|") },
@@ -11,26 +11,31 @@ const std::unordered_map<std::string, RobTopToJson::Parser> RobTopToJson::parser
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
     // Levels
-    { "/database/downloadGJLevel22.php", RobTopToJson::Parser(":") },
+    { "/database/downloadGJLevel22.php", RobTopToJson::Parser(":", {
+        { "hash1", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
+        { "hash2", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
+        { "unknown", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
+        { "songs", RobTopToJson::ObjParser("~|~", "~:~") }
+    }) },
     { "/database/getGJDailyLevel.php", RobTopToJson::Parser({ "tempID", "secondsLeft" }, "|") },
     { "/database/getGJGauntlets21.php", RobTopToJson::Parser(":", "|", {
-        { "hash", RobTopToJson::ObjParser({ "string" }) }
+        { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
     { "/database/getGJLevels21.php", RobTopToJson::Parser(":", "|", {
         { "creators", RobTopToJson::ObjParser({ "userID", "username", "accountID" }, ":", "|") },
         { "songs", RobTopToJson::ObjParser("~|~", "~:~") },
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") },
-        { "hash", RobTopToJson::ObjParser({ "string" }) }
+        { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
     { "/database/getGJLevelLists.php", RobTopToJson::Parser(":", "|", {
         { "creators", RobTopToJson::ObjParser({ "userID", "username", "accountID" }, ":", "|") },
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") },
-        { "hash", RobTopToJson::ObjParser({ "string" }) }
+        { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
     { "/database/getGJLevelScores211.php", RobTopToJson::Parser(":", "|") },
     { "/database/getGJLevelScoresPlat.php", RobTopToJson::Parser(":", "|") },
     { "/database/getGJMapPacks21.php", RobTopToJson::Parser(":", "|", {
-        { "hash", RobTopToJson::ObjParser({ "string" }) }
+        { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
     // Comments
     { "/database/getGJAccountComments20.php", RobTopToJson::Parser("~", "|", {
@@ -60,7 +65,7 @@ const std::unordered_map<std::string, RobTopToJson::Parser> RobTopToJson::parser
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
     // Misc
-    { "/database/getSaveData.php", RobTopToJson::Parser({ "encodedResponse" }) }
+    { "/database/getSaveData.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) }
 });
 
 RobTopToJson::ObjParser::ObjParser(const char* delimiter, const char* entryDelimiter) :
@@ -96,15 +101,20 @@ m_metadata(metadataKeys) {}
 
 std::vector<std::string> RobTopToJson::ObjParser::split(const std::string& str, const std::string& delimiter) {
     std::vector<std::string> parts;
-    size_t end, start = 0;
 
-    while ((end = str.find(delimiter, start)) != std::string::npos) {
-        parts.push_back(str.substr(start, end - start));
+    if (delimiter.empty()) {
+        parts.push_back(str);
+    } else {
+        size_t end, start = 0;
 
-        start = end + delimiter.size();
+        while ((end = str.find(delimiter, start)) != std::string::npos) {
+            parts.push_back(str.substr(start, end - start));
+
+            start = end + delimiter.size();
+        }
+
+        parts.push_back(str.substr(start, end));
     }
-
-    parts.push_back(str.substr(start, end));
 
     return parts;
 }
@@ -154,7 +164,7 @@ json RobTopToJson::Parser::parse(const std::string& str) const {
         json object(json::object());
         std::string section;
 
-        for (size_t i = 0; std::getline(stream, section, '#') && i < m_metadata.size(); i++) {
+        for (size_t i = 0; std::getline(stream, section, '#') && i <= m_metadata.size(); i++) {
             if (i == 0) {
                 object["content"] = ObjParser::parse(section);
             } else {
