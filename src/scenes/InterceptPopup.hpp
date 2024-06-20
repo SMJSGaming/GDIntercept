@@ -15,7 +15,7 @@ protected:
     bool setup() override;
     void onClose(CCObject* obj) override;
 private:
-    static InterceptPopup* instance;
+    static char currentDataType;
     static float uiWidth;
     static float uiHeight;
     static float uiPadding;
@@ -26,18 +26,17 @@ private:
     static float middleColumnXPosition;
     static float codeBlockButtonWidth;
     static float codeBlockButtonHeight;
-    static std::vector<std::tuple<char, SEL_MenuHandler>> dataTypes;
+    static std::vector<std::pair<char, SEL_MenuHandler>> dataTypes;
     static std::vector<std::tuple<std::string, std::string, SEL_MenuHandler>> toggles;
 
     CaptureList* m_captureList;
     HttpInfo* m_currentRequest;
-    char m_currentDataType;
 
     void setupList();
     void setupSettings();
     void setupInfo();
     void setupCodeBlock();
-    void updateInfo(HttpInfo* request);
+    void updateInfo();
     float getPageHeight();
     float getYPadding();
     float getComponentYPosition(float offset, float itemHeight);

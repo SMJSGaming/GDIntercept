@@ -1,7 +1,7 @@
 #include <Geode/loader/SettingEvent.hpp>
 #include "include.hpp"
-#include "scenes/InterceptPopup.hpp"
 #include "objects/HttpInfo.hpp"
+#include "scenes/InterceptPopup.hpp"
 
 #ifdef GEODE_IS_WINDOWS
     #include <geode.custom-keybinds/include/Keybinds.hpp>

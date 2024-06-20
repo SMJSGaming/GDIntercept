@@ -1,12 +1,10 @@
 #include "InterceptPopup.hpp"
 
-InterceptPopup* InterceptPopup::instance = nullptr;
-
 float InterceptPopup::uiWidth = 500;
 
 float InterceptPopup::uiHeight = 280;
 
-float InterceptPopup::uiPadding = (CCDirector::sharedDirector()->getWinSize().width - InterceptPopup::uiWidth) / 2 + 2;
+float InterceptPopup::uiPadding = 2 + PADDING;
 
 float InterceptPopup::captureCellWidth = 170;
 
@@ -18,16 +16,18 @@ float InterceptPopup::infoRowHeight = 65;
 
 float InterceptPopup::codeBlockButtonHeight = 15;
 
-float InterceptPopup::middleColumnXPosition = InterceptPopup::uiPadding + PADDING * 2 + InterceptPopup::captureCellWidth;
+float InterceptPopup::middleColumnXPosition = InterceptPopup::uiPadding + PADDING + InterceptPopup::captureCellWidth;
 
-std::vector<std::tuple<char, SEL_MenuHandler>> InterceptPopup::dataTypes({
+std::vector<std::pair<char, SEL_MenuHandler>> InterceptPopup::dataTypes({
     { 'B', menu_selector(InterceptPopup::onBody) },
     { 'Q', menu_selector(InterceptPopup::onQuery) },
     { 'H', menu_selector(InterceptPopup::onHeaders) },
     { 'R', menu_selector(InterceptPopup::onResponse) }
 });
 
-float InterceptPopup::codeBlockButtonWidth = dataTypes.size() * InterceptPopup::codeBlockButtonHeight;
+char InterceptPopup::currentDataType = InterceptPopup::dataTypes.at(0).first;
+
+float InterceptPopup::codeBlockButtonWidth = InterceptPopup::dataTypes.size() * InterceptPopup::codeBlockButtonHeight;
 
 std::vector<std::tuple<std::string, std::string, SEL_MenuHandler>> InterceptPopup::toggles({
     { "Pause requests", "pause-requests", menu_selector(InterceptPopup::onPauseRequest) },
@@ -42,37 +42,20 @@ InterceptPopup* InterceptPopup::get() {
 
 void InterceptPopup::scene() {
     if (!HttpInfo::requests.empty() && !InterceptPopup::get()) {
-        CCScene* currentScene = CCDirector::sharedDirector()->getRunningScene();
+        InterceptPopup* instance = new InterceptPopup();
 
-        if (instance) {
-            Mod* mod = Mod::get();
-
-            for (const auto& [_1, key, _2] : InterceptPopup::toggles) {
-                as<CCMenuItemToggler*>(instance->getChildByIDRecursive(""_spr + key))->toggle(mod->getSettingValue<bool>(key));
-            }
-
-            instance->m_captureList->createCells();
-            instance->updateInfo(instance->m_currentRequest);
+        if (instance && instance->initAnchored(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
+            instance->m_noElasticity = true;
+            instance->setID("intercept_popup"_spr);
+            instance->retain();
+            instance->show();
         } else {
-            instance = new InterceptPopup();
-
-            if (instance && instance->init(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
-                instance->setID("intercept_popup"_spr);
-                instance->retain();
-            } else {
-                CC_SAFE_DELETE(instance);
-
-                return;
-            }
+            CC_SAFE_DELETE(instance);
         }
-
-        instance->setTouchPriority(100);
-        currentScene->addChild(instance, currentScene->getHighestChildZ() + 1);
     }
 }
 
 bool InterceptPopup::setup() {
-    m_currentDataType = std::get<0>(InterceptPopup::dataTypes.at(0));
     this->setTitle("Intercepted Requests");
     this->setupCodeBlock();
     this->setupInfo();
@@ -87,14 +70,15 @@ void InterceptPopup::onClose(CCObject* obj) {
 }
 
 void InterceptPopup::setupList() {
-    const float xPosition = InterceptPopup::uiPadding + PADDING;
     const CCSize listSize(ccp(InterceptPopup::captureCellWidth, this->getPageHeight()));
     BorderFix* captures = BorderFix::create(m_captureList = CaptureList::create(listSize - 2, InterceptPopup::captureCellHeight, [this](HttpInfo* request) {
-        this->updateInfo(request);
+        m_currentRequest = request;
+
+        this->updateInfo();
     }), LIGHTER_BROWN_4B, listSize, { 1, 1 });
 
     captures->setAnchorPoint(BOTTOM_LEFT);
-    captures->setPosition({ xPosition, this->getYPadding() });
+    captures->setPosition({ InterceptPopup::uiPadding, InterceptPopup::uiPadding });
     m_mainLayer->addChild(captures);
 }
 
@@ -102,7 +86,7 @@ void InterceptPopup::setupSettings() {
     CCNode* info = m_mainLayer->getChildByID("info"_spr);
     CCSize padding(ccp(PADDING, PADDING));
     const float xPosition = info->getPositionX() + info->getContentWidth() + PADDING;
-    const float width = CCDirector::sharedDirector()->getWinSize().width - xPosition - InterceptPopup::uiPadding - PADDING;
+    const float width = InterceptPopup::uiWidth - xPosition - InterceptPopup::uiPadding;
     CCScale9Sprite* settingsBg = CCScale9Sprite::create("square02b_001.png");
     BorderFix* settings = BorderFix::create(settingsBg, LIGHTER_BROWN_4B, { width, InterceptPopup::infoRowHeight }, padding);
     CCMenu* toggleMenu = CCMenu::create();
@@ -128,10 +112,13 @@ void InterceptPopup::setupSettings() {
 }
 
 void InterceptPopup::setupInfo() {
-    const float xPosition = InterceptPopup::uiPadding + PADDING * 2 + InterceptPopup::captureCellWidth;
+    const float xPosition = InterceptPopup::uiPadding + PADDING + InterceptPopup::captureCellWidth;
     SimpleTextArea* infoText = SimpleTextArea::create("", "chatFont.fnt", 0.5f, InterceptPopup::infoWidth - 20);
     CCScale9Sprite* infoBg = CCScale9Sprite::create("square02b_001.png");
-    BorderFix* info = BorderFix::create(infoBg, LIGHTER_BROWN_4B, { InterceptPopup::infoWidth, InterceptPopup::infoRowHeight }, { PADDING, PADDING });
+    BorderFix* info = BorderFix::create(infoBg, LIGHTER_BROWN_4B, {
+        InterceptPopup::infoWidth,
+        InterceptPopup::infoRowHeight
+    }, { PADDING, PADDING });
 
     info->setID("info"_spr);
     info->setPosition({ xPosition, this->getComponentYPosition(0, InterceptPopup::infoRowHeight) });
@@ -148,9 +135,8 @@ void InterceptPopup::setupInfo() {
 }
 
 void InterceptPopup::setupCodeBlock() {
-    const float width = CCDirector::sharedDirector()->getWinSize().width - InterceptPopup::middleColumnXPosition - PADDING - InterceptPopup::uiPadding;
+    const float width = InterceptPopup::uiWidth - InterceptPopup::middleColumnXPosition - InterceptPopup::uiPadding;
     const float codeBlockHeight = this->getPageHeight() - InterceptPopup::infoRowHeight - PADDING;
-    const float yPadding = this->getYPadding();
     const size_t buttonCount = InterceptPopup::dataTypes.size();
     JSONCodeBlock* codeBlock = JSONCodeBlock::create({ HttpInfo::UNKNOWN_CONTENT, "" }, { width, codeBlockHeight });
     std::vector<CCMenuItemSpriteExtra*> buttons;
@@ -173,23 +159,24 @@ void InterceptPopup::setupCodeBlock() {
         cocos::getChild<CCSprite>(label, 0)->setPositionY(InterceptPopup::codeBlockButtonHeight / 2);
     }
 
-    ButtonBar* buttonBar = ButtonBar::create("square02_001.png", 0.2f, { InterceptPopup::codeBlockButtonWidth, InterceptPopup::codeBlockButtonHeight }, buttons);
+    ButtonBar* buttonBar = ButtonBar::create("square02_001.png", 0.2f, {
+        InterceptPopup::codeBlockButtonWidth,
+        InterceptPopup::codeBlockButtonHeight
+    }, buttons);
 
     codeBlock->setID("info_code"_spr);
-    codeBlock->setPosition({ InterceptPopup::middleColumnXPosition, yPadding });
+    codeBlock->setPosition({ InterceptPopup::middleColumnXPosition, InterceptPopup::uiPadding });
     buttonBar->setID("code_buttons"_spr);
-    buttonBar->setPosition({ InterceptPopup::middleColumnXPosition + width - PADDING * 1.5f, codeBlockHeight + yPadding - PADDING });
+    buttonBar->setPosition({ InterceptPopup::middleColumnXPosition + width - PADDING * 1.5f, codeBlockHeight + InterceptPopup::uiPadding - PADDING });
     buttonBar->setAnchorPoint(TOP_RIGHT);
     m_mainLayer->addChild(codeBlock);
     m_mainLayer->addChild(buttonBar);
 }
 
-void InterceptPopup::updateInfo(HttpInfo* request) {
-    m_currentRequest = request;
+void InterceptPopup::updateInfo() {
+    as<SimpleTextArea*>(m_mainLayer->getChildByIDRecursive("info_text"_spr))->setText(m_currentRequest->generateBasicInfo());
 
-    as<SimpleTextArea*>(m_mainLayer->getChildByIDRecursive("info_text"_spr))->setText(request->generateBasicInfo());
-
-    switch (m_currentDataType) {
+    switch (currentDataType) {
         case 'B': this->onBody(nullptr); break;
         case 'Q': this->onQuery(nullptr); break;
         case 'H': this->onHeaders(nullptr); break;
@@ -198,23 +185,21 @@ void InterceptPopup::updateInfo(HttpInfo* request) {
 }
 
 float InterceptPopup::getPageHeight() {
-    return m_title->getPositionY() - m_title->getContentHeight() * 1.5f - PADDING;
-}
-
-float InterceptPopup::getYPadding() {
-    return m_title->getContentHeight() + PADDING;
+    return m_title->getPositionY() - m_title->getContentHeight() / 2 - InterceptPopup::uiPadding;
 }
 
 float InterceptPopup::getComponentYPosition(float offset, float itemHeight) {
-    return this->getYPadding() + this->getPageHeight() - itemHeight - offset;
+    return InterceptPopup::uiPadding + this->getPageHeight() - itemHeight - offset;
 }
 
 void InterceptPopup::updateDataTypeColor(char type) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
-    m_currentDataType = type;
+    currentDataType = type;
 
     for (const auto& [key, _] : InterceptPopup::dataTypes) {
-        as<CCLabelBMFont*>(m_mainLayer->getChildByID("code_buttons"_spr)->getChildByIDRecursive(""_spr + std::string(1, key)))->setColor(key == type ? theme.text : theme.line);
+        as<CCLabelBMFont*>(
+            m_mainLayer->getChildByID("code_buttons"_spr)->getChildByIDRecursive(""_spr + std::string(1, key))
+        )->setColor(key == type ? theme.text : theme.line);
     }
 }
 
@@ -225,7 +210,7 @@ void InterceptPopup::onPauseRequest(CCObject* sender) {
 void InterceptPopup::onCensorData(CCObject* sender) {
     Mod::get()->setSettingValue("censor-data", !as<CCMenuItemToggler*>(sender)->isOn());
 
-    this->updateInfo(m_currentRequest);
+    this->updateInfo();
 }
 
 void InterceptPopup::onRememberRequests(CCObject* sender) {
@@ -241,7 +226,7 @@ void InterceptPopup::onRememberRequests(CCObject* sender) {
 void InterceptPopup::onRawData(CCObject* sender) {
     Mod::get()->setSettingValue("raw-data", !as<CCMenuItemToggler*>(sender)->isOn());
 
-    this->updateInfo(m_currentRequest);
+    this->updateInfo();
 }
 
 void InterceptPopup::onBody(CCObject* sender) {
