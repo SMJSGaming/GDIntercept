@@ -1,5 +1,4 @@
 #include "InterceptPopup.hpp"
-#include "Geode/cocos/touch_dispatcher/CCTouchDispatcher.h"
 
 float InterceptPopup::uiWidth = 500;
 
@@ -105,9 +104,13 @@ BorderFix* InterceptPopup::setupSettings() {
     const float width = InterceptPopup::uiWidth - xPosition - InterceptPopup::uiPadding;
     CCScale9Sprite* settingsBg = CCScale9Sprite::create("square02b_001.png");
     BorderFix* settings = BorderFix::create(settingsBg, LIGHTER_BROWN_4B, { width, InterceptPopup::infoRowHeight }, padding);
+    CCLabelBMFont* settingsLabel = CCLabelBMFont::create("Coming Soon...", "bigFont.fnt");
 
+    settingsLabel->setScale(0.5f);
+    settingsLabel->setPosition(settingsBg->getContentSize() / 2);
     settings->setPosition({ xPosition, this->getComponentYPosition(0, InterceptPopup::infoRowHeight) });
     settingsBg->setColor(LIGHT_BROWN_3B);
+    settingsBg->addChild(settingsLabel);
     m_mainLayer->addChild(settings);
 
     return settings;
