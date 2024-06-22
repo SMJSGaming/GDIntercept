@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.2.1-alpha2 (2024-06-22) - Android Fix
+
+- Added a failsafe for Android devices
+
 ## v0.2.0-alpha2 (2024-06-22) - Optimizations, QOL and Redesign
 
 - Added a direct link to the Geode settings menu
