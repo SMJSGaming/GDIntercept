@@ -1,20 +1,7 @@
 #include "JSONCodeBlock.hpp"
+#include "Geode/cocos/CCDirector.h"
 
-JSONCodeBlock* JSONCodeBlock::create(const std::pair<HttpInfo::ContentType, std::string>& code, const CCSize& size, bool readonly) {
-    JSONCodeBlock* instance = new JSONCodeBlock();
-
-    if (instance && instance->init(code, size, readonly)) {
-        instance->autorelease();
-
-        return instance;
-    } else {
-        CC_SAFE_DELETE(instance);
-
-        return nullptr;
-    }
-}
-
-bool JSONCodeBlock::init(const std::pair<HttpInfo::ContentType, std::string>& code, const CCSize& size, bool readonly) {
+bool JSONCodeBlock::init(const std::pair<HttpInfo::ContentType, std::string>& code, const CCSize& size) {
     if (!BorderFix::init({ 0, 0, 0, FULL_OPACITY }, size)) {
         return false;
     }
@@ -41,6 +28,7 @@ void JSONCodeBlock::setCode(const std::pair<HttpInfo::ContentType, std::string>&
     const CCSize& size = this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2;
     const float cellHeight = fontSize.height + theme.lineHeight;
     const float lineNumberWidth = fontSize.width * 4;
+    CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
     CCArray* cells = CCArray::create();
     std::stringstream stream(m_code = code.second);
     std::string line;
@@ -52,7 +40,7 @@ void JSONCodeBlock::setCode(const std::pair<HttpInfo::ContentType, std::string>&
         cells->addObject(CodeLineCell::create({ code.first, line }, i, lineNumberWidth, color));
     }
 
-    ListView* list = ListView::create(cells, cellHeight, size.width, size.height);
+    TouchFixList* list = TouchFixList::create(cells, cellHeight, size.width, size.height);
     TracklessScrollbar* scrollbar = TracklessScrollbar::create({ PADDING, this->getContentHeight() - 2 }, list);
 
     list->setCellOpacity(0);

@@ -1,18 +1,14 @@
 #pragma once
 
 #include "../../include.hpp"
-#include "../../objects/HttpInfo.hpp"
+#include "TouchFixList.hpp"
 #include "../cells/CaptureCell.hpp"
+#include "../../objects/HttpInfo.hpp"
 
 struct CaptureList : public CCNode {
     static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo);
-
-    void createCells();
 private:
-    float m_itemSeparation;
-    std::function<void(HttpInfo*)> m_switchInfo;
+    TouchFixList* m_list;
 
-    CaptureList(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo);
-    void switchCell(CaptureCell* cell);
-    bool init() override;
+    bool init(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo);
 };

@@ -1,4 +1,4 @@
-Beta Todo:
+Alpha 1 Todo:
   ✔ @today Add a RobTop API response parser @done(24-06-16 01:08)
   ✔ @high Convert json objects to strings @done(24-06-16 01:25)
   ✔ @critical Add a menu icon @done(24-06-19 12:04)
@@ -9,15 +9,16 @@ Beta Todo:
   ✔ @high Replace the rate limit button with a raw data button @done(24-06-17 18:42)
   ✔ @high Truncase data per line @done(24-06-17 18:42)
   ✔ @low Add a copy keybind @done(24-06-19 12:04)
+Alpha 2 Todo:
+  ✔ @high Add a settings button @done(24-06-22 13:24)
+  ✔ @low Replace the popup init with initAnchored @done(24-06-22 13:29)
+  ✔ @low Paths overflow in the info section, obscuring the status code @done(24-06-22 19:32)
+  ☐ @high Add a send button
+  ☐ @critical Add a pause/resume button
+  ☐ @high Add more keybinds
 Release Todo:
-  ☐ Paths overflow in the info section, obscuring the status code
   ☐ Add inputs to the json code block
+  # TODO: Figure out wtf I meant by this
   ☐ Add a format to original in the converters
-  ☐ Add a send button
-  ☐ Add a settings button
-  ☐ Add more keybinds
-  ☐ Make a proper menu icon
-  ☐ Add a proper transition
-  ☐ Replace the popup init with initAnchored
 Nice To Haves:
   ☐ Custom theme support

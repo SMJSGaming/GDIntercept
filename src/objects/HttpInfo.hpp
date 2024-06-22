@@ -38,7 +38,7 @@ struct HttpInfo : public CCObject {
     std::pair<ContentType, std::string> formatBody();
     std::pair<ContentType, std::string> formatResponse();
     unsigned int getResponseCode();
-    std::string generateBasicInfo();
+    std::string generateBasicInfo(const bool withStatus = true);
     ccColor3B colorForMethod();
 private:
     static FormToJson formToJson;

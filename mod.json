@@ -1,6 +1,6 @@
 {
-  "geode": "3.0.0-beta.2",
-  "version": "v0.1.2-alpha.1",
+  "geode": "3.0.0-beta.5",
+  "version": "v0.2.0-alpha.2",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "developers": [
@@ -52,6 +52,13 @@
     ]
   },
   "settings": {
+    "theme": {
+      "name": "Theme",
+      "description": "The theme of the code block.",
+      "type": "string",
+      "default": "dark",
+      "one-of": [ "dark", "light" ]
+    },
     "pause-requests": {
       "name": "Pause Requests",
       "description": "Pauses all requests and set their timeout to infinite.",
@@ -76,12 +83,11 @@
       "type": "bool",
       "default": false
     },
-    "theme": {
-      "name": "Theme",
-      "description": "The theme of the code block.",
-      "type": "string",
-      "default": "dark",
-      "match": "dark|light"
+    "log-requests": {
+      "name": "Log Requests",
+      "description": "Logs all requests made in the current session to the Geode console.",
+      "type": "bool",
+      "default": false
     }
   }
 }

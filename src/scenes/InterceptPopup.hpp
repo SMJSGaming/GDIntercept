@@ -1,8 +1,11 @@
 #pragma once
 
+#include <Geode/ui/GeodeUI.hpp>
 #include "../include.hpp"
+#include "../nodes/InfoArea.hpp"
 #include "../nodes/ButtonBar.hpp"
 #include "../nodes/BorderFix.hpp"
+#include "../nodes/CodeBlock.hpp"
 #include "../objects/HttpInfo.hpp"
 #include "../objects/ThemeStyle.hpp"
 #include "../nodes/lists/CaptureList.hpp"
@@ -11,11 +14,13 @@
 struct InterceptPopup : public Popup<> {
     static InterceptPopup* get();
     static void scene();
+
+    void reload();
+    void copyCode();
 protected:
     bool setup() override;
     void onClose(CCObject* obj) override;
 private:
-    static char currentDataType;
     static float uiWidth;
     static float uiHeight;
     static float uiPadding;
@@ -24,29 +29,18 @@ private:
     static float infoWidth;
     static float infoRowHeight;
     static float middleColumnXPosition;
-    static float codeBlockButtonWidth;
     static float codeBlockButtonHeight;
-    static std::vector<std::pair<char, SEL_MenuHandler>> dataTypes;
-    static std::vector<std::tuple<std::string, std::string, SEL_MenuHandler>> toggles;
 
-    CaptureList* m_captureList;
-    HttpInfo* m_currentRequest;
+    InfoArea* m_infoArea;
+    CodeBlock* m_codeBlock;
+    BorderFix* m_settings;
+    BorderFix* m_list;
 
-    void setupList();
-    void setupSettings();
-    void setupInfo();
-    void setupCodeBlock();
-    void updateInfo();
+    InfoArea* setupInfo();
+    BorderFix* setupList();
+    BorderFix* setupSettings();
+    CodeBlock* setupCodeBlock();
     float getPageHeight();
-    float getYPadding();
     float getComponentYPosition(float offset, float itemHeight);
-    void updateDataTypeColor(char type);
-    void onPauseRequest(CCObject* sender);
-    void onCensorData(CCObject* sender);
-    void onRememberRequests(CCObject* sender);
-    void onRawData(CCObject* sender);
-    void onBody(CCObject* sender);
-    void onQuery(CCObject* sender);
-    void onHeaders(CCObject* sender);
-    void onResponse(CCObject* sender);
+    void onSettings(CCObject* obj);
 };

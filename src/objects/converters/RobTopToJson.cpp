@@ -49,7 +49,7 @@ const std::unordered_map<std::string, RobTopToJson::Parser> RobTopToJson::parser
     }) },
     // Socials
     { "/database/downloadGJMessage20.php", RobTopToJson::Parser(":") },
-    { "/database/getGJFriendRequests20", RobTopToJson::Parser(":", "|", {
+    { "/database/getGJFriendRequests20.php", RobTopToJson::Parser(":", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
     { "/database/getGJMessages20.php", RobTopToJson::Parser(":", "|", {

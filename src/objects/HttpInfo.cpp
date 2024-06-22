@@ -148,13 +148,18 @@ unsigned int HttpInfo::getResponseCode() {
     return m_responseCode;
 }
 
-std::string HttpInfo::generateBasicInfo() {
-    return fmt::format("Method: {}\nProtocol: {}\nHost: {}\nPath: {}\nStatus Code: {}",
+std::string HttpInfo::generateBasicInfo(const bool withStatus) {
+    const std::string info(fmt::format("Method: {}\nProtocol: {}\nHost: {}\nPath: {}",
         this->formatMethod(),
         this->formatProtocol(),
         m_host,
-        m_path,
-        m_responseCode);
+        m_path));
+
+    if (withStatus) {
+        return fmt::format("Status Code: {}\n{}", m_responseCode, info);
+    } else {
+        return info;
+    }
 }
 
 ccColor3B HttpInfo::colorForMethod() {

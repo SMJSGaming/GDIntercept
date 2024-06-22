@@ -3,12 +3,14 @@
 void ModCCHttpClient::send(CCHttpRequest* request) {
     HttpInfo* requestInfo = HttpInfo::create(request);
 
-    log::info("Sending request:\n{}\nQuery: {}\nHeaders: {}\nBody: {}",
-        requestInfo->generateBasicInfo(),
-        requestInfo->formatQuery(),
-        requestInfo->formatHeaders(),
-        requestInfo->formatBody().second
-    );
+    if (Mod::get()->getSettingValue<bool>("log-requests")) {
+        log::info("Sending request:\n{}\nQuery: {}\nHeaders: {}\nBody: {}",
+            requestInfo->generateBasicInfo(false),
+            requestInfo->formatQuery(),
+            requestInfo->formatHeaders(),
+            requestInfo->formatBody().second
+        );
+    }
 
     CCHttpClient::send(request);
 }

@@ -6,7 +6,7 @@
 using namespace geode::prelude;
 using namespace nlohmann;
 
-#define PADDING 5
+#define PADDING 5.0f
 #define FULL_OPACITY 0xFF
 
 #define ZERO_POINT { 0, 0 }

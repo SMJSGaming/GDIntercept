@@ -39,10 +39,8 @@
         }, InvokeBindFilter(nullptr, "open_capture_menu"_spr));
 
         new EventListener([=](InvokeBindEvent* event) {
-            InterceptPopup* popup = InterceptPopup::get();
-
-            if (event->isDown() && popup) {
-                as<JSONCodeBlock*>(popup->m_mainLayer->getChildByID("info_code"_spr))->copyCode();
+            if (event->isDown()) {
+                OPT(InterceptPopup::get())->copyCode();
             }
 
             return ListenerResult::Propagate;
@@ -60,6 +58,12 @@ $execute {
             if (HttpInfo::requests.size() > 1) {
                 HttpInfo::requests.resize(1);
             }
+
+            OPT(InterceptPopup::get())->reload();
         }
+    });
+
+    listenForAllSettingChanges(+[](SettingValue* event) {
+        OPT(InterceptPopup::get())->reload();
     });
 }

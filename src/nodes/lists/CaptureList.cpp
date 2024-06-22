@@ -1,9 +1,11 @@
 #include "CaptureList.hpp"
+#include "Geode/cocos/touch_dispatcher/CCTouchDispatcher.h"
+#include <functional>
 
 CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
-    CaptureList* instance = new CaptureList(size, cellHeight, switchInfo);
+    CaptureList* instance = new CaptureList();
 
-    if (instance && instance->init()) {
+    if (instance && instance->init(size, cellHeight, switchInfo)) {
         instance->autorelease();
 
         return instance;
@@ -14,19 +16,28 @@ CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, con
     }
 }
 
-CaptureList::CaptureList(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) : m_itemSeparation(cellHeight), m_switchInfo(switchInfo) {
-    this->setContentSize(size);
-}
+bool CaptureList::init(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
+    if (!CCNode::init()) {
+        return false;
+    }
 
-void CaptureList::createCells() {
-    const float width = this->getContentWidth();
+    CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
     CCArrayExt<CaptureCell*> entries;
     bool active = false;
 
     for (HttpInfo* request : HttpInfo::requests) {
-        CaptureCell* capture = CaptureCell::create(request, { width, this->m_itemSeparation }, [this, request](CaptureCell* cell) {
-            m_switchInfo(request);
-            this->switchCell(cell);
+        CaptureCell* capture = CaptureCell::create(request, { size.width, cellHeight }, [this, request, switchInfo](CaptureCell* cell) {
+            switchInfo(request);
+
+            if (m_list) {
+                CCArrayExt<CaptureCell*> entries(m_list->m_entries);
+
+                for (CaptureCell* entry : entries) {
+                    if (entry != cell) {
+                        entry->deactivate();
+                    }
+                }
+            }
         });
 
         if (request->isActive() && !active) {
@@ -41,30 +52,8 @@ void CaptureList::createCells() {
         entries[0]->activate();
     }
 
-    ListView* list = ListView::create(entries.inner(), m_itemSeparation, width, this->getContentHeight());
+    this->setContentSize(size);
+    this->addChild(m_list = TouchFixList::create(entries.inner(), cellHeight, size.width, this->getContentHeight()));
 
-    OPT(this->getChildByID("capture_list"_spr))->removeFromParentAndCleanup(true);
-
-    list->setID("capture_list"_spr);
-    this->addChild(list);
-}
-
-void CaptureList::switchCell(CaptureCell* cell) {
-    ListView* list = as<ListView*>(this->getChildByID("capture_list"_spr));
-
-    if (list != nullptr) {
-        CCArrayExt<CaptureCell*> entries(list->m_entries);
-
-        for (CaptureCell* entry : entries) {
-            if (entry != cell) {
-                entry->deactivate();
-            }
-        }
-    }
-}
-
-bool CaptureList::init() {
-    this->createCells();
-
-    return CCNode::init();
+    return true;
 }
