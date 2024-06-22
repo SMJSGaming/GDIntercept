@@ -46,14 +46,13 @@ bool InterceptPopup::setup() {
 
     settingsSprite->setScale(0.4f);
 
-    CCMenu* menu = CCMenu::createWithItem(CCMenuItemSpriteExtra::create(settingsSprite, this, menu_selector(InterceptPopup::onSettings)));
+    CCMenuItemSpriteExtra* item = CCMenuItemSpriteExtra::create(settingsSprite, this, menu_selector(InterceptPopup::onSettings));
 
-    menu->setAnchorPoint(BOTTOM_LEFT);
-    menu->setPosition({
+    item->setPosition({
         InterceptPopup::uiWidth - InterceptPopup::uiPadding - settingsSprite->getContentWidth() * settingsSprite->getScale() / 2,
         m_title->getPositionY()
     });
-    m_mainLayer->addChild(menu);
+    m_buttonMenu->addChild(item);
 
     return true;
 }
