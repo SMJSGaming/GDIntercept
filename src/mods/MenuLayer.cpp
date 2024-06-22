@@ -11,6 +11,10 @@ bool ModMenuLayer::init() {
 
     CCNode* closeMenu = this->getChildByID("close-menu");
 
+    if (!closeMenu) {
+        closeMenu = this->getChildByID("top-right-menu");
+    }
+
     closeMenu->addChild(CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick)));
     closeMenu->updateLayout();
 
