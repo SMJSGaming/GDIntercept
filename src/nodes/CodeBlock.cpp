@@ -1,5 +1,4 @@
 #include "CodeBlock.hpp"
-#include <vector>
 
 std::vector<std::pair<char, SEL_MenuHandler>> CodeBlock::dataTypes({
     { 'B', menu_selector(CodeBlock::onBody) },

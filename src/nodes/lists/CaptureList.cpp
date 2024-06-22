@@ -1,6 +1,4 @@
 #include "CaptureList.hpp"
-#include "Geode/cocos/touch_dispatcher/CCTouchDispatcher.h"
-#include <functional>
 
 CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
     CaptureList* instance = new CaptureList();

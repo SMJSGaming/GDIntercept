@@ -1,5 +1,4 @@
 #include "TouchFixList.hpp"
-#include "Geode/ui/ListView.hpp"
 
 TouchFixList* TouchFixList::create(CCArray* cells, const float cellHeight, const float width, const float height) {
     TouchFixList* instance = new TouchFixList();

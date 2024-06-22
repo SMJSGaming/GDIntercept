@@ -1,5 +1,4 @@
 #include "JSONCodeBlock.hpp"
-#include "Geode/cocos/CCDirector.h"
 
 bool JSONCodeBlock::init(const std::pair<HttpInfo::ContentType, std::string>& code, const CCSize& size) {
     if (!BorderFix::init({ 0, 0, 0, FULL_OPACITY }, size)) {
