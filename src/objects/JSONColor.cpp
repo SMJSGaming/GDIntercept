@@ -6,7 +6,8 @@ JSONColor::JSONColor() : m_token(UNKNOWN), m_futureToken(UNKNOWN), m_line(0), m_
 
 void JSONColor::parseLine(const std::string& code, CCLabelBMFont* label) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
-    const size_t length = label->getChildren()->count();
+    const size_t labelLength = label->getChildrenCount();
+    const size_t length = code.size();
     bool previousWasAccepted = true;
 
     if (m_token == STRING || m_token == NUMBER || m_token == CONSTANT) {
@@ -21,22 +22,34 @@ void JSONColor::parseLine(const std::string& code, CCLabelBMFont* label) {
 
     for (size_t i = 0; i < length; i++) {
         if (code[i] != ' ' || (m_token == STRING || m_token == NUMBER)) {
+            if (previousWasAccepted && m_token == STRING) {
+                const size_t originalI = i;
+                const size_t end = std::min(i = code.find_first_of(std::string() + m_openQuote + '\\', i), labelLength);
+
+                for (size_t j = originalI; j < end; j++) {
+                    cocos::getChild<CCSprite>(label, j)->setColor(theme.string);
+                }
+            }
+
             CCSprite* child = cocos::getChild<CCSprite>(label, i);
 
             previousWasAccepted = this->determineCharToken(code[i], code.substr(i), previousWasAccepted);
 
-            switch (m_token) {
-                case KEY: child->setColor(theme.key); break;
-                case STRING: child->setColor(theme.string); break;
-                case NUMBER: child->setColor(theme.number); break;
-                case CONSTANT: child->setColor(theme.constant); break;
-                default: child->setColor(theme.text);
+            if (child) {
+                switch (m_token) {
+                    case KEY: child->setColor(theme.key); break;
+                    case STRING: child->setColor(theme.string); break;
+                    case NUMBER: child->setColor(theme.number); break;
+                    case CONSTANT: child->setColor(theme.constant); break;
+                    default: child->setColor(theme.text);
+                }
+
+                if (!previousWasAccepted) {
+                    child->setColor(theme.error);
+                }
             }
 
-            if (!previousWasAccepted) {
-                log::warn("Unexpected character: '{}' at {}:{}", code[i], m_line, i);
-                child->setColor(theme.error);
-            } else if (m_futureToken != m_token) {
+            if (m_futureToken != m_token) {
                 this->reset();
             }
         }
