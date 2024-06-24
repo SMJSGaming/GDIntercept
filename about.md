@@ -21,9 +21,14 @@ This mod has been tested by doing an official penetration test on the game and f
 
 Request manipulation has for the time being been disabled due to security concerns and bugs. Once the official penetration test has concluded and all issues have been patched, this feature will be re-enabled.
 
+### ALPHA.2
+
+This version has yet to enable request manipulation due to the official penetration test still being in progress. This version mostly aims to simplify the use of settings and fixing a lot of bugs. Some features requested by the community have also been added.
+
 ## Credits
 
 - [RobTop](user:71) - Some UI tips, providing source code and help with determining the sensitive data keys.
 - [Alphalaneous](https://github.com/Alphalaneous) - Providing the scaled border fix.
 - [GD Endy](user:5115808) - Helping out with sprite scaling issues.
 - [HJfod](https://github.com/HJfod) - Helping out with issues and geode specific quirks.
+- [Justin](https://github.com/hiimjustin000) - Finding the cause of the Android crashes.
