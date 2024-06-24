@@ -28,18 +28,17 @@ HttpInfo::HttpInfo(CCHttpRequest* request) : m_active(false),
     m_method(request->getRequestType()),
     m_query(json::object()),
     m_headers(json::object()),
-    m_response(""),
     m_responseCode(102),
     m_responseContentType(ContentType::UNKNOWN_CONTENT),
     m_originalTarget(request->getTarget()),
-    m_originalProxy(request->getSelector()),
-    m_simplifiedBodyCache(ContentType::UNKNOWN_CONTENT, ""),
-    m_simplifiedResponseCache(ContentType::UNKNOWN_CONTENT, "") {
+    m_originalProxy(request->getSelector()) {
     const char* body = request->getRequestData();
     const std::string url(request->getUrl());
     const size_t protocolEnd = url.find("://");
     const size_t queryStart = url.find('?');
     size_t pathStart;
+
+    this->resetCache();
 
     if (protocolEnd == std::string::npos) {
         pathStart = url.find('/');
@@ -140,24 +139,12 @@ std::string HttpInfo::formatHeaders() {
     return m_headers.dump(2);
 }
 
-std::pair<HttpInfo::ContentType, std::string> HttpInfo::formatBody() {
-    if (Mod::get()->getSettingValue<bool>("raw-data")) {
-        return { m_responseContentType, m_response };
-    } else if (m_simplifiedBodyCache.second.empty()) {
-        return m_simplifiedBodyCache = this->simplifyContent({ m_bodyContentType, m_body });
-    } else {
-        return m_simplifiedBodyCache;
-    }
+HttpInfo::content HttpInfo::formatBody() {
+    return this->getContent(m_bodyContentType, m_body, m_simplifiedBodyCache);
 }
 
-std::pair<HttpInfo::ContentType, std::string> HttpInfo::formatResponse() {
-    if (Mod::get()->getSettingValue<bool>("raw-data")) {
-        return { m_responseContentType, m_response };
-    } else if (m_simplifiedResponseCache.second.empty()) {
-        return m_simplifiedResponseCache = this->simplifyContent({ m_responseContentType, m_response });
-    } else {
-        return m_simplifiedResponseCache;
-    }
+HttpInfo::content HttpInfo::formatResponse() {
+    return this->getContent(m_responseContentType, m_response, m_simplifiedResponseCache);
 }
 
 unsigned int HttpInfo::getResponseCode() {
@@ -188,7 +175,28 @@ ccColor3B HttpInfo::colorForMethod() {
     }
 }
 
-std::pair<HttpInfo::ContentType, std::string> HttpInfo::simplifyContent(const std::pair<HttpInfo::ContentType, std::string>& content) {
+void HttpInfo::resetCache() {
+    m_simplifiedBodyCache = { ContentType::UNKNOWN_CONTENT, "" };
+    m_simplifiedResponseCache = { ContentType::UNKNOWN_CONTENT, "" };
+}
+
+HttpInfo::content HttpInfo::getContent(const ContentType originalContentType, const std::string& original, HttpInfo::content& cache) {
+    if (Mod::get()->getSettingValue<bool>("raw-data")) {
+        return { cache.first, original };
+    } else if (cache.second.empty()) {
+        const content simplified = this->simplifyContent({ originalContentType, original });
+
+        if (Mod::get()->getSettingValue<bool>("cache")) {
+            cache = simplified;
+        }
+
+        return simplified;
+    } else {
+        return cache;
+    }
+}
+
+HttpInfo::content HttpInfo::simplifyContent(const HttpInfo::content& content) {
     switch (content.first) {
         case ContentType::FORM: return { ContentType::JSON, HttpInfo::formToJson.convert(m_path, content.second).dump(2) };
         case ContentType::ROBTOP: return { ContentType::JSON, HttpInfo::robtopToJson.convert(m_path, content.second).dump(2) };

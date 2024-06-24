@@ -22,6 +22,8 @@ struct HttpInfo : public CCObject {
         UNKNOWN_CONTENT
     };
 
+    typedef std::pair<ContentType, std::string> content;
+
     static std::vector<HttpInfo*> requests;
 
     static HttpInfo* create(CCHttpRequest* request);
@@ -37,11 +39,12 @@ struct HttpInfo : public CCObject {
     std::string formatMethod();
     std::string formatQuery();
     std::string formatHeaders();
-    std::pair<ContentType, std::string> formatBody();
-    std::pair<ContentType, std::string> formatResponse();
+    content formatBody();
+    content formatResponse();
     unsigned int getResponseCode();
     std::string generateBasicInfo(const bool withStatus = true);
     ccColor3B colorForMethod();
+    void resetCache();
 private:
     static FormToJson formToJson;
     static RobTopToJson robtopToJson;
@@ -61,10 +64,11 @@ private:
     json m_headers;
     CCObject* m_originalTarget;
     SEL_HttpResponse m_originalProxy;
-    std::pair<ContentType, std::string> m_simplifiedBodyCache;
-    std::pair<ContentType, std::string> m_simplifiedResponseCache;
+    content m_simplifiedBodyCache;
+    content m_simplifiedResponseCache;
 
-    std::pair<ContentType, std::string> simplifyContent(const std::pair<HttpInfo::ContentType, std::string>& content);
+    content getContent(const ContentType originalContentType, const std::string& original, content& cache);
+    content simplifyContent(const content& content);
     ContentType determineContentType(const std::string& content, const bool isBody = false);
     void onResponse(CCHttpClient* client, CCHttpResponse* response);
 };

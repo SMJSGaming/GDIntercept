@@ -49,7 +49,7 @@
 #endif
 
 $execute {
-    listenForSettingChanges("remember-requests", +[](bool value) {
+    listenForSettingChanges("remember-requests", +[](const bool value) {
         if (!value) {
             for (int i = 1; i < HttpInfo::requests.size(); i++) {
                 delete HttpInfo::requests.at(i);
@@ -60,6 +60,14 @@ $execute {
             }
 
             OPT(InterceptPopup::get())->reload();
+        }
+    });
+
+    listenForSettingChanges("cache", +[](const bool value) {
+        if (!value) {
+            for (HttpInfo* request : HttpInfo::requests) {
+                request->resetCache();
+            }
         }
     });
 

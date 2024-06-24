@@ -61,27 +61,33 @@
     },
     "pause-requests": {
       "name": "Pause Requests",
-      "description": "Pauses all requests and set their timeout to infinite.",
+      "description": "Pauses all requests and sets their timeout to infinite.",
       "type": "bool",
       "default": false
     },
     "censor-data": {
       "name": "Censor Sensitive Data",
-      "description": "Censors all known sensitive keys in GD and some common sensitive keys",
+      "description": "Censors all known sensitive keys in GD and some common sensitive keys.",
       "type": "bool",
       "default": true
     },
     "remember-requests": {
       "name": "Remember Requests",
-      "description": "Remembers all requests made in the current session.",
+      "description": "Remembers all requests made in the current session.\n\n<cy>WARNING</c>: Turning this off will completely remove all but the last request currently cached.",
       "type": "bool",
       "default": true
     },
     "raw-data": {
       "name": "Raw Data",
-      "description": "Displays data in its raw state without any manipulation of the text. (WARNING! This can make the game freeze on particularly large requests/responses)",
+      "description": "Displays data in its raw state without any manipulation of the text besides capping the amount of rendered characters.",
       "type": "bool",
       "default": false
+    },
+    "cache": {
+      "name": "Cache",
+      "description": "Caches all converted request bodies/responses to speed up the view process. This only happens when you view the request in the UI.\n\n<cy>WARNING</c>: This can take up a lot of memory if you have a lot of requests cached.",
+      "type": "bool",
+      "default": true
     },
     "log-requests": {
       "name": "Log Requests",

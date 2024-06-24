@@ -1,6 +1,6 @@
 #include "CodeLineCell.hpp"
 
-CodeLineCell* CodeLineCell::create(const std::pair<HttpInfo::ContentType, std::string>& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color) {
+CodeLineCell* CodeLineCell::create(const HttpInfo::content& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color) {
     CodeLineCell* instance = new CodeLineCell(lineNumberWidth, color);
 
     if (instance && instance->init(code.first, code.second, lineNumber)) {

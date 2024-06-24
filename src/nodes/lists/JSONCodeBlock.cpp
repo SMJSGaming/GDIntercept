@@ -1,6 +1,6 @@
 #include "JSONCodeBlock.hpp"
 
-bool JSONCodeBlock::init(const std::pair<HttpInfo::ContentType, std::string>& code, const CCSize& size) {
+bool JSONCodeBlock::init(const HttpInfo::content& code, const CCSize& size) {
     if (!Border::init({ 0, 0, 0, FULL_OPACITY }, size)) {
         return false;
     }
@@ -21,7 +21,7 @@ void JSONCodeBlock::copyCode() {
 
 }
 
-void JSONCodeBlock::setCode(const std::pair<HttpInfo::ContentType, std::string>& code) {
+void JSONCodeBlock::setCode(const HttpInfo::content& code) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
     const CCSize& fontSize = CCLabelBMFont::create("0", theme.fontName)->getContentSize() * theme.fontSize;
     const CCSize& size = this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2;

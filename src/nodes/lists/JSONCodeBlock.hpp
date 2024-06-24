@@ -10,9 +10,9 @@
 
 struct JSONCodeBlock : public Border {
     void copyCode();
-    void setCode(const std::pair<HttpInfo::ContentType, std::string>& code);
+    void setCode(const HttpInfo::content& code);
 protected:
-    bool init(const std::pair<HttpInfo::ContentType, std::string>& code, const CCSize& size);
+    bool init(const HttpInfo::content& code, const CCSize& size);
 private:
     std::string m_code;
 
