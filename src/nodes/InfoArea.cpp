@@ -18,7 +18,7 @@ bool InfoArea::init(const CCSize& size) {
     SimpleTextArea* infoText = SimpleTextArea::create("", "chatFont.fnt", 0.5f, size.width - PADDING * 4);
     CCScale9Sprite* infoBg = CCScale9Sprite::create("square02b_001.png");
 
-    if (!BorderFix::init(infoBg, LIGHTER_BROWN_4B, size)) {
+    if (!Border::init(infoBg, LIGHTER_BROWN_4B, size)) {
         return false;
     }
 

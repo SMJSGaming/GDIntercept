@@ -4,7 +4,6 @@
 #include "../include.hpp"
 #include "../nodes/InfoArea.hpp"
 #include "../nodes/ButtonBar.hpp"
-#include "../nodes/BorderFix.hpp"
 #include "../nodes/CodeBlock.hpp"
 #include "../objects/HttpInfo.hpp"
 #include "../objects/ThemeStyle.hpp"
@@ -33,12 +32,12 @@ private:
 
     InfoArea* m_infoArea;
     CodeBlock* m_codeBlock;
-    BorderFix* m_settings;
-    BorderFix* m_list;
+    Border* m_settings;
+    Border* m_list;
 
     InfoArea* setupInfo();
-    BorderFix* setupList();
-    BorderFix* setupSettings();
+    Border* setupList();
+    Border* setupSettings();
     CodeBlock* setupCodeBlock();
     float getPageHeight();
     float getComponentYPosition(float offset, float itemHeight);

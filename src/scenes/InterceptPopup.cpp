@@ -84,9 +84,9 @@ InfoArea* InterceptPopup::setupInfo() {
     return infoArea;
 }
 
-BorderFix* InterceptPopup::setupList() {
+Border* InterceptPopup::setupList() {
     const CCSize listSize(ccp(InterceptPopup::captureCellWidth, this->getPageHeight()));
-    BorderFix* captures = BorderFix::create(CaptureList::create(listSize - 2, InterceptPopup::captureCellHeight, [this](HttpInfo* request) {
+    Border* captures = Border::create(CaptureList::create(listSize - 2, InterceptPopup::captureCellHeight, [this](HttpInfo* request) {
         m_infoArea->updateRequest(request);
         m_codeBlock->updateRequest(request);
     }), LIGHTER_BROWN_4B, listSize, { 1, 1 });
@@ -98,12 +98,12 @@ BorderFix* InterceptPopup::setupList() {
     return captures;
 }
 
-BorderFix* InterceptPopup::setupSettings() {
+Border* InterceptPopup::setupSettings() {
     CCSize padding(ccp(PADDING, PADDING));
     const float xPosition = m_infoArea->getPositionX() + m_infoArea->getContentWidth() + PADDING;
     const float width = InterceptPopup::uiWidth - xPosition - InterceptPopup::uiPadding;
     CCScale9Sprite* settingsBg = CCScale9Sprite::create("square02b_001.png");
-    BorderFix* settings = BorderFix::create(settingsBg, LIGHTER_BROWN_4B, { width, InterceptPopup::infoRowHeight }, padding);
+    Border* settings = Border::create(settingsBg, LIGHTER_BROWN_4B, { width, InterceptPopup::infoRowHeight }, padding);
     CCLabelBMFont* settingsLabel = CCLabelBMFont::create("Coming Soon...", "bigFont.fnt");
 
     settingsLabel->setScale(0.5f);

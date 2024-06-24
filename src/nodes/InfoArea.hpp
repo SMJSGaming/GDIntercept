@@ -1,10 +1,9 @@
 #pragma once
 
-#include "BorderFix.hpp"
 #include "../include.hpp"
 #include "../objects/HttpInfo.hpp"
 
-struct InfoArea : public BorderFix {
+struct InfoArea : public Border {
     static InfoArea* create(const CCSize& size);
     void updateRequest(HttpInfo* request);
 private:

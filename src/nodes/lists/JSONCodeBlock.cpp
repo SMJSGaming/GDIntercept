@@ -1,7 +1,7 @@
 #include "JSONCodeBlock.hpp"
 
 bool JSONCodeBlock::init(const std::pair<HttpInfo::ContentType, std::string>& code, const CCSize& size) {
-    if (!BorderFix::init({ 0, 0, 0, FULL_OPACITY }, size)) {
+    if (!Border::init({ 0, 0, 0, FULL_OPACITY }, size)) {
         return false;
     }
 
@@ -13,7 +13,7 @@ bool JSONCodeBlock::init(const std::pair<HttpInfo::ContentType, std::string>& co
 }
 
 void JSONCodeBlock::copyCode() {
-    TextAlertPopup* alert = TextAlertPopup::create("Code Copied", 0.5f, 0.6f, 99999, "");
+    TextAlertPopup* alert = TextAlertPopup::create("Code Copied", 0.5f, 0.6f, 150, "");
 
     utils::clipboard::write(this->m_code);
     alert->setPosition(this->getContentSize() / 2);
@@ -36,7 +36,14 @@ void JSONCodeBlock::setCode(const std::pair<HttpInfo::ContentType, std::string>&
     OPT(this->getChildByID("scrollbar"_spr))->removeFromParentAndCleanup(true);
 
     for (size_t i = 1; std::getline(stream, line); i++) {
-        cells->addObject(CodeLineCell::create({ code.first, line }, i, lineNumberWidth, color));
+        if (i == 999) {
+            cells->addObject(CodeLineCell::create({ HttpInfo::UNKNOWN_CONTENT, "..." }, i, lineNumberWidth, color));
+
+            break;
+        } else {
+            cells->addObject(CodeLineCell::create({ code.first, line }, i, lineNumberWidth, color));
+        }
+
     }
 
     TouchFixList* list = TouchFixList::create(cells, cellHeight, size.width, size.height);
@@ -71,7 +78,7 @@ void JSONCodeBlock::draw() {
         )));
     }
 
-    BorderFix::draw();
+    Border::draw();
 
     ccDrawColor4B(theme.scrollBorder.r, theme.scrollBorder.g, theme.scrollBorder.b, FULL_OPACITY);
     glLineWidth(2);
