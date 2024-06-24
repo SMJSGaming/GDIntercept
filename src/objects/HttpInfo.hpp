@@ -4,6 +4,7 @@
 #include "converters/FormToJson.hpp"
 #include "converters/RobTopToJson.hpp"
 #include "converters/JsonConverter.hpp"
+#include "converters/BinaryToRaw.hpp"
 
 struct HttpInfo : public CCObject {
     enum Protocol {
@@ -17,6 +18,7 @@ struct HttpInfo : public CCObject {
         JSON,
         XML,
         ROBTOP,
+        BINARY,
         UNKNOWN_CONTENT
     };
 
@@ -43,6 +45,7 @@ struct HttpInfo : public CCObject {
 private:
     static FormToJson formToJson;
     static RobTopToJson robtopToJson;
+    static BinaryToRaw binaryToRaw;
 
     bool m_active;
     Protocol m_protocol;
@@ -58,6 +61,8 @@ private:
     json m_headers;
     CCObject* m_originalTarget;
     SEL_HttpResponse m_originalProxy;
+    std::pair<ContentType, std::string> m_simplifiedBodyCache;
+    std::pair<ContentType, std::string> m_simplifiedResponseCache;
 
     std::pair<ContentType, std::string> simplifyContent(const std::pair<HttpInfo::ContentType, std::string>& content);
     ContentType determineContentType(const std::string& content, const bool isBody = false);

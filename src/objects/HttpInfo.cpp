@@ -6,6 +6,8 @@ FormToJson HttpInfo::formToJson;
 
 RobTopToJson HttpInfo::robtopToJson;
 
+BinaryToRaw HttpInfo::binaryToRaw;
+
 HttpInfo* HttpInfo::create(CCHttpRequest* request) {
     HttpInfo* requestInfo = new HttpInfo(request);
 
@@ -30,7 +32,9 @@ HttpInfo::HttpInfo(CCHttpRequest* request) : m_active(false),
     m_responseCode(102),
     m_responseContentType(ContentType::UNKNOWN_CONTENT),
     m_originalTarget(request->getTarget()),
-    m_originalProxy(request->getSelector()) {
+    m_originalProxy(request->getSelector()),
+    m_simplifiedBodyCache(ContentType::UNKNOWN_CONTENT, ""),
+    m_simplifiedResponseCache(ContentType::UNKNOWN_CONTENT, "") {
     const char* body = request->getRequestData();
     const std::string url(request->getUrl());
     const size_t protocolEnd = url.find("://");
@@ -137,11 +141,23 @@ std::string HttpInfo::formatHeaders() {
 }
 
 std::pair<HttpInfo::ContentType, std::string> HttpInfo::formatBody() {
-    return this->simplifyContent({ m_bodyContentType, m_body });
+    if (Mod::get()->getSettingValue<bool>("raw-data")) {
+        return { m_responseContentType, m_response };
+    } else if (m_simplifiedBodyCache.second.empty()) {
+        return m_simplifiedBodyCache = this->simplifyContent({ m_bodyContentType, m_body });
+    } else {
+        return m_simplifiedBodyCache;
+    }
 }
 
 std::pair<HttpInfo::ContentType, std::string> HttpInfo::formatResponse() {
-    return this->simplifyContent({ m_responseContentType, m_response });
+    if (Mod::get()->getSettingValue<bool>("raw-data")) {
+        return { m_responseContentType, m_response };
+    } else if (m_simplifiedResponseCache.second.empty()) {
+        return m_simplifiedResponseCache = this->simplifyContent({ m_responseContentType, m_response });
+    } else {
+        return m_simplifiedResponseCache;
+    }
 }
 
 unsigned int HttpInfo::getResponseCode() {
@@ -173,20 +189,19 @@ ccColor3B HttpInfo::colorForMethod() {
 }
 
 std::pair<HttpInfo::ContentType, std::string> HttpInfo::simplifyContent(const std::pair<HttpInfo::ContentType, std::string>& content) {
-    if (Mod::get()->getSettingValue<bool>("raw-data")) {
-        return { ContentType::UNKNOWN_CONTENT, content.second };
-    } else {
-        switch (content.first) {
-            case ContentType::FORM: return { ContentType::JSON, HttpInfo::formToJson.convert(m_path, content.second).dump(2) };
-            case ContentType::ROBTOP: return { ContentType::JSON, HttpInfo::robtopToJson.convert(m_path, content.second).dump(2) };
-            default: return content;
-        }
+    switch (content.first) {
+        case ContentType::FORM: return { ContentType::JSON, HttpInfo::formToJson.convert(m_path, content.second).dump(2) };
+        case ContentType::ROBTOP: return { ContentType::JSON, HttpInfo::robtopToJson.convert(m_path, content.second).dump(2) };
+        case ContentType::BINARY: return { ContentType::BINARY, HttpInfo::binaryToRaw.convert(content.second) };
+        default: return content;
     }
 }
 
 HttpInfo::ContentType HttpInfo::determineContentType(const std::string& content, const bool isBody) {
     if (content.empty()) {
         return ContentType::UNKNOWN_CONTENT;
+    } else if (HttpInfo::binaryToRaw.canConvert(content)) {
+        return ContentType::BINARY;
     } else if (JsonConverter::isJson(content)) {
         return ContentType::JSON;
     } else if (content.starts_with('<')) {
