@@ -1,5 +1,13 @@
 # GDIntercept Changelog
 
+## v0.2.2-alpha2 (2024-06-23) - Binary Update
+
+- Added binary support
+- Optimized text processing
+- Fixed binary being attempted to be rendered as forms
+- Added cache support
+- Made the setting descriptions clearer
+
 ## v0.2.1-alpha2 (2024-06-22) - Android Fix
 
 - Added a failsafe for Android devices
