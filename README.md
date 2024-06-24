@@ -27,3 +27,4 @@ Request manipulation has for the time being been disabled due to security concer
 - [Alphalaneous](https://github.com/Alphalaneous) - Providing the scaled border fix.
 - [GD Endy](https://www.youtube.com/@GDEndy) - Helping out with sprite scaling issues.
 - [HJfod](https://github.com/HJfod) - Helping out with issues and geode specific quirks.
+- [Justin](https://github.com/hiimjustin000) - Finding the cause of the Android crashes.
