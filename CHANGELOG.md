@@ -1,6 +1,6 @@
 # GDIntercept Changelog
 
-## v0.2.3-alpha.2 (2024-06-UNKNOWN) - More Android Fixes
+## v0.2.3-alpha.2 (2024-06-25) - More Android Fixes
 
 - Fixed Android having a lot of touch priority issues
 
