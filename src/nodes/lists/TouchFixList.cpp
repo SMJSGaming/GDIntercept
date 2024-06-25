@@ -29,7 +29,7 @@ void TouchFixList::draw() {
 
     ListView::draw();
 
-    #ifdef GEODE_IS_WINDOWS
+    #ifndef  GEODE_ANDROID
         if (popupHandler && listHandler) {
             dispatcher->setPriority(popupHandler->getPriority(), listHandler->getDelegate());
         }
