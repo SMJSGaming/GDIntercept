@@ -1,6 +1,10 @@
 # GDIntercept Changelog
 
-## v0.2.2-alpha2 (2024-06-23) - Binary Update
+## v0.2.3-alpha.2 (2024-06-UNKNOWN) - More Android Fixes
+
+- Fixed Android having a lot of touch priority issues
+
+## v0.2.2-alpha.2 (2024-06-23) - Binary Update
 
 - Added binary support
 - Optimized text processing
@@ -8,11 +12,11 @@
 - Added cache support
 - Made the setting descriptions clearer
 
-## v0.2.1-alpha2 (2024-06-22) - Android Fix
+## v0.2.1-alpha.2 (2024-06-22) - Android Fix
 
 - Added a failsafe for Android devices
 
-## v0.2.0-alpha2 (2024-06-22) - Optimizations, QOL and Redesign
+## v0.2.0-alpha.2 (2024-06-22) - Optimizations, QOL and Redesign
 
 - Added a direct link to the Geode settings menu
 - Fixed a ton of issues
