@@ -26,7 +26,7 @@ bool ButtonBar::init(const char* bgSprite, const float spriteScale, const CCSize
 
     this->setContentSize(size);
 
-    for (int i = 0; i < m_itemCount; i++) {
+    for (size_t i = 0; i < m_itemCount; i++) {
         const float width = size.width / m_itemCount;
         CCMenuItemSpriteExtra* item = items.at(i);
 
@@ -52,12 +52,13 @@ void ButtonBar::draw() {
     const ThemeStyle& theme = ThemeStyle::getTheme();
     const float width = this->getContentWidth() / m_itemCount;
     const float height = this->getContentHeight();
+
     CCNode::draw();
 
     ccDrawColor4B(theme.line.r, theme.line.g, theme.line.b, 40);
     glLineWidth(2);
 
-    for (int i = 1; i < m_itemCount; i++) {
+    for (size_t i = 1; i < m_itemCount; i++) {
         const float x = i * width;
 
         ccDrawLine({ x, 0 }, { x, height });

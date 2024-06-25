@@ -51,7 +51,7 @@
 $execute {
     listenForSettingChanges("remember-requests", +[](const bool value) {
         if (!value) {
-            for (int i = 1; i < HttpInfo::requests.size(); i++) {
+            for (size_t i = 1; i < HttpInfo::requests.size(); i++) {
                 delete HttpInfo::requests.at(i);
             }
 
