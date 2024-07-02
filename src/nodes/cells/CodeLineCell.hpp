@@ -5,7 +5,7 @@
 #include "../../objects/ThemeStyle.hpp"
 
 struct CodeLineCell : public CCLayer {
-    static CodeLineCell* create(const HttpInfo::content& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color);
+    static CodeLineCell* create(const HttpInfo::HttpContent& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color);
 
     JSONColor& m_color;
 private:

@@ -41,14 +41,19 @@ namespace proxy {
             UNKNOWN_CONTENT
         };
 
-        typedef std::pair<ContentType, std::string> content;
+        struct HttpContent {
+            ContentType type;
+            std::string contents;
+        };
 
         std::string stringifyProtocol() const;
         std::string stringifyMethod() const;
         std::string stringifyQuery() const;
         std::string stringifyHeaders() const;
-        content getBodyContent(const bool raw = true);
-        content getResponseContent(const bool raw = true);
+        std::string stringifyStatusCode() const;
+        HttpContent getBodyContent(const bool raw = true);
+        HttpContent getResponseContent(const bool raw = true);
+        bool isPaused() const;
         void resetCache();
     private:
         static converters::FormToJson formToJson;
@@ -68,15 +73,17 @@ namespace proxy {
         GETTER(int, statusCode, StatusCode)
         GETTER(std::string, response, Response)
         GETTER(ContentType, responseContentType, ResponseContentType)
-        content m_simplifiedBodyCache;
-        content m_simplifiedResponseCache;
+        HttpContent m_simplifiedBodyCache;
+        HttpContent m_simplifiedResponseCache;
+        bool m_paused;
 
         HttpInfo(CCHttpRequest* request);
         HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url);
-        content getContent(const bool raw, const ContentType originalContentType, const std::string& original, content& cache);
-        content simplifyContent(const content& content);
+        HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& original, HttpContent& cache);
+        HttpContent simplifyContent(const HttpContent& content);
         ContentType determineContentType(const std::string& content, const bool isBody = false);
         bool isDomain(const std::string& domain);
+        bool shouldPause();
         void determineOrigin();
         void parseUrl();
 

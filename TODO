@@ -16,7 +16,7 @@ Alpha 2 Todo:
   ✔ @today Add a binary view (request from Absolute) @done(24-06-24 22:48)
 Alpha 3 Todo:
   ☐ @high Add a send button
-  ☐ @critical Add a pause/resume button
+  ✔ @critical Add a pause/resume button @done(24-07-02 23:29)
   ☐ @high Add more keybinds
   ✔ @low Add modding API support @done(24-07-02 15:10)
   ☐ @high Add mod request support

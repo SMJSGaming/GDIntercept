@@ -23,7 +23,7 @@ InterceptPopup* InterceptPopup::get() {
 }
 
 void InterceptPopup::scene() {
-    if (!context::CACHED_PROXIES.empty() && !InterceptPopup::get()) {
+    if (!ProxyHandler::getProxies().empty() && !InterceptPopup::get()) {
         InterceptPopup* instance = new InterceptPopup();
 
         if (instance && instance->initAnchored(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {

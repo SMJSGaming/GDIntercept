@@ -1,9 +1,9 @@
 #include "CodeLineCell.hpp"
 
-CodeLineCell* CodeLineCell::create(const HttpInfo::content& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color) {
+CodeLineCell* CodeLineCell::create(const HttpInfo::HttpContent& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color) {
     CodeLineCell* instance = new CodeLineCell(lineNumberWidth, color);
 
-    if (instance && instance->init(code.first, code.second, lineNumber)) {
+    if (instance && instance->init(code.type, code.contents, lineNumber)) {
         return instance;
     } else {
         CC_SAFE_DELETE(instance);

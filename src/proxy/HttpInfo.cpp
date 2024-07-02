@@ -6,11 +6,12 @@ proxy::converters::RobTopToJson proxy::HttpInfo::robtopToJson;
 
 proxy::converters::BinaryToRaw proxy::HttpInfo::binaryToRaw;
 
-proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_method(request->getRequestType()),
+proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_paused(this->shouldPause()),
+    m_method(request->getRequestType()),
     m_url(request->getUrl()),
     m_query(json::object()),
     m_headers(json::object()),
-    m_statusCode(102),
+    m_statusCode(0),
     m_responseContentType(ContentType::UNKNOWN_CONTENT) {
     const char* body = request->getRequestData();
 
@@ -37,9 +38,11 @@ proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_method(request->getRequest
     m_bodyContentType = this->determineContentType(m_body, true);
 }
 
-proxy::HttpInfo::HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url) : m_query(json::object()),
+proxy::HttpInfo::HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url) : m_paused(this->shouldPause()),
+    m_url(url),
+    m_query(json::object()),
     m_headers(json::object()),
-    m_statusCode(102),
+    m_statusCode(0),
     m_responseContentType(ContentType::UNKNOWN_CONTENT) {
     // this->resetCache();
     // this->parseUrl(url);
@@ -78,12 +81,24 @@ std::string proxy::HttpInfo::stringifyHeaders() const {
     return m_headers.dump(2);
 }
 
-proxy::HttpInfo::content proxy::HttpInfo::getBodyContent(const bool raw) {
+std::string proxy::HttpInfo::stringifyStatusCode() const {
+    switch (m_statusCode) {
+        case -1: return "Request Error";
+        case 0: return "No Response";
+        default: return std::to_string(m_statusCode);
+    }
+}
+
+proxy::HttpInfo::HttpContent proxy::HttpInfo::getBodyContent(const bool raw) {
     return this->getContent(raw, m_bodyContentType, m_body, m_simplifiedBodyCache);
 }
 
-proxy::HttpInfo::content proxy::HttpInfo::getResponseContent(const bool raw) {
+proxy::HttpInfo::HttpContent proxy::HttpInfo::getResponseContent(const bool raw) {
     return this->getContent(raw, m_responseContentType, m_response, m_simplifiedResponseCache);
+}
+
+bool proxy::HttpInfo::isPaused() const {
+    return m_paused;
 }
 
 void proxy::HttpInfo::resetCache() {
@@ -91,11 +106,11 @@ void proxy::HttpInfo::resetCache() {
     m_simplifiedResponseCache = { ContentType::UNKNOWN_CONTENT, "" };
 }
 
-proxy::HttpInfo::content proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& original, content& cache) {
+proxy::HttpInfo::HttpContent proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& original, HttpContent& cache) {
     if (raw) {
         return { originalContentType, original };
-    } else if (cache.second.empty()) {
-        const content simplified = this->simplifyContent({ originalContentType, original });
+    } else if (cache.contents.empty()) {
+        const HttpContent simplified = this->simplifyContent({ originalContentType, original });
 
         if (Mod::get()->getSettingValue<bool>("cache")) {
             cache = simplified;
@@ -107,19 +122,19 @@ proxy::HttpInfo::content proxy::HttpInfo::getContent(const bool raw, const Conte
     }
 }
 
-proxy::HttpInfo::content proxy::HttpInfo::simplifyContent(const content& content) {
-    switch (content.first) {
+proxy::HttpInfo::HttpContent proxy::HttpInfo::simplifyContent(const HttpContent& content) {
+    switch (content.type) {
         case ContentType::FORM: return {
             ContentType::JSON,
-            HttpInfo::formToJson.convert(m_path, content.second).dump(2)
+            HttpInfo::formToJson.convert(m_path, content.contents).dump(2)
         };
         case ContentType::ROBTOP: return {
             ContentType::JSON,
-            HttpInfo::robtopToJson.convert(m_path, content.second).dump(2)
+            HttpInfo::robtopToJson.convert(m_path, content.contents).dump(2)
         };
         case ContentType::BINARY: return {
             ContentType::BINARY,
-            HttpInfo::binaryToRaw.convert(m_path, content.second)
+            HttpInfo::binaryToRaw.convert(m_path, content.contents)
         };
         default: return content;
     }
@@ -147,13 +162,22 @@ bool proxy::HttpInfo::isDomain(const std::string& domain) {
     return m_host == domain || m_host.ends_with("." + domain);
 }
 
+bool proxy::HttpInfo::shouldPause() {
+    return Mod::get()->getSettingValue<bool>("pause-requests");
+}
+
 void proxy::HttpInfo::determineOrigin() {
     if (this->isDomain("boomlings.com") || this->isDomain("geometrydash.com")) {
         m_origin = Origin::GD;
     } else if (this->isDomain("geometrydashfiles.b-cdn.net") || this->isDomain("geometrydashcontent.b-cdn.net")) {
         m_origin = Origin::GD_CDN;
     // robtop.games is currently in the process of being sold
-    } else if (this->isDomain("robtopgames.org") || this->isDomain("robtopgames.net") || this->isDomain("robtopgames.com") || this->isDomain("robtop.games")) {
+    } else if (
+        this->isDomain("robtopgames.org") ||
+        this->isDomain("robtopgames.net") ||
+        this->isDomain("robtopgames.com") ||
+        this->isDomain("robtop.games")
+    ) {
         m_origin = Origin::ROBTOP_GAMES;
     } else if (this->isDomain("ngfiles.com")) {
         m_origin = Origin::NEWGROUNDS;

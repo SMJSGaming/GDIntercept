@@ -59,32 +59,29 @@ $execute {
                 request->getPath(),
                 request->stringifyQuery(),
                 request->stringifyHeaders(),
-                request->getBodyContent(false).second
+                request->getBodyContent(false).contents
             );
         }
 
         return ListenerResult::Propagate;
-    }, RequestFilter());
+    }, RequestFilter(GD));
+
+    new EventListener([=](ResponseEvent* event) {
+        log::debug("This is the response my server is giving back: {}", event->getResponse().contents);
+
+        return ListenerResult::Propagate;
+    }, ResponseFilter({ "https://myveryspecific.endpoint/with_path" }));
 
     listenForSettingChanges("remember-requests", +[](const bool value) {
         if (!value) {
-            for (size_t i = 1; i < context::CACHED_PROXIES.size(); i++) {
-                delete context::CACHED_PROXIES.at(i);
-            }
-
-            if (context::CACHED_PROXIES.size() > 1) {
-                context::CACHED_PROXIES.resize(1);
-            }
-
+            ProxyHandler::forgetProxies();
             OPT(InterceptPopup::get())->reload();
         }
     });
 
     listenForSettingChanges("cache", +[](const bool value) {
         if (!value) {
-            for (ProxyHandler* proxy : context::CACHED_PROXIES) {
-                proxy->getInfo()->resetCache();
-            }
+            ProxyHandler::resetCache();
         }
     });
 

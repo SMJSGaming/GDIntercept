@@ -1,6 +1,6 @@
 #include "JSONCodeBlock.hpp"
 
-bool JSONCodeBlock::init(const HttpInfo::content& code, const CCSize& size) {
+bool JSONCodeBlock::init(const HttpInfo::HttpContent& code, const CCSize& size) {
     if (!Border::init({ 0, 0, 0, FULL_OPACITY }, size)) {
         return false;
     }
@@ -21,7 +21,7 @@ void JSONCodeBlock::copyCode() {
 
 }
 
-void JSONCodeBlock::setCode(const HttpInfo::content& code) {
+void JSONCodeBlock::setCode(const HttpInfo::HttpContent& code) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
     const CCSize& fontSize = CCLabelBMFont::create("0", theme.fontName)->getContentSize() * theme.fontSize;
     const CCSize& size = this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2;
@@ -29,7 +29,7 @@ void JSONCodeBlock::setCode(const HttpInfo::content& code) {
     const float lineNumberWidth = fontSize.width * 4;
     CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
     CCArray* cells = CCArray::create();
-    std::stringstream stream(m_code = code.second);
+    std::stringstream stream(m_code = code.contents);
     std::string line;
     JSONColor color;
 
@@ -41,7 +41,7 @@ void JSONCodeBlock::setCode(const HttpInfo::content& code) {
 
             break;
         } else {
-            cells->addObject(CodeLineCell::create({ code.first, line }, i, lineNumberWidth, color));
+            cells->addObject(CodeLineCell::create({ code.type, line }, i, lineNumberWidth, color));
         }
     }
 

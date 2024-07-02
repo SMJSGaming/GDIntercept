@@ -10,14 +10,14 @@ proxy::RequestEvent::RequestEvent(HttpInfo* info) : ProxyEvent(info) { }
 
 proxy::ResponseEvent::ResponseEvent(HttpInfo* info) : ProxyEvent(info) { }
 
-proxy::HttpInfo::content proxy::ResponseEvent::getResponse(const bool raw) const {
+proxy::HttpInfo::HttpContent proxy::ResponseEvent::getResponse(const bool raw) const {
     return m_info->getResponseContent(raw);
 }
 
 proxy::RequestFilter::RequestFilter(const SourceFilter source) : ProxyFilter(source) { }
 
-proxy::RequestFilter::RequestFilter(const SourceFilter source, const std::initializer_list<std::string>& urls) : ProxyFilter(source, urls) { }
+proxy::RequestFilter::RequestFilter(const std::initializer_list<std::string>& urls) : ProxyFilter(urls) { }
 
 proxy::ResponseFilter::ResponseFilter(const SourceFilter source) : ProxyFilter(source) { }
 
-proxy::ResponseFilter::ResponseFilter(const SourceFilter source, const std::initializer_list<std::string>& urls) : ProxyFilter(source, urls) { }
+proxy::ResponseFilter::ResponseFilter(const std::initializer_list<std::string>& urls) : ProxyFilter(urls) { }

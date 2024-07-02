@@ -29,7 +29,7 @@ namespace proxy {
 
     struct ResponseEvent : public ProxyEvent {
         ResponseEvent(HttpInfo* info);
-        HttpInfo::content getResponse(const bool raw = true) const;
+        HttpInfo::HttpContent getResponse(const bool raw = true) const;
     };
 
     template <typename T>
@@ -38,7 +38,7 @@ namespace proxy {
     template<proxy_event T>
     struct ProxyFilter : public EventFilter<T> {
         ProxyFilter(const SourceFilter source = ALL) : m_source(source) { };
-        ProxyFilter(const SourceFilter source, const std::initializer_list<std::string>& urls) : m_source(source), m_urls(urls) { };
+        ProxyFilter(const std::initializer_list<std::string>& urls) : m_source(ALL), m_urls(urls) { };
         ListenerResult handle(MiniFunction<ListenerResult(T*)> callback, T* event) {
             if (
                 (m_urls.empty() || std::find(m_urls.begin(), m_urls.end(), event->getRequest()->getUrl()) != m_urls.end()) &&
@@ -56,11 +56,11 @@ namespace proxy {
 
     struct RequestFilter : public ProxyFilter<RequestEvent> {
         RequestFilter(const SourceFilter source = ALL);
-        RequestFilter(const SourceFilter source, const std::initializer_list<std::string>& urls);
+        RequestFilter(const std::initializer_list<std::string>& urls);
     };
 
     struct ResponseFilter : public ProxyFilter<ResponseEvent> {
         ResponseFilter(const SourceFilter source = ALL);
-        ResponseFilter(const SourceFilter source, const std::initializer_list<std::string>& urls);
+        ResponseFilter(const std::initializer_list<std::string>& urls);
     };
 }

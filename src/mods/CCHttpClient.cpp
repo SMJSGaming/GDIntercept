@@ -1,8 +1,21 @@
 #include "CCHttpClient.hpp"
 
 void ModCCHttpClient::send(CCHttpRequest* request) {
-    ProxyHandler* proxy = ProxyHandler::create(request);
+    bool isProxy = false;
 
-    context::registerRequest(proxy);
-    CCHttpClient::send(request);
+    for (ProxyHandler* proxy : ProxyHandler::getProxies()) {
+        if (proxy->getCocosRequest() == request) {
+            isProxy = true;
+
+            break;
+        }
+    }
+
+    if (!isProxy) {
+        ProxyHandler::create(request);
+    }
+
+    if (!Mod::get()->getSettingValue<bool>("pause-requests")) {
+        CCHttpClient::send(request);
+    }
 }

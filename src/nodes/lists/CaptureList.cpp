@@ -24,7 +24,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
     CCArrayExt<CaptureCell*> entries;
 
-    for (ProxyHandler* proxy : context::CACHED_PROXIES) {
+    for (ProxyHandler* proxy : ProxyHandler::getProxies()) {
         HttpInfo* request = proxy->getInfo();
         CaptureCell* capture = CaptureCell::create(request, { size.width, cellHeight }, [this, request, switchInfo](CaptureCell* cell) {
             active = request;
