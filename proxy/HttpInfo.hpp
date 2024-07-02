@@ -78,7 +78,7 @@ namespace proxy {
         ContentType determineContentType(const std::string& content, const bool isBody = false);
         bool isDomain(const std::string& domain);
         void determineOrigin();
-        void parseUrl(const std::string& url);
+        void parseUrl();
 
         friend struct ProxyHandler;
     };

@@ -7,6 +7,7 @@ proxy::converters::RobTopToJson proxy::HttpInfo::robtopToJson;
 proxy::converters::BinaryToRaw proxy::HttpInfo::binaryToRaw;
 
 proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_method(request->getRequestType()),
+    m_url(request->getUrl()),
     m_query(json::object()),
     m_headers(json::object()),
     m_statusCode(102),
@@ -14,7 +15,7 @@ proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_method(request->getRequest
     const char* body = request->getRequestData();
 
     this->resetCache();
-    this->parseUrl(request->getUrl());
+    this->parseUrl();
     this->determineOrigin();
 
     // CCHttpRequest headers technically allow for weird header formats, but I'm assuming they're all key-value pairs separated by a colon since this is the standard
@@ -163,17 +164,17 @@ void proxy::HttpInfo::determineOrigin() {
     }
 }
 
-void proxy::HttpInfo::parseUrl(const std::string& url) {
-    const size_t protocolEnd = url.find("://");
-    const size_t queryStart = url.find('?');
+void proxy::HttpInfo::parseUrl() {
+    const size_t protocolEnd = m_url.find("://");
+    const size_t queryStart = m_url.find('?');
     size_t pathStart;
 
     if (protocolEnd == std::string::npos) {
-        pathStart = url.find('/');
+        pathStart = m_url.find('/');
         m_protocol = Protocol::UNKNOWN_PROTOCOL;
-        m_host = url.substr(0, pathStart == std::string::npos ? queryStart : pathStart);
+        m_host = m_url.substr(0, pathStart == std::string::npos ? queryStart : pathStart);
     } else {
-        const std::string protocol(url.substr(0, protocolEnd));
+        const std::string protocol(m_url.substr(0, protocolEnd));
 
         if (protocol == "https") {
             m_protocol = Protocol::HTTPS;
@@ -183,17 +184,17 @@ void proxy::HttpInfo::parseUrl(const std::string& url) {
             m_protocol = Protocol::UNKNOWN_PROTOCOL;
         }
 
-        pathStart = url.find('/', protocolEnd + 3);
-        m_host = url.substr(protocolEnd + 3, (pathStart == std::string::npos ? queryStart : pathStart) - protocolEnd - 3);
+        pathStart = m_url.find('/', protocolEnd + 3);
+        m_host = m_url.substr(protocolEnd + 3, (pathStart == std::string::npos ? queryStart : pathStart) - protocolEnd - 3);
     }
 
     if (pathStart == std::string::npos) {
         m_path = "/";
     } else {
-        m_path = url.substr(pathStart, queryStart == std::string::npos ? std::string::npos : queryStart - pathStart);
+        m_path = m_url.substr(pathStart, queryStart == std::string::npos ? std::string::npos : queryStart - pathStart);
     }
 
     if (queryStart != std::string::npos) {
-        m_query = HttpInfo::formToJson.convert(m_path, url.substr(queryStart + 1));
+        m_query = HttpInfo::formToJson.convert(m_path, m_url.substr(queryStart + 1));
     }
 }
