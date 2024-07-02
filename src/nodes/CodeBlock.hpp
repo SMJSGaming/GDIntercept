@@ -2,7 +2,6 @@
 
 #include "ButtonBar.hpp"
 #include "../include.hpp"
-#include "../objects/HttpInfo.hpp"
 #include "lists/JSONCodeBlock.hpp"
 #include "../objects/ThemeStyle.hpp"
 

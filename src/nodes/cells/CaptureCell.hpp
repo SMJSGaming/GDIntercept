@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../include.hpp"
-#include "../../objects/HttpInfo.hpp"
 
 struct CaptureCell : public GenericListCell {
     static CaptureCell* create(HttpInfo* request, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell);
@@ -14,5 +13,6 @@ private:
 
     CaptureCell(HttpInfo* request, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell);
     bool init(const CCSize& size);
+    ccColor3B colorForMethod();
     void onView(CCObject* obj);
 };

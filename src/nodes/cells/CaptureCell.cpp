@@ -19,7 +19,7 @@ CaptureCell::CaptureCell(HttpInfo* request, const CCSize& size, const std::funct
 }
 
 bool CaptureCell::init(const CCSize& size) {
-    const std::string method(m_request->formatMethod());
+    const std::string method(m_request->stringifyMethod());
     std::string path(m_request->getPath());
     std::string cutoffPath(path.substr(path.find_last_of('/')));
 
@@ -54,22 +54,28 @@ bool CaptureCell::init(const CCSize& size) {
     }
 
     for (size_t i = 0; i < method.size(); i++) {
-        cocos::getChild<CCSprite>(label, i)->setColor(m_request->colorForMethod());
+        cocos::getChild<CCSprite>(label, i)->setColor(this->colorForMethod());
     }
 
     return true;
 }
 
-void CaptureCell::activate() {
-    m_request->setActive(true);
+ccColor3B CaptureCell::colorForMethod() {
+    switch (m_request->getMethod()) {
+        case CCHttpRequest::kHttpGet: return { 0xA8, 0x96, 0xFF };
+        case CCHttpRequest::kHttpPost: return { 0x7E, 0xCF, 0x2B };
+        case CCHttpRequest::kHttpPut: return { 0xFF, 0x9A, 0x1F };
+        case CCHttpRequest::kHttpDelete: return { 0xFF, 0x56, 0x31 };
+        default: return { 0x46, 0xC1, 0xE6 };
+    }
+}
 
+void CaptureCell::activate() {
     m_switchCell(this);
     as<ButtonSprite*>(m_mainLayer->getChildByIDRecursive("view"_spr))->updateBGImage("GJ_button_05.png");
 }
 
 void CaptureCell::deactivate() {
-    m_request->setActive(false);
-
     as<ButtonSprite*>(m_mainLayer->getChildByIDRecursive("view"_spr))->updateBGImage("GJ_button_01.png");
 }
 

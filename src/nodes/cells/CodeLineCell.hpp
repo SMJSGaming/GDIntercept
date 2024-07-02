@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../include.hpp"
-#include "../../objects/HttpInfo.hpp"
 #include "../../objects/JSONColor.hpp"
 #include "../../objects/ThemeStyle.hpp"
 

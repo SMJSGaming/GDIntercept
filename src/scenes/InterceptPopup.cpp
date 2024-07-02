@@ -23,7 +23,7 @@ InterceptPopup* InterceptPopup::get() {
 }
 
 void InterceptPopup::scene() {
-    if (!HttpInfo::requests.empty() && !InterceptPopup::get()) {
+    if (!context::CACHED_PROXIES.empty() && !InterceptPopup::get()) {
         InterceptPopup* instance = new InterceptPopup();
 
         if (instance && instance->initAnchored(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
@@ -57,15 +57,23 @@ bool InterceptPopup::setup() {
 }
 
 void InterceptPopup::reload() {
+    CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+    const size_t sceneNodeCount = scene->getChildrenCount();
+
     OPT(m_infoArea)->removeFromParentAndCleanup(true);
-    OPT(m_settings)->removeFromParentAndCleanup(true);
+    OPT(m_controls)->removeFromParentAndCleanup(true);
     OPT(m_codeBlock)->removeFromParentAndCleanup(true);
     OPT(m_list)->removeFromParentAndCleanup(true);
 
     m_infoArea = this->setupInfo();
-    m_settings = this->setupSettings();
+    m_controls = this->setupControls();
     m_codeBlock = this->setupCodeBlock();
     m_list = this->setupList();
+
+    if (m_settings) {
+        m_settings->removeFromParentAndCleanup(true);
+        this->onSettings(nullptr);
+    }
 }
 
 void InterceptPopup::copyCode() {
@@ -98,22 +106,18 @@ Border* InterceptPopup::setupList() {
     return captures;
 }
 
-Border* InterceptPopup::setupSettings() {
-    CCSize padding(ccp(PADDING, PADDING));
+ControlMenu* InterceptPopup::setupControls() {
     const float xPosition = m_infoArea->getPositionX() + m_infoArea->getContentWidth() + PADDING;
-    const float width = InterceptPopup::uiWidth - xPosition - InterceptPopup::uiPadding;
-    CCScale9Sprite* settingsBg = CCScale9Sprite::create("square02b_001.png");
-    Border* settings = Border::create(settingsBg, LIGHTER_BROWN_4B, { width, InterceptPopup::infoRowHeight }, padding);
-    CCLabelBMFont* settingsLabel = CCLabelBMFont::create("Coming Soon...", "bigFont.fnt");
 
-    settingsLabel->setScale(0.5f);
-    settingsLabel->setPosition(settingsBg->getContentSize() / 2);
-    settings->setPosition({ xPosition, this->getComponentYPosition(0, InterceptPopup::infoRowHeight) });
-    settingsBg->setColor(LIGHT_BROWN_3B);
-    settingsBg->addChild(settingsLabel);
-    m_mainLayer->addChild(settings);
+    ControlMenu* controls = ControlMenu::create({
+        InterceptPopup::uiWidth - xPosition - InterceptPopup::uiPadding,
+        InterceptPopup::infoRowHeight
+    }, this->m_settings);
 
-    return settings;
+    controls->setPosition({ xPosition, this->getComponentYPosition(0, InterceptPopup::infoRowHeight) });
+    m_mainLayer->addChild(controls);
+
+    return controls;
 }
 
 CodeBlock* InterceptPopup::setupCodeBlock() {
@@ -144,5 +148,10 @@ void InterceptPopup::onClose(CCObject* obj) {
 }
 
 void InterceptPopup::onSettings(CCObject* obj) {
+    CCScene* currentScene = CCDirector::sharedDirector()->getRunningScene();
+
     openSettingsPopup(Mod::get());
+
+    // If this breaks, someone should stop messing with addChild, that's a whole lot of not my problem
+    m_settings = as<FLAlertLayer*>(currentScene->getChildren()->objectAtIndex(currentScene->getChildrenCount() - 1));
 }

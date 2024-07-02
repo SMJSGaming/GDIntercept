@@ -18,10 +18,11 @@ Alpha 3 Todo:
   ☐ @high Add a send button
   ☐ @critical Add a pause/resume button
   ☐ @high Add more keybinds
+  ✔ @low Add modding API support @done(24-07-02 15:10)
+  ☐ @high Add mod request support
 Release Todo:
   ☐ Add inputs to the json code block
-  # TODO: Figure out wtf I meant by this
-  ☐ Add a format to original in the converters
+  ☐ Add a formatted text to original in the converters
 Nice To Haves:
   ☐ Custom theme support
   ☐ Do some lobbying to push the Geode team to add a request event

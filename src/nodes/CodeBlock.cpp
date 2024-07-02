@@ -58,22 +58,22 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
 }
 
 void CodeBlock::onBody(CCObject* sender) {
-    this->setCode(m_request->formatBody());
+    this->setCode(m_request->getBodyContent(Mod::get()->getSettingValue<bool>("raw-data")));
     this->updateDataTypeColor('B');
 }
 
 void CodeBlock::onQuery(CCObject* sender) {
-    this->setCode({ HttpInfo::JSON, m_request->formatQuery() });
+    this->setCode({ HttpInfo::JSON, m_request->stringifyQuery() });
     this->updateDataTypeColor('Q');
 }
 
 void CodeBlock::onHeaders(CCObject* sender) {
-    this->setCode({ HttpInfo::JSON, m_request->formatHeaders() });
+    this->setCode({ HttpInfo::JSON, m_request->stringifyQuery() });
     this->updateDataTypeColor('H');
 }
 
 void CodeBlock::onResponse(CCObject* sender) {
-    this->setCode(m_request->formatResponse());
+    this->setCode(m_request->getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
     this->updateDataTypeColor('R');
 }
 

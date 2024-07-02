@@ -1,6 +1,5 @@
 #include <Geode/loader/SettingEvent.hpp>
 #include "include.hpp"
-#include "objects/HttpInfo.hpp"
 #include "scenes/InterceptPopup.hpp"
 
 #ifdef GEODE_IS_WINDOWS
@@ -49,14 +48,32 @@
 #endif
 
 $execute {
+    new EventListener([=](RequestEvent* event) {
+        if (Mod::get()->getSettingValue<bool>("log-requests")) {
+            HttpInfo* request = event->getRequest();
+
+            log::info("Sending request:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}",
+                request->stringifyMethod(),
+                request->stringifyProtocol(),
+                request->getHost(),
+                request->getPath(),
+                request->stringifyQuery(),
+                request->stringifyHeaders(),
+                request->getBodyContent(false).second
+            );
+        }
+
+        return ListenerResult::Propagate;
+    }, RequestFilter());
+
     listenForSettingChanges("remember-requests", +[](const bool value) {
         if (!value) {
-            for (size_t i = 1; i < HttpInfo::requests.size(); i++) {
-                delete HttpInfo::requests.at(i);
+            for (size_t i = 1; i < context::CACHED_PROXIES.size(); i++) {
+                delete context::CACHED_PROXIES.at(i);
             }
 
-            if (HttpInfo::requests.size() > 1) {
-                HttpInfo::requests.resize(1);
+            if (context::CACHED_PROXIES.size() > 1) {
+                context::CACHED_PROXIES.resize(1);
             }
 
             OPT(InterceptPopup::get())->reload();
@@ -65,13 +82,17 @@ $execute {
 
     listenForSettingChanges("cache", +[](const bool value) {
         if (!value) {
-            for (HttpInfo* request : HttpInfo::requests) {
-                request->resetCache();
+            for (ProxyHandler* proxy : context::CACHED_PROXIES) {
+                proxy->getInfo()->resetCache();
             }
         }
     });
 
     listenForAllSettingChanges(+[](SettingValue* event) {
-        OPT(InterceptPopup::get())->reload();
+        std::vector<std::string> blacklist({ "remember-requests", "cache" });
+
+        if (std::find(blacklist.begin(), blacklist.end(), event->getKey()) == blacklist.end()) {
+            OPT(InterceptPopup::get())->reload();
+        }
     });
 }

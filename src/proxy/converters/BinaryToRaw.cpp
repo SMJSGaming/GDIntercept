@@ -1,10 +1,10 @@
-#include "BinaryToRaw.hpp"
+#include "../../../proxy/converters/BinaryToRaw.hpp"
 
-bool BinaryToRaw::canConvert(const std::string& original) {
+bool proxy::converters::BinaryToRaw::canConvert(const std::string& path, const std::string& original) {
     return original.find_first_of('\0') != std::string::npos;
 }
 
-std::string BinaryToRaw::convert(const std::string& original) {
+std::string proxy::converters::BinaryToRaw::convert(const std::string& path, const std::string& original) {
     std::stringstream result;
 
     result << std::hex << std::setfill('0');

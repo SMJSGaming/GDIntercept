@@ -2,7 +2,7 @@
 
 #include <Geode/modify/CCHttpClient.hpp>
 #include "../include.hpp"
-#include "../objects/HttpInfo.hpp"
+#include "../proxy/ProxyHandler.hpp"
 
 class $modify(ModCCHttpClient, CCHttpClient) {
     static void onModify(auto& self) {

@@ -1,10 +1,13 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
-#include "lib/json.hpp"
+#include "../lib/json.hpp"
+#include "../proxy/Proxy.hpp"
+#include "proxy/ProxyHandler.hpp"
 
-using namespace geode::prelude;
+using namespace proxy;
 using namespace nlohmann;
+using namespace geode::prelude;
 
 #define PADDING 5.0f
 #define FULL_OPACITY 0xFF
@@ -29,5 +32,10 @@ constexpr ccColor3B BROWN_3B({ 0xA0, 0x54, 0x34 });
 constexpr ccColor4B BROWN_4B({ 0xA0, 0x54, 0x34, FULL_OPACITY });
 constexpr ccColor3B DARK_BROWN_3B({ 0x82, 0x40, 0x21 });
 constexpr ccColor4B DARK_BROWN_4B({ 0x82, 0x40, 0x21, FULL_OPACITY });
+
+namespace context {
+    extern std::vector<ProxyHandler*> CACHED_PROXIES;
+    void registerRequest(ProxyHandler* proxy);
+}
 
 #define OPT(expr) if (auto _opt_ = expr) _opt_

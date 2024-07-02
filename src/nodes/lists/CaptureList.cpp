@@ -1,5 +1,7 @@
 #include "CaptureList.hpp"
 
+HttpInfo* CaptureList::active = nullptr;
+
 CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
     CaptureList* instance = new CaptureList();
 
@@ -21,10 +23,11 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
 
     CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
     CCArrayExt<CaptureCell*> entries;
-    bool active = false;
 
-    for (HttpInfo* request : HttpInfo::requests) {
+    for (ProxyHandler* proxy : context::CACHED_PROXIES) {
+        HttpInfo* request = proxy->getInfo();
         CaptureCell* capture = CaptureCell::create(request, { size.width, cellHeight }, [this, request, switchInfo](CaptureCell* cell) {
+            active = request;
             switchInfo(request);
 
             if (m_list) {
@@ -38,9 +41,8 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
             }
         });
 
-        if (request->isActive() && !active) {
+        if (request == CaptureList::active) {
             capture->activate();
-            active = true;
         }
 
         entries.push_back(capture);
@@ -51,7 +53,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     }
 
     this->setContentSize(size);
-    this->addChild(m_list = TouchFixList::create(entries.inner(), cellHeight, size.width, this->getContentHeight()));
+    this->addChild(m_list = ListView::create(entries.inner(), cellHeight, size.width, this->getContentHeight()));
 
     return true;
 }

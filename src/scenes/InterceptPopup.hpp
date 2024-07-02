@@ -5,7 +5,7 @@
 #include "../nodes/InfoArea.hpp"
 #include "../nodes/ButtonBar.hpp"
 #include "../nodes/CodeBlock.hpp"
-#include "../objects/HttpInfo.hpp"
+#include "../nodes/ControlMenu.hpp"
 #include "../objects/ThemeStyle.hpp"
 #include "../nodes/lists/CaptureList.hpp"
 #include "../nodes/lists/JSONCodeBlock.hpp"
@@ -32,12 +32,13 @@ private:
 
     InfoArea* m_infoArea;
     CodeBlock* m_codeBlock;
-    Border* m_settings;
+    ControlMenu* m_controls;
     Border* m_list;
+    FLAlertLayer* m_settings;
 
     InfoArea* setupInfo();
     Border* setupList();
-    Border* setupSettings();
+    ControlMenu* setupControls();
     CodeBlock* setupCodeBlock();
     float getPageHeight();
     float getComponentYPosition(float offset, float itemHeight);

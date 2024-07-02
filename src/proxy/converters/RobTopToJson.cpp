@@ -1,6 +1,6 @@
-#include "RobTopToJson.hpp"
+#include "../../../proxy/converters/RobTopToJson.hpp"
 
-const std::unordered_map<std::string, RobTopToJson::Parser> RobTopToJson::parsers({
+const std::unordered_map<std::string, proxy::converters::RobTopToJson::Parser> proxy::converters::RobTopToJson::parsers({
     // Accounts
     { "/database/accounts/syncGJAccountNew.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) },
     { "/database/accounts/loginGJAccount.php", RobTopToJson::Parser({ "accountID", "userID" }, ",") },
@@ -68,14 +68,14 @@ const std::unordered_map<std::string, RobTopToJson::Parser> RobTopToJson::parser
     { "/database/getSaveData.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) }
 });
 
-RobTopToJson::ObjParser::ObjParser(const char* delimiter, const char* entryDelimiter) :
+proxy::converters::RobTopToJson::ObjParser::ObjParser(const char* delimiter, const char* entryDelimiter) :
 m_delimiter(delimiter),
 m_entryDelimiter(entryDelimiter),
 m_separatorType(KEY_VALUE) {
     m_bodyType = m_entryDelimiter.empty() ? ARRAY : OBJECT;
 }
 
-RobTopToJson::ObjParser::ObjParser(const std::vector<std::string>& tupleKeys, const char* delimiter, const char* entryDelimiter) :
+proxy::converters::RobTopToJson::ObjParser::ObjParser(const std::vector<std::string>& tupleKeys, const char* delimiter, const char* entryDelimiter) :
 m_tupleKeys(tupleKeys),
 m_delimiter(delimiter),
 m_entryDelimiter(entryDelimiter),
@@ -83,23 +83,23 @@ m_separatorType(TUPLE) {
     m_bodyType = m_entryDelimiter.empty() ? ARRAY : OBJECT;
 }
 
-RobTopToJson::Parser::Parser(const char* delimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
+proxy::converters::RobTopToJson::Parser::Parser(const char* delimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
 ObjParser(delimiter),
 m_metadata(metadataKeys) {}
 
-RobTopToJson::Parser::Parser(const std::vector<std::string>& tupleKeys, const char* delimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
+proxy::converters::RobTopToJson::Parser::Parser(const std::vector<std::string>& tupleKeys, const char* delimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
 ObjParser(tupleKeys, delimiter),
 m_metadata(metadataKeys) {}
 
-RobTopToJson::Parser::Parser(const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
+proxy::converters::RobTopToJson::Parser::Parser(const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
 ObjParser(delimiter, entryDelimiter),
 m_metadata(metadataKeys) {}
 
-RobTopToJson::Parser::Parser(const std::vector<std::string>& tupleKeys, const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
+proxy::converters::RobTopToJson::Parser::Parser(const std::vector<std::string>& tupleKeys, const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys) :
 ObjParser(tupleKeys, delimiter, entryDelimiter),
 m_metadata(metadataKeys) {}
 
-std::vector<std::string> RobTopToJson::ObjParser::split(const std::string& str, const std::string& delimiter) {
+std::vector<std::string> proxy::converters::RobTopToJson::ObjParser::split(const std::string& str, const std::string& delimiter) {
     std::vector<std::string> parts;
 
     if (delimiter.empty()) {
@@ -119,7 +119,7 @@ std::vector<std::string> RobTopToJson::ObjParser::split(const std::string& str, 
     return parts;
 }
 
-json RobTopToJson::ObjParser::parse(const std::string& str) const {
+nlohmann::json proxy::converters::RobTopToJson::ObjParser::parse(const std::string& str) const {
     if (m_entryDelimiter.empty()) {
         return parseEntry(str);
     } else {
@@ -136,7 +136,7 @@ json RobTopToJson::ObjParser::parse(const std::string& str) const {
     }
 }
 
-json RobTopToJson::ObjParser::parseEntry(const std::string& str) const {
+nlohmann::json proxy::converters::RobTopToJson::ObjParser::parseEntry(const std::string& str) const {
     const std::vector<std::string> parts(this->split(str, m_delimiter));
     json object(json::object());
     std::string lastKey;
@@ -145,18 +145,18 @@ json RobTopToJson::ObjParser::parseEntry(const std::string& str) const {
         if (m_separatorType == TUPLE) {
             const std::string key(i < m_tupleKeys.size() ? m_tupleKeys.at(i) : fmt::format("unknown{}", i));
 
-            object[key] = JsonConverter::getPrimitiveType(key, parts.at(i));
+            object[key] = getPrimitiveJsonType(key, parts.at(i));
         } else if (i % 2 == 0) {
             object[lastKey = parts.at(i)] = json();
         } else {
-            object[lastKey] = JsonConverter::getPrimitiveType(lastKey, parts.at(i));
+            object[lastKey] = getPrimitiveJsonType(lastKey, parts.at(i));
         }
     }
 
     return object;
 }
 
-json RobTopToJson::Parser::parse(const std::string& str) const {
+nlohmann::json proxy::converters::RobTopToJson::Parser::parse(const std::string& str) const {
     if (m_metadata.empty()) {
         return ObjParser::parse(str);
     } else {
@@ -178,12 +178,12 @@ json RobTopToJson::Parser::parse(const std::string& str) const {
     }
 }
 
-bool RobTopToJson::canConvert(const std::string& path, const std::string& original) {
+bool proxy::converters::RobTopToJson::canConvert(const std::string& path, const std::string& original) {
     return RobTopToJson::parsers.contains(path);
 }
 
-json RobTopToJson::convert(const std::string& path, const std::string& original) {
-    if (JsonConverter::isNumber(original)) {
+nlohmann::json proxy::converters::RobTopToJson::convert(const std::string& path, const std::string& original) {
+    if (isNumber(original)) {
         return json(std::stold(original));
     } else {
         return RobTopToJson::parsers.at(path).parse(original);

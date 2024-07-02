@@ -1,10 +1,8 @@
 #pragma once
 
 #include "../../include.hpp"
-#include "TouchFixList.hpp"
 #include "../cells/CodeLineCell.hpp"
 #include "../TracklessScrollbar.hpp"
-#include "../../objects/HttpInfo.hpp"
 #include "../../objects/JSONColor.hpp"
 #include "../../objects/ThemeStyle.hpp"
 

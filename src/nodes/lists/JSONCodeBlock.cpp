@@ -46,7 +46,7 @@ void JSONCodeBlock::setCode(const HttpInfo::content& code) {
 
     }
 
-    TouchFixList* list = TouchFixList::create(cells, cellHeight, size.width, size.height);
+    ListView* list = ListView::create(cells, cellHeight, size.width, size.height);
     TracklessScrollbar* scrollbar = TracklessScrollbar::create({ PADDING, this->getContentHeight() - 2 }, list);
 
     list->setCellOpacity(0);
