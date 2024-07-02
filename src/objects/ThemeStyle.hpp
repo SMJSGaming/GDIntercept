@@ -14,7 +14,7 @@ struct ThemeStyle {
     float fontSize;
     float lineHeight;
     cocos2d::ccColor3B background;
-    cocos2d::ccColor3B line;
+    cocos2d::ccColor3B lineNum;
     cocos2d::ccColor3B scrollBorder;
     cocos2d::ccColor3B text;
     cocos2d::ccColor3B key;

@@ -36,7 +36,7 @@ bool CodeLineCell::init(const HttpInfo::ContentType content, std::string code, c
 
     lineNumberLabel->setScale(theme.fontSize);
     lineNumberLabel->setAnchorPoint(BOTTOM_RIGHT);
-    lineNumberLabel->setColor(theme.line);
+    lineNumberLabel->setColor(theme.lineNum);
     lineNumberLabel->setPosition({ m_lineNumberWidth, theme.lineHeight / 2 });
     codeLabel->setScale(theme.fontSize);
     codeLabel->setAnchorPoint(BOTTOM_LEFT);

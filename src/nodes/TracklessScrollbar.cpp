@@ -23,7 +23,7 @@ bool TracklessScrollbar::init(const CCSize& size, ListView* list) {
     m_thumb->removeFromParentAndCleanup(true);
     this->addChild(m_thumb = CCScale9Sprite::createWithSpriteFrameName("d_largeSquare_01_001.png"));
     m_thumb->setScale(0.1f);
-    m_thumb->setColor(ThemeStyle::getTheme().line);
+    m_thumb->setColor(ThemeStyle::getTheme().lineNum);
     m_thumb->setAnchorPoint(TOP_LEFT);
     this->setContentSize({ size.width, size.height });
 

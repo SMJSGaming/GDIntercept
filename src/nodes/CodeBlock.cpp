@@ -41,7 +41,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
         buttons.push_back(CCMenuItemSpriteExtra::create(label, this, selector));
         label->setScale(0.8f);
         label->setAnchorPoint(CENTER);
-        label->setColor(ThemeStyle::getTheme().line);
+        label->setColor(ThemeStyle::getTheme().lineNum);
         label->setPosition(ccp(buttonBarSize.width / buttonCount, buttonBarSize.height) / 2);
         m_labels.insert({ key, label });
 
@@ -82,7 +82,7 @@ void CodeBlock::updateDataTypeColor(char type) {
     currentDataType = type;
 
     for (const auto& [key, _] : CodeBlock::dataTypes) {
-        m_labels.at(key)->setColor(key == type ? theme.text : theme.line);
+        m_labels.at(key)->setColor(key == type ? theme.text : theme.lineNum);
     }
 }
 

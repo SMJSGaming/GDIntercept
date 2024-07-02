@@ -55,7 +55,7 @@ void ButtonBar::draw() {
 
     CCNode::draw();
 
-    ccDrawColor4B(theme.line.r, theme.line.g, theme.line.b, 40);
+    ccDrawColor4B(theme.lineNum.r, theme.lineNum.g, theme.lineNum.b, 40);
     glLineWidth(2);
 
     for (size_t i = 1; i < m_itemCount; i++) {

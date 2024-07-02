@@ -35,7 +35,7 @@ void JSONCodeBlock::setCode(const HttpInfo::content& code) {
 
     OPT(this->getChildByID("scrollbar"_spr))->removeFromParentAndCleanup(true);
 
-    for (size_t i = 1; std::getline(stream, line); i++) {
+    for (size_t i = 1; std::getline(stream, line) || i == 1; i++) {
         if (i == 999) {
             cells->addObject(CodeLineCell::create({ HttpInfo::UNKNOWN_CONTENT, "..." }, i, lineNumberWidth, color));
 
@@ -43,7 +43,6 @@ void JSONCodeBlock::setCode(const HttpInfo::content& code) {
         } else {
             cells->addObject(CodeLineCell::create({ code.first, line }, i, lineNumberWidth, color));
         }
-
     }
 
     ListView* list = ListView::create(cells, cellHeight, size.width, size.height);
