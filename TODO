@@ -20,6 +20,7 @@ Alpha 3 Todo:
   ☐ @high Add more keybinds
   ✔ @low Add modding API support @done(24-07-02 15:10)
   ☐ @high Add mod request support
+  ☐ @critical Fix pause member not being toggled on resume
 Release Todo:
   ☐ Add inputs to the json code block
   ☐ Add a formatted text to original in the converters

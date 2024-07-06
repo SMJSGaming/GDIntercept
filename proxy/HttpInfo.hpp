@@ -47,7 +47,6 @@ namespace proxy {
         };
 
         std::string stringifyProtocol() const;
-        std::string stringifyMethod() const;
         std::string stringifyQuery() const;
         std::string stringifyHeaders() const;
         std::string stringifyStatusCode() const;
@@ -62,7 +61,7 @@ namespace proxy {
 
         GETTER(Origin, origin, Origin)
         GETTER(Protocol, protocol, Protocol)
-        GETTER(CCHttpRequest::HttpRequestType, method, Method)
+        GETTER(std::string, method, Method)
         GETTER(std::string, url, Url)
         GETTER(std::string, host, Host)
         GETTER(std::string, path, Path)
@@ -82,6 +81,7 @@ namespace proxy {
         HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& original, HttpContent& cache);
         HttpContent simplifyContent(const HttpContent& content);
         ContentType determineContentType(const std::string& content, const bool isBody = false);
+        std::string determineMethod(CCHttpRequest::HttpRequestType method);
         bool isDomain(const std::string& domain);
         bool shouldPause();
         void determineOrigin();

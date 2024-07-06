@@ -14,7 +14,7 @@ ControlMenu* ControlMenu::create(const CCSize& size, FLAlertLayer*& settings) {
     }
 }
 
-ControlMenu::ControlMenu(FLAlertLayer*& settings): m_settings(settings) { }
+ControlMenu::ControlMenu(FLAlertLayer*& settings) : m_settings(settings) { }
 
 bool ControlMenu::init(const CCSize& size) {
     const CCSize menuSize(size - PADDING * 2);
@@ -74,5 +74,5 @@ void ControlMenu::onPause(CCObject* sender) {
 }
 
 void ControlMenu::onSend(CCObject* sender) {
-    // Mod::get()->sendRequest();
+    
 }

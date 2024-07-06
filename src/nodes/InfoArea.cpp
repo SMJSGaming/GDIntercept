@@ -38,7 +38,7 @@ bool InfoArea::init(const CCSize& size) {
 void InfoArea::updateRequest(HttpInfo* request) {
     as<SimpleTextArea*>(this->getNode()->getChildByID("info_text"_spr))->setText(fmt::format("Status Code: {}\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}",
         request->stringifyStatusCode(),
-        request->stringifyMethod(),
+        request->getMethod(),
         request->stringifyProtocol(),
         request->getHost(),
         request->getPath()
