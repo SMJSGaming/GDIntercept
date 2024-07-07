@@ -53,7 +53,7 @@ $execute {
             HttpInfo* request = event->getRequest();
 
             log::info("Sending request:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}",
-                request->stringifyMethod(),
+                request->getMethod(),
                 request->stringifyProtocol(),
                 request->getHost(),
                 request->getPath(),

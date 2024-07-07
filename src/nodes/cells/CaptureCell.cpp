@@ -13,13 +13,13 @@ CaptureCell* CaptureCell::create(HttpInfo* request, const CCSize& size, const st
 }
 
 CaptureCell::CaptureCell(HttpInfo* request, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) : GenericListCell("", size),
-    m_request(request),
-    m_switchCell(switchCell) {
+m_request(request),
+m_switchCell(switchCell) {
     this->setID("capture"_spr);
 }
 
 bool CaptureCell::init(const CCSize& size) {
-    const std::string method(m_request->stringifyMethod());
+    const std::string method(m_request->getMethod());
     std::string path(m_request->getPath());
     std::string cutoffPath(path.substr(path.find_last_of('/')));
 
@@ -61,12 +61,18 @@ bool CaptureCell::init(const CCSize& size) {
 }
 
 ccColor3B CaptureCell::colorForMethod() {
-    switch (m_request->getMethod()) {
-        case CCHttpRequest::kHttpGet: return { 0xA8, 0x96, 0xFF };
-        case CCHttpRequest::kHttpPost: return { 0x7E, 0xCF, 0x2B };
-        case CCHttpRequest::kHttpPut: return { 0xFF, 0x9A, 0x1F };
-        case CCHttpRequest::kHttpDelete: return { 0xFF, 0x56, 0x31 };
-        default: return { 0x46, 0xC1, 0xE6 };
+    const std::string& method(m_request->getMethod());
+
+    if (method == "GET") {
+        return { 0xA8, 0x96, 0xFF };
+    } else if (method == "POST") {
+        return { 0x7E, 0xCF, 0x2B };
+    } else if (method == "PUT") {
+        return { 0xFF, 0x9A, 0x1F };
+    } else if (method == "DELETE") {
+        return { 0xFF, 0x56, 0x31 };
+    } else {
+        return { 0x46, 0xC1, 0xE6 };
     }
 }
 

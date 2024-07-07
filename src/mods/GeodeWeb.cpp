@@ -2,9 +2,21 @@
 #include "../include.hpp"
 
 web::WebTask WebRequest_send(web::WebRequest* request, std::string_view method, std::string_view url) {
-    log::info("{} {}", method, url);
+    bool isProxy = false;
 
-    return request->send(method, url);
+    for (ProxyHandler* proxy : ProxyHandler::getProxies()) {
+        if (proxy->getModRequest() == request) {
+            isProxy = true;
+
+            break;
+        }
+    }
+
+    if (isProxy) {
+        return request->send(method, url);
+    } else {
+        return ProxyHandler::create(request, std::string(method), std::string(url))->getModTask();
+    }
 }
 
 $execute {

@@ -36,7 +36,7 @@ void JSONCodeBlock::setCode(const HttpInfo::HttpContent& code) {
     OPT(this->getChildByID("scrollbar"_spr))->removeFromParentAndCleanup(true);
 
     for (size_t i = 1; std::getline(stream, line) || i == 1; i++) {
-        if (i == 999) {
+        if ((code.type == HttpInfo::BINARY || code.type == HttpInfo::UNKNOWN_CONTENT) && i == 999) {
             cells->addObject(CodeLineCell::create({ HttpInfo::UNKNOWN_CONTENT, "..." }, i, lineNumberWidth, color));
 
             break;

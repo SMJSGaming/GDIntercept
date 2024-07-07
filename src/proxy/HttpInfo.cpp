@@ -7,12 +7,12 @@ proxy::converters::RobTopToJson proxy::HttpInfo::robtopToJson;
 proxy::converters::BinaryToRaw proxy::HttpInfo::binaryToRaw;
 
 proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_paused(this->shouldPause()),
-    m_method(request->getRequestType()),
-    m_url(request->getUrl()),
-    m_query(json::object()),
-    m_headers(json::object()),
-    m_statusCode(0),
-    m_responseContentType(ContentType::UNKNOWN_CONTENT) {
+m_method(this->determineMethod(request->getRequestType())),
+m_url(request->getUrl()),
+m_query(json::object()),
+m_headers(json::object()),
+m_statusCode(0),
+m_responseContentType(ContentType::UNKNOWN_CONTENT) {
     const char* body = request->getRequestData();
 
     this->resetCache();
@@ -34,41 +34,35 @@ proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_paused(this->shouldPause()
         }
     }
 
-    m_body = body ? std::string(request->getRequestData()).substr(0, request->getRequestDataSize()) : "";
+    m_body = body ? std::string(body, request->getRequestDataSize()) : "";
     m_bodyContentType = this->determineContentType(m_body, true);
 }
 
 proxy::HttpInfo::HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url) : m_paused(this->shouldPause()),
-    m_url(url),
-    m_query(json::object()),
-    m_headers(json::object()),
-    m_statusCode(0),
-    m_responseContentType(ContentType::UNKNOWN_CONTENT) {
-    // this->resetCache();
-    // this->parseUrl(url);
+m_url(url),
+m_method(method),
+m_query(json::object()),
+m_headers(json::object()),
+m_statusCode(0),
+m_responseContentType(ContentType::UNKNOWN_CONTENT) {
+    const ByteVector body = request->getBody().value_or(ByteVector());
 
-    // for (const auto& [key, value] : request->m_impl->headers()) {
-    //     m_headers[key] = json(value);
-    // }
+    this->resetCache();
+    this->parseUrl();
+    this->determineOrigin();
 
-    // m_body = request->m_impl->body();
-    // m_bodyContentType = this->determineContentType(m_body, true);
+    for (const auto& [key, value] : request->getHeaders()) {
+        m_headers[key] = json(value);
+    }
+
+    m_body = std::string(body.begin(), body.end());
+    m_bodyContentType = this->determineContentType(m_body, true);
 }
 
 std::string proxy::HttpInfo::stringifyProtocol() const {
     switch (m_protocol) {
         case Protocol::HTTP: return "HTTP";
         case Protocol::HTTPS: return "HTTPS";
-        default: return "UNKNOWN";
-    }
-}
-
-std::string proxy::HttpInfo::stringifyMethod() const {
-    switch (m_method) {
-        case CCHttpRequest::kHttpGet: return "GET";
-        case CCHttpRequest::kHttpPost: return "POST";
-        case CCHttpRequest::kHttpPut: return "PUT";
-        case CCHttpRequest::kHttpDelete: return "DELETE";
         default: return "UNKNOWN";
     }
 }
@@ -124,6 +118,10 @@ proxy::HttpInfo::HttpContent proxy::HttpInfo::getContent(const bool raw, const C
 
 proxy::HttpInfo::HttpContent proxy::HttpInfo::simplifyContent(const HttpContent& content) {
     switch (content.type) {
+        case ContentType::JSON: return {
+            ContentType::JSON,
+            json::parse(content.contents).dump(2)
+        };
         case ContentType::FORM: return {
             ContentType::JSON,
             HttpInfo::formToJson.convert(m_path, content.contents).dump(2)
@@ -155,6 +153,16 @@ proxy::HttpInfo::ContentType proxy::HttpInfo::determineContentType(const std::st
         return ContentType::FORM;
     } else {
         return ContentType::UNKNOWN_CONTENT;
+    }
+}
+
+std::string proxy::HttpInfo::determineMethod(CCHttpRequest::HttpRequestType method) {
+    switch (method) {
+        case CCHttpRequest::kHttpGet: return "GET";
+        case CCHttpRequest::kHttpPost: return "POST";
+        case CCHttpRequest::kHttpPut: return "PUT";
+        case CCHttpRequest::kHttpDelete: return "DELETE";
+        default: return "UNKNOWN";
     }
 }
 

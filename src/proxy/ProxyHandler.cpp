@@ -64,17 +64,51 @@ void ProxyHandler::registerProxy(ProxyHandler* proxy) {
 }
 
 ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_info(new HttpInfo(request)),
-    m_cocosRequest(request),
-    m_originalTarget(request->getTarget()),
-    m_originalProxy(request->getSelector()) {
-    request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onResponse));
+m_cocosRequest(request),
+m_modRequest(nullptr),
+m_originalTarget(request->getTarget()),
+m_originalProxy(request->getSelector()) {
+    request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
 }
 
-ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_info(new HttpInfo(request, method, url)),
-    m_cocosRequest(nullptr),
-    m_originalTarget(nullptr),
-    m_originalProxy(nullptr) {
-    // request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onResponse));
+ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_cocosRequest(nullptr),
+m_originalTarget(nullptr),
+m_originalProxy(nullptr) {
+    m_info = new HttpInfo(m_modRequest = new web::WebRequest(*request), method, url);
+
+    m_modTask = web::WebTask::run([this](auto progress, auto cancelled) -> web::WebTask::Result {
+        web::WebResponse response;
+
+        while (m_info->isPaused()) {
+            if (cancelled()) {
+                return web::WebTask::Cancel();
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+
+        m_modRequest->send(m_info->getMethod(), m_info->getUrl()).listen([&response](web::WebResponse* taskResponse) {
+            response = web::WebResponse(*taskResponse);
+        }, [&progress](web::WebProgress* taskProgress) {
+            progress(*taskProgress);
+        });
+
+        while (!response.code()) {
+            if (cancelled()) {
+                return web::WebTask::Cancel();
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+
+        if (cancelled()) {
+            return web::WebTask::Cancel();
+        } else {
+            this->onModResponse(response);
+
+            return response;
+        }
+    }, fmt::format("Proxy for {} {}", method, url));
 }
 
 ProxyHandler::~ProxyHandler() {
@@ -89,13 +123,28 @@ CCHttpRequest* ProxyHandler::getCocosRequest() {
     return m_cocosRequest;
 }
 
-void ProxyHandler::onResponse(CCHttpClient* client, CCHttpResponse* response) {
+web::WebRequest* ProxyHandler::getModRequest() {
+    return m_modRequest;
+}
+
+web::WebTask ProxyHandler::getModTask() {
+    return m_modTask;
+}
+
+void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* response) {
     gd::vector<char>* data = response->getResponseData();
 
-    m_info->m_response = std::string(data->begin(), data->end());
     m_info->m_statusCode = response->getResponseCode();
-    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response);
+    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response = std::string(data->begin(), data->end()));
 
     (m_originalTarget->*m_originalProxy)(client, response);
+    ResponseEvent(m_info).post();
+}
+
+void ProxyHandler::onModResponse(web::WebResponse result) {
+    m_info->m_statusCode = result.code();
+    m_info->m_response = result.string().unwrapOrDefault();
+    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response);
+
     ResponseEvent(m_info).post();
 }

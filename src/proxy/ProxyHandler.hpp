@@ -15,6 +15,8 @@ namespace proxy {
         ~ProxyHandler();
         HttpInfo* getInfo();
         CCHttpRequest* getCocosRequest();
+        web::WebRequest* getModRequest();
+        web::WebTask getModTask();
     private:
         static std::vector<ProxyHandler*> cachedProxies;
 
@@ -24,9 +26,12 @@ namespace proxy {
         CCObject* m_originalTarget;
         SEL_HttpResponse m_originalProxy;
         CCHttpRequest* m_cocosRequest;
+        web::WebRequest* m_modRequest;
+        web::WebTask m_modTask;
 
         ProxyHandler(CCHttpRequest* request);
         ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);
-        void onResponse(CCHttpClient* client, CCHttpResponse* response);
+        void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);
+        void onModResponse(web::WebResponse result);
     };
 }
