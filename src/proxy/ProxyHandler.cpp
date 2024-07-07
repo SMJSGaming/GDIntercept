@@ -71,13 +71,13 @@ m_originalProxy(request->getSelector()) {
     request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
 }
 
-ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_info(new HttpInfo(request, method, url)),
-m_cocosRequest(nullptr),
-m_modRequest(request),
+ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_cocosRequest(nullptr),
 m_originalTarget(nullptr),
 m_originalProxy(nullptr) {
-    m_modTask = web::WebTask::run([this, &request](auto progress, auto cancelled) -> web::WebTask::Result {
-        web::WebResponse* response = nullptr;
+    m_info = new HttpInfo(m_modRequest = new web::WebRequest(*request), method, url);
+
+    m_modTask = web::WebTask::run([this](auto progress, auto cancelled) -> web::WebTask::Result {
+        web::WebResponse response;
 
         while (m_info->isPaused()) {
             if (cancelled()) {
@@ -87,13 +87,13 @@ m_originalProxy(nullptr) {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
-        request->send(m_info->getMethod(), m_info->getUrl()).listen([&response](web::WebResponse* taskResponse) {
-            response = taskResponse;
+        m_modRequest->send(m_info->getMethod(), m_info->getUrl()).listen([&response](web::WebResponse* taskResponse) {
+            response = web::WebResponse(*taskResponse);
         }, [&progress](web::WebProgress* taskProgress) {
             progress(*taskProgress);
         });
 
-        while (!response) {
+        while (!response.code()) {
             if (cancelled()) {
                 return web::WebTask::Cancel();
             }
@@ -106,7 +106,7 @@ m_originalProxy(nullptr) {
         } else {
             this->onModResponse(response);
 
-            return *response;
+            return response;
         }
     }, fmt::format("Proxy for {} {}", method, url));
 }
@@ -141,9 +141,10 @@ void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* respons
     ResponseEvent(m_info).post();
 }
 
-void ProxyHandler::onModResponse(web::WebResponse* result) {
-    m_info->m_statusCode = result->code();
-    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response = result->string().unwrap());
+void ProxyHandler::onModResponse(web::WebResponse result) {
+    m_info->m_statusCode = result.code();
+    m_info->m_response = result.string().unwrapOrDefault();
+    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response);
 
     ResponseEvent(m_info).post();
 }

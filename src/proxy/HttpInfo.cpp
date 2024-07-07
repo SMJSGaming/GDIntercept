@@ -118,6 +118,10 @@ proxy::HttpInfo::HttpContent proxy::HttpInfo::getContent(const bool raw, const C
 
 proxy::HttpInfo::HttpContent proxy::HttpInfo::simplifyContent(const HttpContent& content) {
     switch (content.type) {
+        case ContentType::JSON: return {
+            ContentType::JSON,
+            json::parse(content.contents).dump(2)
+        };
         case ContentType::FORM: return {
             ContentType::JSON,
             HttpInfo::formToJson.convert(m_path, content.contents).dump(2)

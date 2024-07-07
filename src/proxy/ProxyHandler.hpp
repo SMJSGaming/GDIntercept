@@ -32,6 +32,6 @@ namespace proxy {
         ProxyHandler(CCHttpRequest* request);
         ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);
         void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);
-        void onModResponse(web::WebResponse* result);
+        void onModResponse(web::WebResponse result);
     };
 }
