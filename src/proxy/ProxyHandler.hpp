@@ -12,6 +12,7 @@
 namespace proxy {
     struct ProxyHandler : public CCObject {
         static std::vector<ProxyHandler*> getProxies();
+        static std::vector<ProxyHandler*> getFilteredProxies();
         static ProxyHandler* create(CCHttpRequest* request);
         static ProxyHandler* create(web::WebRequest* request, const std::string& method, const std::string& url);
         static void resetCache();

@@ -58,28 +58,39 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
 }
 
 void CodeBlock::onBody(CCObject* sender) {
-    this->setCode(m_request->getBodyContent(Mod::get()->getSettingValue<bool>("raw-data")));
-    this->updateDataTypeColor('B');
+    if (m_request) {
+        this->setCode(m_request->getBodyContent(Mod::get()->getSettingValue<bool>("raw-data")));
+        this->updateDataTypeColor('B');
+    }
 }
 
 void CodeBlock::onQuery(CCObject* sender) {
-    this->setCode({ HttpInfo::JSON, m_request->stringifyQuery() });
-    this->updateDataTypeColor('Q');
+    if (m_request) {
+        this->setCode({ HttpInfo::JSON, m_request->stringifyQuery() });
+        this->updateDataTypeColor('Q');
+    }
 }
 
 void CodeBlock::onHeaders(CCObject* sender) {
-    this->setCode({ HttpInfo::JSON, m_request->stringifyHeaders() });
-    this->updateDataTypeColor('H');
+    if (m_request) {
+        this->setCode({ HttpInfo::JSON, m_request->stringifyHeaders() });
+        this->updateDataTypeColor('H');
+    }
 }
 
 void CodeBlock::onResponse(CCObject* sender) {
-    this->setCode(m_request->getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
-    this->updateDataTypeColor('R');
+    if (m_request) {
+        this->setCode(m_request->getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
+        this->updateDataTypeColor('R');
+    }
 }
 
-void CodeBlock::updateDataTypeColor(char type) {
+void CodeBlock::updateDataTypeColor(const char type) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
-    currentDataType = type;
+
+    if (type != '-') {
+        currentDataType = type;
+    }
 
     for (const auto& [key, _] : CodeBlock::dataTypes) {
         m_labels.at(key)->setColor(key == type ? theme.text : theme.lineNum);
@@ -89,10 +100,14 @@ void CodeBlock::updateDataTypeColor(char type) {
 void CodeBlock::updateRequest(HttpInfo* request) {
     m_request = request;
 
-    switch (currentDataType) {
-        case 'B': this->onBody(nullptr); break;
-        case 'Q': this->onQuery(nullptr); break;
-        case 'H': this->onHeaders(nullptr); break;
-        case 'R': this->onResponse(nullptr); break;
+    if (request) {
+        switch (currentDataType) {
+            case 'B': this->onBody(nullptr); break;
+            case 'Q': this->onQuery(nullptr); break;
+            case 'H': this->onHeaders(nullptr); break;
+            case 'R': this->onResponse(nullptr); break;
+        }
+    } else {
+        this->updateDataTypeColor('-');
     }
 }

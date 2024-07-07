@@ -19,9 +19,10 @@ private:
     HttpInfo* m_request;
 
     bool init(const CCSize& size, const CCSize& buttonBarSize);
+    void doNothing(CCObject* sender);
     void onBody(CCObject* sender);
     void onQuery(CCObject* sender);
     void onHeaders(CCObject* sender);
     void onResponse(CCObject* sender);
-    void updateDataTypeColor(char type);
+    void updateDataTypeColor(const char type);
 };

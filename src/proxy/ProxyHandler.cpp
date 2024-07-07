@@ -6,6 +6,40 @@ std::vector<ProxyHandler*> ProxyHandler::getProxies() {
     return ProxyHandler::cachedProxies;
 }
 
+std::vector<ProxyHandler*> ProxyHandler::getFilteredProxies() {
+    const std::string filter(Mod::get()->getSettingValue<std::string>("filter"));
+    std::vector<ProxyHandler*> proxies;
+
+    if (ProxyHandler::cachedProxies.empty() || filter == "None") {
+        return ProxyHandler::cachedProxies;
+    }
+
+    for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
+        switch (proxy->m_info->getOrigin()) {
+            case HttpInfo::Origin::GD: if (filter == "Geometry Dash Server") {
+                proxies.push_back(proxy);
+            } break;
+            case HttpInfo::Origin::GD_CDN: if (filter == "Geometry Dash CDN") {
+                proxies.push_back(proxy);
+            } break;
+            case HttpInfo::Origin::ROBTOP_GAMES: if (filter == "RobtopGames Server") {
+                proxies.push_back(proxy);
+            } break;
+            case HttpInfo::Origin::NEWGROUNDS: if (filter == "Newgrounds CDN") {
+                proxies.push_back(proxy);
+            } break;
+            case HttpInfo::Origin::GEODE: if (filter == "Geode Server") {
+                proxies.push_back(proxy);
+            } break;
+            case HttpInfo::Origin::OTHER: if (filter == "Unknown Origin") {
+                proxies.push_back(proxy);
+            } break;
+        }
+    }
+
+    return proxies;
+}
+
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
 

@@ -11,11 +11,10 @@ void ModCCHttpClient::send(CCHttpRequest* request) {
         }
     }
 
-    if (!isProxy) {
+    if (isProxy) {
+        CCHttpClient::send(request);
+    } else {
         ProxyHandler::create(request);
     }
 
-    if (!Mod::get()->getSettingValue<bool>("pause-requests")) {
-        CCHttpClient::send(request);
-    }
 }
