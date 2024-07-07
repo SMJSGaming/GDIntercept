@@ -47,6 +47,18 @@ m_statusCode(0),
 m_responseContentType(ContentType::UNKNOWN_CONTENT) {
     const ByteVector body = request->getBody().value_or(ByteVector());
 
+    if (!request->getUrlParams().empty() && url.find('?') == std::string::npos) {
+        m_url += '?';
+    }
+
+    for (const auto& [key, value] : request->getUrlParams()) {
+        m_url += key + '=' + value + '&';
+    }
+
+    if (m_url.ends_with('&')) {
+        m_url.pop_back();
+    }
+
     this->resetCache();
     this->parseUrl();
     this->determineOrigin();

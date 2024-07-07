@@ -76,7 +76,7 @@ m_originalTarget(nullptr),
 m_originalProxy(nullptr) {
     m_info = new HttpInfo(m_modRequest = new web::WebRequest(*request), method, url);
 
-    m_modTask = web::WebTask::run([this](auto progress, auto cancelled) -> web::WebTask::Result {
+    m_modTask = web::WebTask::run([this, method, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse response;
 
         while (m_info->isPaused()) {
@@ -87,7 +87,7 @@ m_originalProxy(nullptr) {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
-        m_modRequest->send(m_info->getMethod(), m_info->getUrl()).listen([&response](web::WebResponse* taskResponse) {
+        m_modRequest->send(m_info->getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
             response = web::WebResponse(*taskResponse);
         }, [&progress](web::WebProgress* taskProgress) {
             progress(*taskProgress);

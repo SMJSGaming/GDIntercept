@@ -68,7 +68,7 @@ void CodeBlock::onQuery(CCObject* sender) {
 }
 
 void CodeBlock::onHeaders(CCObject* sender) {
-    this->setCode({ HttpInfo::JSON, m_request->stringifyQuery() });
+    this->setCode({ HttpInfo::JSON, m_request->stringifyHeaders() });
     this->updateDataTypeColor('H');
 }
 

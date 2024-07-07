@@ -19,7 +19,7 @@ Alpha 3 Todo:
   ✔ @critical Add a pause/resume button @done(24-07-02 23:29)
   ☐ @high Add more keybinds
   ✔ @low Add modding API support @done(24-07-02 15:10)
-  ☐ @high Add mod request support
+  ✔ @high Add mod request support @done(24-07-07 14:45)
   ☐ @critical Fix pause member not being toggled on resume
 Release Todo:
   ☐ Add inputs to the json code block
