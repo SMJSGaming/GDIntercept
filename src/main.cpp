@@ -64,13 +64,7 @@ $execute {
         }
 
         return ListenerResult::Propagate;
-    }, RequestFilter(GD));
-
-    new EventListener([=](ResponseEvent* event) {
-        log::debug("This is the response my server is giving back: {}", event->getResponse().contents);
-
-        return ListenerResult::Propagate;
-    }, ResponseFilter({ "https://myveryspecific.endpoint/with_path" }));
+    }, RequestFilter());
 
     listenForSettingChanges("remember-requests", +[](const bool value) {
         if (!value) {
