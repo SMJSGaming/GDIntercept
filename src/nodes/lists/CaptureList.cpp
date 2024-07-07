@@ -23,12 +23,12 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
 
     CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
     CCArrayExt<CaptureCell*> entries;
+    bool activated = false;
 
     for (ProxyHandler* proxy : ProxyHandler::getProxies()) {
         HttpInfo* request = proxy->getInfo();
         CaptureCell* capture = CaptureCell::create(request, { size.width, cellHeight }, [this, request, switchInfo](CaptureCell* cell) {
-            active = request;
-            switchInfo(request);
+            switchInfo(CaptureList::active = request);
 
             if (m_list) {
                 CCArrayExt<CaptureCell*> entries(m_list->m_entries);
@@ -42,13 +42,14 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
         });
 
         if (request == CaptureList::active) {
+            activated = true;
             capture->activate();
         }
 
         entries.push_back(capture);
     }
 
-    if (!active) {
+    if (!active || !activated) {
         entries[0]->activate();
     }
 

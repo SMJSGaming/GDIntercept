@@ -3,31 +3,29 @@
 #include <Geode/utils/web.hpp>
 #include "../include.hpp"
 
+#define GETTER(type, name, capital_name) \
+        public: \
+            type get##capital_name() const { return m_##name; } \
+        private: \
+            type m_##name;
+
 namespace proxy {
     struct ProxyHandler : public CCObject {
         static std::vector<ProxyHandler*> getProxies();
         static ProxyHandler* create(CCHttpRequest* request);
         static ProxyHandler* create(web::WebRequest* request, const std::string& method, const std::string& url);
-        static void resumeRequests();
-        static void forgetProxies();
         static void resetCache();
-
-        ~ProxyHandler();
-        HttpInfo* getInfo();
-        CCHttpRequest* getCocosRequest();
-        web::WebRequest* getModRequest();
-        web::WebTask getModTask();
     private:
         static std::vector<ProxyHandler*> cachedProxies;
 
         static void registerProxy(ProxyHandler* proxy);
 
-        HttpInfo* m_info;
+        GETTER(HttpInfo*, info, Info)
+        GETTER(CCHttpRequest*, cocosRequest, CocosRequest)
+        GETTER(web::WebRequest*, modRequest, ModRequest)
+        GETTER(web::WebTask, modTask, ModTask)
         CCObject* m_originalTarget;
         SEL_HttpResponse m_originalProxy;
-        CCHttpRequest* m_cocosRequest;
-        web::WebRequest* m_modRequest;
-        web::WebTask m_modTask;
 
         ProxyHandler(CCHttpRequest* request);
         ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);

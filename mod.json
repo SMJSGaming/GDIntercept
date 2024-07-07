@@ -61,8 +61,26 @@
       "name": "Theme",
       "description": "The theme of the code block.",
       "type": "string",
-      "default": "dark",
-      "one-of": [ "dark", "light" ]
+      "default": "Dark",
+      "one-of": [
+        "Dark",
+        "Light"
+      ]
+    },
+    "filter": {
+      "name": "Filter",
+      "description": "Filters out requests from specific sources.",
+      "type": "string",
+      "default": "None",
+      "one-of": [
+        "None",
+        "Geometry Dash Server",
+        "Geometry Dash CDN",
+        "RobtopGames Server",
+        "Newgrounds CDN",
+        "Geode Server",
+        "Unknown Origin"
+      ]
     },
     "pause-requests": {
       "name": "Pause Requests",
@@ -73,12 +91,6 @@
     "censor-data": {
       "name": "Censor Sensitive Data",
       "description": "Censors all known sensitive keys in GD and some common sensitive keys.",
-      "type": "bool",
-      "default": true
-    },
-    "remember-requests": {
-      "name": "Remember Requests",
-      "description": "Remembers all requests made in the current session.\n\n<cy>WARNING</c>: Turning this off will completely remove all but the last request currently cached.",
       "type": "bool",
       "default": true
     },

@@ -56,7 +56,7 @@ const std::unordered_map<ThemeStyle::Theme, ThemeStyle> ThemeStyle::themes = {
 };
 
 const ThemeStyle& ThemeStyle::getTheme() {
-    if (Mod::get()->getSettingValue<std::string>("theme") == "light") {
+    if (Mod::get()->getSettingValue<std::string>("theme") == "Light") {
         return ThemeStyle::themes.at(LIGHT);
     } else {
         return ThemeStyle::themes.at(DARK);

@@ -66,13 +66,6 @@ $execute {
         return ListenerResult::Propagate;
     }, RequestFilter());
 
-    listenForSettingChanges("remember-requests", +[](const bool value) {
-        if (!value) {
-            ProxyHandler::forgetProxies();
-            OPT(InterceptPopup::get())->reload();
-        }
-    });
-
     listenForSettingChanges("cache", +[](const bool value) {
         if (!value) {
             ProxyHandler::resetCache();
@@ -80,9 +73,7 @@ $execute {
     });
 
     listenForAllSettingChanges(+[](SettingValue* event) {
-        std::vector<std::string> blacklist({ "remember-requests", "cache" });
-
-        if (std::find(blacklist.begin(), blacklist.end(), event->getKey()) == blacklist.end()) {
+        if (event->getKey() != "cache") {
             OPT(InterceptPopup::get())->reload();
         }
     });

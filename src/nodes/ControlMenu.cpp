@@ -67,10 +67,6 @@ void ControlMenu::onPause(CCObject* sender) {
     m_settings = nullptr;
     m_pauseButton->setString(value ? "Resume" : "Pause");
     Mod::get()->setSettingValue("pause-requests", value);
-
-    if (!value) {
-        ProxyHandler::resumeRequests();
-    }
 }
 
 void ControlMenu::onSend(CCObject* sender) {

@@ -186,6 +186,10 @@ bool proxy::HttpInfo::shouldPause() {
     return Mod::get()->getSettingValue<bool>("pause-requests");
 }
 
+void proxy::HttpInfo::resume() {
+    m_paused = false;
+}
+
 void proxy::HttpInfo::determineOrigin() {
     if (this->isDomain("boomlings.com") || this->isDomain("geometrydash.com")) {
         m_origin = Origin::GD;

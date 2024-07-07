@@ -27,26 +27,6 @@ ProxyHandler* ProxyHandler::create(web::WebRequest* request, const std::string& 
     return instance;
 }
 
-void ProxyHandler::resumeRequests() {
-    CCHttpClient* instance = CCHttpClient::getInstance();
-
-    for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
-        if (proxy->getInfo()->isPaused() && proxy->m_cocosRequest) {
-            instance->send(proxy->m_cocosRequest);
-        }
-    }
-}
-
-void ProxyHandler::forgetProxies() {
-    for (size_t i = 1; i < ProxyHandler::cachedProxies.size(); i++) {
-        delete ProxyHandler::cachedProxies.at(i);
-    }
-
-    if (ProxyHandler::cachedProxies.size() > 1) {
-        ProxyHandler::cachedProxies.resize(1);
-    }
-}
-
 void ProxyHandler::resetCache() {
     for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
         proxy->getInfo()->resetCache();
@@ -54,12 +34,6 @@ void ProxyHandler::resetCache() {
 }
 
 void ProxyHandler::registerProxy(ProxyHandler* proxy) {
-    if (!Mod::get()->getSettingValue<bool>("remember-requests") && ProxyHandler::cachedProxies.size() > 0) {
-        delete ProxyHandler::cachedProxies.at(0);
-
-        ProxyHandler::cachedProxies.resize(0);
-    }
-
     ProxyHandler::cachedProxies.insert(ProxyHandler::cachedProxies.begin(), proxy);
 }
 
@@ -69,6 +43,15 @@ m_modRequest(nullptr),
 m_originalTarget(request->getTarget()),
 m_originalProxy(request->getSelector()) {
     request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
+
+    std::thread([this, request]() {
+        while (Mod::get()->getSettingValue<bool>("pause-requests")) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+
+        CCHttpClient::getInstance()->send(request);
+        m_info->resume();
+    }).detach();
 }
 
 ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_cocosRequest(nullptr),
@@ -79,12 +62,12 @@ m_originalProxy(nullptr) {
     m_modTask = web::WebTask::run([this, method, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse response;
 
-        while (m_info->isPaused()) {
+        while (Mod::get()->getSettingValue<bool>("pause-requests")) {
             if (cancelled()) {
                 return web::WebTask::Cancel();
             }
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
 
         m_modRequest->send(m_info->getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
@@ -92,6 +75,7 @@ m_originalProxy(nullptr) {
         }, [&progress](web::WebProgress* taskProgress) {
             progress(*taskProgress);
         });
+        m_info->resume();
 
         while (!response.code()) {
             if (cancelled()) {
@@ -111,26 +95,6 @@ m_originalProxy(nullptr) {
     }, fmt::format("Proxy for {} {}", method, url));
 }
 
-ProxyHandler::~ProxyHandler() {
-    delete m_info;
-}
-
-HttpInfo* ProxyHandler::getInfo() {
-    return m_info;
-}
-
-CCHttpRequest* ProxyHandler::getCocosRequest() {
-    return m_cocosRequest;
-}
-
-web::WebRequest* ProxyHandler::getModRequest() {
-    return m_modRequest;
-}
-
-web::WebTask ProxyHandler::getModTask() {
-    return m_modTask;
-}
-
 void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* response) {
     gd::vector<char>* data = response->getResponseData();
 
@@ -143,8 +107,7 @@ void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* respons
 
 void ProxyHandler::onModResponse(web::WebResponse result) {
     m_info->m_statusCode = result.code();
-    m_info->m_response = result.string().unwrapOrDefault();
-    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response);
+    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response = result.string().unwrapOrDefault());
 
     ResponseEvent(m_info).post();
 }

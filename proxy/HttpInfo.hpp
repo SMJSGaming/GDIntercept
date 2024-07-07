@@ -84,6 +84,7 @@ namespace proxy {
         std::string determineMethod(CCHttpRequest::HttpRequestType method);
         bool isDomain(const std::string& domain);
         bool shouldPause();
+        void resume();
         void determineOrigin();
         void parseUrl();
 
