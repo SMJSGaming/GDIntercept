@@ -279,7 +279,7 @@ m_request(request),
 m_headers(HttpInfo::parseCocosHeaders(response->getResponseHeader())),
 m_statusCode(response->getResponseCode()),
 m_simplifiedResponseCache({ ContentType::UNKNOWN_CONTENT, "" }) {
-    std::vector<char>* data = response->getResponseData();
+    gd::vector<char>* data = response->getResponseData();
 
     m_response = std::string(data->begin(), data->end());
     m_contentType = HttpInfo::determineContentType(request->m_url.getPath(), m_response);

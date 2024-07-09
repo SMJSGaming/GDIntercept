@@ -85,7 +85,7 @@ void ControlMenu::onSend(CCObject* sender) {
     }
 
     for (const auto& [name, value] : original.getHeaders().items()) {
-        request.header(name, value);
+        request.header(name, value.get<std::string>());
     }
 
     (void) request.send(url.getMethod(), url.getRaw());
