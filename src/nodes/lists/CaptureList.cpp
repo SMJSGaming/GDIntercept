@@ -1,6 +1,6 @@
 #include "CaptureList.hpp"
 
-HttpInfo* CaptureList::active = nullptr;
+size_t CaptureList::active = 1;
 
 CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
     CaptureList* instance = new CaptureList();
@@ -17,21 +17,67 @@ CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, con
 }
 
 bool CaptureList::init(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
-    if (!CCNode::init()) {
+    #ifdef GEODE_IS_WINDOWS
+        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+            if (event->isDown()) {
+                std::vector<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
+
+                for (size_t i = 0; i < proxies.size(); i++) {
+                    if (proxies[i]->getInfo()->getID() == CaptureList::active) {
+                        if (i == proxies.size() - 1) {
+                            m_cells[0]->activate();
+                        } else {
+                            m_cells[i + 1]->activate();
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return ListenerResult::Propagate;
+        }, "next_packet"_spr);
+
+        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+            if (event->isDown()) {
+                std::vector<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
+
+                for (size_t i = 0; i < proxies.size(); i++) {
+                    if (proxies[i]->getInfo()->getID() == CaptureList::active) {
+                        if (i == 0) {
+                            m_cells[m_cells.size() - 1]->activate();
+                        } else {
+                            m_cells[i - 1]->activate();
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return ListenerResult::Propagate;
+        }, "previous_packet"_spr);
+    #endif
+
+    const CCSize listSize = size - 2;
+    CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
+    bool activated = false;
+
+    if (!Border::init(LIGHTER_BROWN_4B, size)) {
         return false;
     }
 
-    CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
-    CCArrayExt<CaptureCell*> entries;
-    bool activated = false;
+    this->setPadding(1);
 
     for (ProxyHandler* proxy : ProxyHandler::getFilteredProxies()) {
         HttpInfo* info = proxy->getInfo();
         CaptureCell* capture = CaptureCell::create(info->getRequest().getURL(), {
-            size.width,
+            listSize.width,
             cellHeight
         }, [this, info, switchInfo](CaptureCell* cell) {
-            switchInfo(CaptureList::active = info);
+            CaptureList::active = info->getID();
+
+            switchInfo(info);
 
             if (m_list) {
                 CCArrayExt<CaptureCell*> entries(m_list->m_entries);
@@ -44,20 +90,19 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
             }
         });
 
-        if (info == CaptureList::active) {
+        if (CaptureList::active == info->getID()) {
             activated = true;
             capture->activate();
         }
 
-        entries.push_back(capture);
+        m_cells.push_back(capture);
     }
 
-    if ((!active || !activated) && entries.size()) {
-        entries[0]->activate();
+    if ((!active || !activated) && m_cells.size()) {
+        m_cells[0]->activate();
     }
 
-    this->setContentSize(size);
-    this->addChild(m_list = ListView::create(entries.inner(), cellHeight, size.width, this->getContentHeight()));
+    this->setNode(m_list = ListView::create(m_cells.inner(), cellHeight, listSize.width, listSize.height));
 
     return true;
 }

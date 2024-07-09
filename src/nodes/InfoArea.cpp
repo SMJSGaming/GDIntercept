@@ -15,6 +15,20 @@ InfoArea* InfoArea::create(const CCSize& size) {
 }
 
 bool InfoArea::init(const CCSize& size) {
+    #ifdef GEODE_IS_WINDOWS
+        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+            if (event->isDown()) {
+                TextAlertPopup* alert = TextAlertPopup::create("Code Copied", 0.5f, 0.6f, 150, "");
+
+                utils::clipboard::write(as<SimpleTextArea*>(this->getNode()->getChildByID("info_text"_spr))->getText());
+                alert->setPosition(this->getContentSize() / 2);
+                this->addChild(alert, 100);
+            }
+
+            return ListenerResult::Propagate;
+        }, "copy_info_block"_spr);
+    #endif
+
     SimpleTextArea* infoText = SimpleTextArea::create("", "chatFont.fnt", 0.5f, size.width - PADDING * 4);
     CCScale9Sprite* infoBg = CCScale9Sprite::create("square02b_001.png");
 

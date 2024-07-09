@@ -5,6 +5,12 @@
 #include "../proxy/Proxy.hpp"
 #include "proxy/ProxyHandler.hpp"
 
+#ifdef GEODE_IS_WINDOWS
+    #include <geode.custom-keybinds/include/Keybinds.hpp>
+
+    using namespace keybinds;
+#endif
+
 using namespace proxy;
 using namespace nlohmann;
 using namespace geode::prelude;

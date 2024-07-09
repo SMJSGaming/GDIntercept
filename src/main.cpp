@@ -3,11 +3,7 @@
 #include "scenes/InterceptPopup.hpp"
 
 #ifdef GEODE_IS_WINDOWS
-    #include <geode.custom-keybinds/include/Keybinds.hpp>
-
     $execute {
-        using namespace keybinds;
-
         BindManager* manager = BindManager::get();
 
         manager->registerBindable({
@@ -18,15 +14,85 @@
             "GD Intercept"
         });
         manager->registerBindable({
+            "next_packet"_spr,
+            "Next Packet",
+            "Selects the next packet in the capture menu",
+            {
+                Keybind::create(KEY_Tab),
+                Keybind::create(KEY_Down, Modifier::Shift),
+            },
+            "GD Intercept"
+        });
+        manager->registerBindable({
+            "previous_packet"_spr,
+            "Previous Packet",
+            "Selects the previous packet in the capture menu",
+            {
+                // This will clash with steam overlay, but I'll leave it to the user to fix that
+                Keybind::create(KEY_Tab, Modifier::Shift),
+                Keybind::create(KEY_Up, Modifier::Shift)
+            },
+            "GD Intercept"
+        });
+        manager->registerBindable({
+            "copy_info_block"_spr,
+            "Copy Info",
+            "Copies the contents of the request info",
+            {
+                Keybind::create(KEY_C, Modifier::Alt)
+            },
+            "GD Intercept"
+        });
+        manager->registerBindable({
             "copy_code_block"_spr,
-            "Copy Code Block",
+            "Copy",
             "Copies the contents of the intercept menu code block to the clipboard",
             {
                 Keybind::create(KEY_C, Modifier::Control),
                 // This will only work if this extension finally gets MacOS support
                 Keybind::create(KEY_C, Modifier::Command)
             },
-            "GD Intercept"
+            "GD Intercept/Code Block"
+        });
+        manager->registerBindable({
+            "code_line_up"_spr,
+            "Line Up",
+            "Scrolls one line up in the code block",
+            {
+                Keybind::create(KEY_Up)
+            },
+            "GD Intercept/Code Block"
+        });
+        manager->registerBindable({
+            "code_page_up"_spr,
+            "Page Up",
+            "Scrolls one page up in the code block",
+            {
+                Keybind::create(KEY_PageUp),
+                Keybind::create(KEY_Up, Modifier::Control),
+                Keybind::create(KEY_Up, Modifier::Command)
+            },
+            "GD Intercept/Code Block"
+        });
+        manager->registerBindable({
+            "code_line_down"_spr,
+            "Line Down",
+            "Scrolls one line down in the code block",
+            {
+                Keybind::create(KEY_Down)
+            },
+            "GD Intercept/Code Block"
+        });
+        manager->registerBindable({
+            "code_page_down"_spr,
+            "Page Down",
+            "Scrolls one page down in the code block",
+            {
+                Keybind::create(KEY_PageDown),
+                Keybind::create(KEY_Down, Modifier::Control),
+                Keybind::create(KEY_Down, Modifier::Command)
+            },
+            "GD Intercept/Code Block"
         });
 
         new EventListener([=](InvokeBindEvent* event) {
@@ -36,14 +102,6 @@
 
             return ListenerResult::Propagate;
         }, InvokeBindFilter(nullptr, "open_capture_menu"_spr));
-
-        new EventListener([=](InvokeBindEvent* event) {
-            if (event->isDown()) {
-                OPT(InterceptPopup::get())->copyCode();
-            }
-
-            return ListenerResult::Propagate;
-        }, InvokeBindFilter(nullptr, "copy_code_block"_spr));
     }
 #endif
 

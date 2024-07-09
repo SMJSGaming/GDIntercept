@@ -1,5 +1,7 @@
 #include "../../proxy/HttpInfo.hpp"
 
+static size_t globalIndexCounter = 1;
+
 proxy::converters::FormToJson proxy::HttpInfo::formToJson;
 
 proxy::converters::RobTopToJson proxy::HttpInfo::robtopToJson;
@@ -98,10 +100,12 @@ bool proxy::HttpInfo::shouldPause() {
     return Mod::get()->getSettingValue<bool>("pause-requests");
 }
 
-proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_paused(this->shouldPause()),
+proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_id(globalIndexCounter++),
+m_paused(this->shouldPause()),
 m_request(request) { }
 
-proxy::HttpInfo::HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url) : m_paused(this->shouldPause()),
+proxy::HttpInfo::HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url) : m_id(globalIndexCounter++),
+m_paused(this->shouldPause()),
 m_request(request, method, url) { }
 
 bool proxy::HttpInfo::isPaused() const {

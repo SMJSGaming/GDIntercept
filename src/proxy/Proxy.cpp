@@ -18,6 +18,14 @@ proxy::RequestFilter::RequestFilter(const SourceFilter source) : ProxyFilter(sou
 
 proxy::RequestFilter::RequestFilter(const std::initializer_list<std::string>& urls) : ProxyFilter(urls) { }
 
+proxy::RequestFilter::RequestFilter(CCNode* target, const SourceFilter source) : ProxyFilter(target, source) { }
+
+proxy::RequestFilter::RequestFilter(CCNode* target, const std::initializer_list<std::string>& urls) : ProxyFilter(target, urls) { }
+
 proxy::ResponseFilter::ResponseFilter(const SourceFilter source) : ProxyFilter(source) { }
 
 proxy::ResponseFilter::ResponseFilter(const std::initializer_list<std::string>& urls) : ProxyFilter(urls) { }
+
+proxy::ResponseFilter::ResponseFilter(CCNode* target, const SourceFilter source) : ProxyFilter(target, source) { }
+
+proxy::ResponseFilter::ResponseFilter(CCNode* target, const std::initializer_list<std::string>& urls) : ProxyFilter(target, urls) { }

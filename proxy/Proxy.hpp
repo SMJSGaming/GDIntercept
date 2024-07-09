@@ -65,17 +65,23 @@ namespace proxy {
 
         ProxyFilter(const SourceFilter source = ALL) : m_source(source) { };
         ProxyFilter(const std::initializer_list<std::string>& urls) : m_source(ALL), m_urls(urls) { };
+        ProxyFilter(CCNode* target, const SourceFilter source) : m_source(source) { };
+        ProxyFilter(CCNode* target, const std::initializer_list<std::string>& urls) : m_source(ALL), m_urls(urls) { };
     };
 
     class RequestFilter : public ProxyFilter<RequestEvent> {
     public:
         RequestFilter(const SourceFilter source = ALL);
         RequestFilter(const std::initializer_list<std::string>& urls);
+        RequestFilter(CCNode* target, const SourceFilter source = ALL);
+        RequestFilter(CCNode* target, const std::initializer_list<std::string>& urls);
     };
 
     class ResponseFilter : public ProxyFilter<ResponseEvent> {
     public:
         ResponseFilter(const SourceFilter source = ALL);
         ResponseFilter(const std::initializer_list<std::string>& urls);
+        ResponseFilter(CCNode* target, const SourceFilter source = ALL);
+        ResponseFilter(CCNode* target, const std::initializer_list<std::string>& urls);
     };
 }

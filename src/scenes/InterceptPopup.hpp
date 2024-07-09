@@ -4,11 +4,10 @@
 #include "../include.hpp"
 #include "../nodes/InfoArea.hpp"
 #include "../nodes/ButtonBar.hpp"
-#include "../nodes/CodeBlock.hpp"
 #include "../nodes/ControlMenu.hpp"
 #include "../objects/ThemeStyle.hpp"
+#include "../nodes/lists/CodeBlock.hpp"
 #include "../nodes/lists/CaptureList.hpp"
-#include "../nodes/lists/JSONCodeBlock.hpp"
 
 class InterceptPopup : public Popup<> {
 public:
@@ -16,7 +15,6 @@ public:
     static void scene();
 
     void reload();
-    void copyCode();
 protected:
     bool setup() override;
     void onClose(CCObject* obj) override;
@@ -34,11 +32,11 @@ private:
     InfoArea* m_infoArea;
     CodeBlock* m_codeBlock;
     ControlMenu* m_controls;
-    Border* m_list;
+    CaptureList* m_list;
     FLAlertLayer* m_settings;
 
     InfoArea* setupInfo();
-    Border* setupList();
+    CaptureList* setupList();
     ControlMenu* setupControls();
     CodeBlock* setupCodeBlock();
     float getPageHeight();

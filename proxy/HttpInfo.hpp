@@ -131,6 +131,7 @@ namespace proxy {
         static json parseCocosHeaders(const std::vector<gd::string>& headers);
         static bool shouldPause();
 
+        GETTER(size_t, id, ID)
         GETTER(Request, request, Request)
         GETTER(Response, response, Response)
         bool m_paused;

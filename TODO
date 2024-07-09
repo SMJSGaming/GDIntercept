@@ -15,9 +15,9 @@ Alpha 2 Todo:
   ✔ @low Paths overflow in the info section, obscuring the status code @done(24-06-22 19:32)
   ✔ @today Add a binary view (request from Absolute) @done(24-06-24 22:48)
 Alpha 3 Todo:
-  ☐ @high Add a send button
+  ✔ @high Add a send button @done(24-07-09 15:34)
   ✔ @critical Add a pause/resume button @done(24-07-02 23:29)
-  ☐ @high Add more keybinds
+  ✔ @high Add more keybinds @done(24-07-10 01:47)
   ✔ @low Add modding API support @done(24-07-02 15:10)
   ✔ @high Add mod request support @done(24-07-07 14:45)
   ✔ @critical Fix pause member not being toggled on resume @done(24-07-07 16:25)
@@ -25,7 +25,8 @@ Alpha 3 Todo:
 Release Todo:
   ☐ Rescale path labels
   ☐ Add inputs to the json code block
-  ☐ Add a formatted text to original in the converters
+  ☐ Add a formatted text to original converter in the converters
+  ☐ Add a copy button to the code block and info block
+  ☐ Add badges to the capture cells (e.g. pause, finished, source)
 Nice To Haves:
   ☐ Custom theme support
-  ☐ Do some lobbying to push the Geode team to add a request event

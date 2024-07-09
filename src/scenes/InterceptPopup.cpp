@@ -76,10 +76,6 @@ void InterceptPopup::reload() {
     }
 }
 
-void InterceptPopup::copyCode() {
-    m_codeBlock->copyCode();
-}
-
 InfoArea* InterceptPopup::setupInfo() {
     InfoArea* infoArea = InfoArea::create({ InterceptPopup::infoWidth, InterceptPopup::infoRowHeight });
 
@@ -92,19 +88,21 @@ InfoArea* InterceptPopup::setupInfo() {
     return infoArea;
 }
 
-Border* InterceptPopup::setupList() {
-    const CCSize listSize(ccp(InterceptPopup::captureCellWidth, this->getPageHeight()));
-    Border* captures = Border::create(CaptureList::create(listSize - 2, InterceptPopup::captureCellHeight, [this](HttpInfo* info) {
+CaptureList* InterceptPopup::setupList() {
+    CaptureList* list = CaptureList::create({
+        InterceptPopup::captureCellWidth,
+        this->getPageHeight()
+    }, InterceptPopup::captureCellHeight, [this](HttpInfo* info) {
         m_infoArea->updateInfo(info);
         m_controls->updateInfo(info);
         m_codeBlock->updateInfo(info);
-    }), LIGHTER_BROWN_4B, listSize, { 1, 1 });
+    });
 
-    captures->setAnchorPoint(BOTTOM_LEFT);
-    captures->setPosition({ InterceptPopup::uiPadding, InterceptPopup::uiPadding });
-    m_mainLayer->addChild(captures);
+    list->setAnchorPoint(BOTTOM_LEFT);
+    list->setPosition({ InterceptPopup::uiPadding, InterceptPopup::uiPadding });
+    m_mainLayer->addChild(list);
 
-    return captures;
+    return list;
 }
 
 ControlMenu* InterceptPopup::setupControls() {
