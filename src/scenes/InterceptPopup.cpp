@@ -96,6 +96,7 @@ Border* InterceptPopup::setupList() {
     const CCSize listSize(ccp(InterceptPopup::captureCellWidth, this->getPageHeight()));
     Border* captures = Border::create(CaptureList::create(listSize - 2, InterceptPopup::captureCellHeight, [this](HttpInfo* info) {
         m_infoArea->updateInfo(info);
+        m_controls->updateInfo(info);
         m_codeBlock->updateInfo(info);
     }), LIGHTER_BROWN_4B, listSize, { 1, 1 });
 

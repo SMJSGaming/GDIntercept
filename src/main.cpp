@@ -49,6 +49,8 @@
 
 $execute {
     new EventListener([=](RequestEvent* event) {
+        OPT(InterceptPopup::get())->reload();
+
         if (Mod::get()->getSettingValue<bool>("log-requests")) {
             const HttpInfo::Request* request = event->getRequest();
             const HttpInfo::URL url = request->getURL();

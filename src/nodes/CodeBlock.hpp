@@ -20,7 +20,6 @@ private:
     HttpInfo* m_info;
 
     bool init(const CCSize& size, const CCSize& buttonBarSize);
-    void doNothing(CCObject* sender);
     void onBody(CCObject* sender);
     void onQuery(CCObject* sender);
     void onHeaders(CCObject* sender);

@@ -61,6 +61,10 @@ bool ControlMenu::init(const CCSize& size) {
     return true;
 }
 
+void ControlMenu::updateInfo(HttpInfo* info) {
+    m_info = info;
+}
+
 void ControlMenu::onPause(CCObject* sender) {
     const bool value = !Mod::get()->getSettingValue<bool>("pause-requests");
 
@@ -70,5 +74,15 @@ void ControlMenu::onPause(CCObject* sender) {
 }
 
 void ControlMenu::onSend(CCObject* sender) {
-    
+    const HttpInfo::Request* original = m_info->getRequest();
+    const HttpInfo::URL url = original->getURL();
+    web::WebRequest request;
+
+    request.bodyString(original->getBody());
+
+    for (const auto& [name, value] : original->getHeaders().items()) {
+        request.header(name, value);
+    }
+
+    (void) request.send(url.getMethod(), url.getRaw());
 }
