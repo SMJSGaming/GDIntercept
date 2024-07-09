@@ -27,7 +27,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
 
     for (ProxyHandler* proxy : ProxyHandler::getFilteredProxies()) {
         HttpInfo* info = proxy->getInfo();
-        CaptureCell* capture = CaptureCell::create(info->getRequest()->getURL(), {
+        CaptureCell* capture = CaptureCell::create(info->getRequest().getURL(), {
             size.width,
             cellHeight
         }, [this, info, switchInfo](CaptureCell* cell) {

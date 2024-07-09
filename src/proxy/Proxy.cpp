@@ -2,7 +2,7 @@
 
 proxy::ProxyEvent::ProxyEvent(HttpInfo* info) : m_info(info) { }
 
-proxy::HttpInfo::Request* proxy::ProxyEvent::getRequest() const {
+proxy::HttpInfo::Request proxy::ProxyEvent::getRequest() const {
     return m_info->getRequest();
 }
 
@@ -10,7 +10,7 @@ proxy::RequestEvent::RequestEvent(HttpInfo* info) : ProxyEvent(info) { }
 
 proxy::ResponseEvent::ResponseEvent(HttpInfo* info) : ProxyEvent(info) { }
 
-proxy::HttpInfo::Response* proxy::ResponseEvent::getResponse() const {
+proxy::HttpInfo::Response proxy::ResponseEvent::getResponse() const {
     return m_info->getResponse();
 }
 

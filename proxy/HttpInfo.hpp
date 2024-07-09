@@ -97,6 +97,7 @@ namespace proxy {
             std::string stringifyStatusCode() const;
             HttpContent getResponseContent() const;
             HttpContent getResponseContent(const bool raw = true);
+            bool received() const;
             void resetCache();
         private:
             GETTER(json, headers, Headers)
@@ -105,11 +106,14 @@ namespace proxy {
             GETTER(ContentType, contentType, ContentType)
             HttpContent m_simplifiedResponseCache;
             Request* m_request;
+            bool m_received;
 
+            Response();
             Response(Request* request, CCHttpResponse* response);
             Response(Request* request, web::WebResponse* response);
 
             friend class ProxyHandler;
+            friend class HttpInfo;
         };
 
         static converters::FormToJson formToJson;
@@ -117,7 +121,7 @@ namespace proxy {
         static converters::BinaryToRaw binaryToRaw;
 
         bool isPaused() const;
-        bool hasResponse() const;
+        bool responseReceived() const;
         void resetCache();
     private:
         static HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original, HttpContent& cache);
@@ -127,8 +131,8 @@ namespace proxy {
         static json parseCocosHeaders(const std::vector<gd::string>& headers);
         static bool shouldPause();
 
-        GETTER(Request*, request, Request)
-        GETTER(Response*, response, Response)
+        GETTER(Request, request, Request)
+        GETTER(Response, response, Response)
         bool m_paused;
 
         HttpInfo(CCHttpRequest* request);

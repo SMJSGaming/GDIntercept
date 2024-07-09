@@ -18,7 +18,7 @@ namespace proxy {
 
     class ProxyEvent : public Event {
     public:
-        HttpInfo::Request* getRequest() const;
+        HttpInfo::Request getRequest() const;
     protected:
         HttpInfo* m_info;
 
@@ -34,7 +34,7 @@ namespace proxy {
 
     class ResponseEvent : public ProxyEvent {
     public:
-        HttpInfo::Response* getResponse() const;
+        HttpInfo::Response getResponse() const;
     private:
         ResponseEvent(HttpInfo* info);
 
@@ -48,7 +48,7 @@ namespace proxy {
     class ProxyFilter : public EventFilter<T> {
     public:
         ListenerResult handle(MiniFunction<ListenerResult(T*)> callback, T* event) {
-            const HttpInfo::URL url = event->getRequest()->getURL();
+            const HttpInfo::URL url = event->getRequest().getURL();
 
             if (
                 (m_urls.empty() || std::find(m_urls.begin(), m_urls.end(), url.getRaw()) != m_urls.end()) &&

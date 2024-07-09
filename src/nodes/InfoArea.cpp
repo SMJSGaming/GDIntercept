@@ -36,8 +36,8 @@ bool InfoArea::init(const CCSize& size) {
 }
 
 void InfoArea::updateInfo(HttpInfo* info) {
-    const HttpInfo::URL& url = info->getRequest()->getURL();
-    const std::string status = info->hasResponse() ? info->getResponse()->stringifyStatusCode() : "No Response";
+    const HttpInfo::URL url = info->getRequest().getURL();
+    const std::string status = info->responseReceived() ? info->getResponse().stringifyStatusCode() : "No Response";
 
     as<SimpleTextArea*>(this->getNode()->getChildByID("info_text"_spr))->setText(fmt::format("Status Code: {}\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}",
         status,

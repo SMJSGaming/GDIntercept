@@ -15,7 +15,7 @@ std::vector<ProxyHandler*> ProxyHandler::getFilteredProxies() {
     }
 
     for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
-        switch (proxy->m_info->getRequest()->getURL().getOrigin()) {
+        switch (proxy->m_info->getRequest().getURL().getOrigin()) {
             case HttpInfo::Origin::GD: if (filter == "Geometry Dash Server") {
                 proxies.push_back(proxy);
             } break;
@@ -104,7 +104,7 @@ m_originalProxy(nullptr) {
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
 
-        m_modRequest->send(m_info->getRequest()->getURL().getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
+        m_modRequest->send(m_info->getRequest().getURL().getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
             response = new web::WebResponse(*taskResponse);
         }, [&progress](web::WebProgress* taskProgress) {
             progress(*taskProgress);
@@ -130,14 +130,14 @@ m_originalProxy(nullptr) {
 }
 
 void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* response) {
-    m_info->m_response = new HttpInfo::Response(m_info->getRequest(), response);
+    m_info->m_response = HttpInfo::Response(&m_info->m_request, response);
 
     (m_originalTarget->*m_originalProxy)(client, response);
     ResponseEvent(m_info).post();
 }
 
 void ProxyHandler::onModResponse(web::WebResponse* result) {
-    m_info->m_response = new HttpInfo::Response(m_info->getRequest(), result);
+    m_info->m_response = HttpInfo::Response(&m_info->m_request, result);
 
     ResponseEvent(m_info).post();
 }

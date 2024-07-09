@@ -74,13 +74,17 @@ void ControlMenu::onPause(CCObject* sender) {
 }
 
 void ControlMenu::onSend(CCObject* sender) {
-    const HttpInfo::Request* original = m_info->getRequest();
-    const HttpInfo::URL url = original->getURL();
+    const HttpInfo::Request original = m_info->getRequest();
+    const HttpInfo::URL url = original.getURL();
+    const std::string method = url.getMethod();
+    const std::string body = original.getBody();
     web::WebRequest request;
 
-    request.bodyString(original->getBody());
+    if (method == "POST" || body.size()) {
+        request.bodyString(original.getBody());
+    }
 
-    for (const auto& [name, value] : original->getHeaders().items()) {
+    for (const auto& [name, value] : original.getHeaders().items()) {
         request.header(name, value);
     }
 

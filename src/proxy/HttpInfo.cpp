@@ -99,26 +99,24 @@ bool proxy::HttpInfo::shouldPause() {
 }
 
 proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_paused(this->shouldPause()),
-m_request(new Request(request)),
-m_response(nullptr) { }
+m_request(request) { }
 
 proxy::HttpInfo::HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url) : m_paused(this->shouldPause()),
-m_request(new Request(request, method, url)),
-m_response(nullptr) { }
+m_request(request, method, url) { }
 
 bool proxy::HttpInfo::isPaused() const {
     return m_paused;
 }
 
-bool proxy::HttpInfo::hasResponse() const {
-    return m_response != nullptr;
+bool proxy::HttpInfo::responseReceived() const {
+    return m_response.received();
 }
 
 void proxy::HttpInfo::resetCache() {
-    m_request->resetCache();
+    m_request.resetCache();
 
-    if (this->hasResponse()) {
-        m_response->resetCache();
+    if (this->responseReceived()) {
+        m_response.resetCache();
     }
 }
 
@@ -270,7 +268,10 @@ void proxy::HttpInfo::Request::resetCache() {
     m_simplifiedBodyCache = { ContentType::UNKNOWN_CONTENT, "" };
 }
 
-proxy::HttpInfo::Response::Response(Request* request, CCHttpResponse* response) : m_request(request),
+proxy::HttpInfo::Response::Response() : m_received(false) { };
+
+proxy::HttpInfo::Response::Response(Request* request, CCHttpResponse* response) : m_received(true),
+m_request(request),
 m_headers(HttpInfo::parseCocosHeaders(response->getResponseHeader())),
 m_statusCode(response->getResponseCode()),
 m_simplifiedResponseCache({ ContentType::UNKNOWN_CONTENT, "" }) {
@@ -280,7 +281,8 @@ m_simplifiedResponseCache({ ContentType::UNKNOWN_CONTENT, "" }) {
     m_contentType = HttpInfo::determineContentType(request->m_url.getPath(), m_response);
 }
 
-proxy::HttpInfo::Response::Response(Request* request, web::WebResponse* response) : m_request(request),
+proxy::HttpInfo::Response::Response(Request* request, web::WebResponse* response) : m_received(true),
+m_request(request),
 m_headers(json::object()),
 m_statusCode(response->code()),
 m_response(response->string().unwrapOrDefault()),
@@ -308,6 +310,10 @@ proxy::HttpInfo::HttpContent proxy::HttpInfo::Response::getResponseContent() con
 
 proxy::HttpInfo::HttpContent proxy::HttpInfo::Response::getResponseContent(const bool raw) {
     return HttpInfo::getContent(raw, m_contentType, m_request->getURL().getPath(), m_response, m_simplifiedResponseCache);
+}
+
+bool proxy::HttpInfo::Response::received() const {
+    return m_received;
 }
 
 void proxy::HttpInfo::Response::resetCache() {

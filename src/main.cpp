@@ -52,8 +52,8 @@ $execute {
         OPT(InterceptPopup::get())->reload();
 
         if (Mod::get()->getSettingValue<bool>("log-requests")) {
-            const HttpInfo::Request* request = event->getRequest();
-            const HttpInfo::URL url = request->getURL();
+            const HttpInfo::Request request = event->getRequest();
+            const HttpInfo::URL url = request.getURL();
 
             log::info("Sending request:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}",
                 url.getMethod(),
@@ -61,8 +61,8 @@ $execute {
                 url.getHost(),
                 url.getPath(),
                 url.stringifyQuery(),
-                request->stringifyHeaders(),
-                request->getBodyContent().contents
+                request.stringifyHeaders(),
+                request.getBodyContent().contents
             );
         }
 

@@ -23,8 +23,8 @@ void JSONCodeBlock::copyCode() {
 
 void JSONCodeBlock::setCode(const HttpInfo::HttpContent& code) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
-    const CCSize& fontSize = CCLabelBMFont::create("0", theme.fontName)->getContentSize() * theme.fontSize;
-    const CCSize& size = this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2;
+    const CCSize fontSize = CCLabelBMFont::create("0", theme.fontName)->getContentSize() * theme.fontSize;
+    const CCSize size = this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2;
     const float cellHeight = fontSize.height + theme.lineHeight;
     const float lineNumberWidth = fontSize.width * 4;
     CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
