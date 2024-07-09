@@ -2,16 +2,16 @@
 
 proxy::ProxyEvent::ProxyEvent(HttpInfo* info) : m_info(info) { }
 
-proxy::HttpInfo* proxy::ProxyEvent::getRequest() const {
-    return m_info;
+proxy::HttpInfo::Request* proxy::ProxyEvent::getRequest() const {
+    return m_info->getRequest();
 }
 
 proxy::RequestEvent::RequestEvent(HttpInfo* info) : ProxyEvent(info) { }
 
 proxy::ResponseEvent::ResponseEvent(HttpInfo* info) : ProxyEvent(info) { }
 
-proxy::HttpInfo::HttpContent proxy::ResponseEvent::getResponse(const bool raw) const {
-    return m_info->getResponseContent(raw);
+proxy::HttpInfo::Response* proxy::ResponseEvent::getResponse() const {
+    return m_info->getResponse();
 }
 
 proxy::RequestFilter::RequestFilter(const SourceFilter source) : ProxyFilter(source) { }

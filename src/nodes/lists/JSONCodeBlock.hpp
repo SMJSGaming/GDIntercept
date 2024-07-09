@@ -6,7 +6,8 @@
 #include "../../objects/JSONColor.hpp"
 #include "../../objects/ThemeStyle.hpp"
 
-struct JSONCodeBlock : public Border {
+class JSONCodeBlock : public Border {
+public:
     void copyCode();
     void setCode(const HttpInfo::HttpContent& code);
 protected:

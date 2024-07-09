@@ -15,7 +15,7 @@ std::vector<ProxyHandler*> ProxyHandler::getFilteredProxies() {
     }
 
     for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
-        switch (proxy->m_info->getOrigin()) {
+        switch (proxy->m_info->getRequest()->getURL().getOrigin()) {
             case HttpInfo::Origin::GD: if (filter == "Geometry Dash Server") {
                 proxies.push_back(proxy);
             } break;
@@ -94,7 +94,7 @@ m_originalProxy(nullptr) {
     m_info = new HttpInfo(m_modRequest = new web::WebRequest(*request), method, url);
 
     m_modTask = web::WebTask::run([this, method, url](auto progress, auto cancelled) -> web::WebTask::Result {
-        web::WebResponse response;
+        web::WebResponse* response = nullptr;
 
         while (Mod::get()->getSettingValue<bool>("pause-requests")) {
             if (cancelled()) {
@@ -104,14 +104,14 @@ m_originalProxy(nullptr) {
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
 
-        m_modRequest->send(m_info->getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
-            response = web::WebResponse(*taskResponse);
+        m_modRequest->send(m_info->getRequest()->getURL().getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
+            response = new web::WebResponse(*taskResponse);
         }, [&progress](web::WebProgress* taskProgress) {
             progress(*taskProgress);
         });
         m_info->resume();
 
-        while (!response.code()) {
+        while (!response) {
             if (cancelled()) {
                 return web::WebTask::Cancel();
             }
@@ -124,24 +124,20 @@ m_originalProxy(nullptr) {
         } else {
             this->onModResponse(response);
 
-            return response;
+            return *response;
         }
     }, fmt::format("Proxy for {} {}", method, url));
 }
 
 void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* response) {
-    gd::vector<char>* data = response->getResponseData();
-
-    m_info->m_statusCode = response->getResponseCode();
-    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response = std::string(data->begin(), data->end()));
+    m_info->m_response = new HttpInfo::Response(m_info->getRequest(), response);
 
     (m_originalTarget->*m_originalProxy)(client, response);
     ResponseEvent(m_info).post();
 }
 
-void ProxyHandler::onModResponse(web::WebResponse result) {
-    m_info->m_statusCode = result.code();
-    m_info->m_responseContentType = m_info->determineContentType(m_info->m_response = result.string().unwrapOrDefault());
+void ProxyHandler::onModResponse(web::WebResponse* result) {
+    m_info->m_response = new HttpInfo::Response(m_info->getRequest(), result);
 
     ResponseEvent(m_info).post();
 }

@@ -16,7 +16,17 @@ namespace proxy {
     using namespace geode::prelude;
     using namespace nlohmann;
 
-    struct HttpInfo {
+    class HttpInfo {
+    public:
+        enum ContentType {
+            FORM,
+            JSON,
+            XML,
+            ROBTOP,
+            BINARY,
+            UNKNOWN_CONTENT
+        };
+
         enum Origin {
             GD,
             GD_CDN,
@@ -32,63 +42,100 @@ namespace proxy {
             UNKNOWN_PROTOCOL
         };
 
-        enum ContentType {
-            FORM,
-            JSON,
-            XML,
-            ROBTOP,
-            BINARY,
-            UNKNOWN_CONTENT
-        };
-
         struct HttpContent {
             ContentType type;
             std::string contents;
         };
 
-        std::string stringifyProtocol() const;
-        std::string stringifyQuery() const;
-        std::string stringifyHeaders() const;
-        std::string stringifyStatusCode() const;
-        HttpContent getBodyContent(const bool raw = true);
-        HttpContent getResponseContent(const bool raw = true);
-        bool isPaused() const;
-        void resetCache();
-    private:
+        class Request;
+
+        class URL {
+        public:
+            std::string stringifyProtocol() const;
+            std::string stringifyQuery() const;
+        private:
+            static std::string stringifyMethod(const CCHttpRequest::HttpRequestType method);
+            static Origin determineOrigin(const std::string& host);
+
+            GETTER(Origin, origin, Origin)
+            GETTER(Protocol, protocol, Protocol)
+            GETTER(std::string, method, Method)
+            GETTER(std::string, raw, Raw)
+            GETTER(std::string, host, Host)
+            GETTER(std::string, path, Path)
+            GETTER(json, query, Query)
+
+            URL(CCHttpRequest* request);
+            URL(web::WebRequest* request, const std::string& method, const std::string& url);
+            void parse();
+
+            friend class HttpInfo::Request;
+        };
+
+        class Request {
+        public:
+            std::string stringifyHeaders() const;
+            HttpContent getBodyContent() const;
+            HttpContent getBodyContent(const bool raw);
+            void resetCache();
+        private:
+            GETTER(URL, url, URL)
+            GETTER(json, headers, Headers)
+            GETTER(std::string, body, Body)
+            GETTER(ContentType, contentType, ContentType)
+            HttpContent m_simplifiedBodyCache;
+
+            Request(CCHttpRequest* request);
+            Request(web::WebRequest* request, const std::string& method, const std::string& url);
+
+            friend class HttpInfo;
+        };
+
+        class Response {
+        public:
+            std::string stringifyHeaders() const;
+            std::string stringifyStatusCode() const;
+            HttpContent getResponseContent() const;
+            HttpContent getResponseContent(const bool raw = true);
+            void resetCache();
+        private:
+            GETTER(json, headers, Headers)
+            GETTER(int, statusCode, StatusCode)
+            GETTER(std::string, response, Response)
+            GETTER(ContentType, contentType, ContentType)
+            HttpContent m_simplifiedResponseCache;
+            Request* m_request;
+
+            Response(Request* request, CCHttpResponse* response);
+            Response(Request* request, web::WebResponse* response);
+
+            friend class ProxyHandler;
+        };
+
         static converters::FormToJson formToJson;
         static converters::RobTopToJson robtopToJson;
         static converters::BinaryToRaw binaryToRaw;
 
-        GETTER(Origin, origin, Origin)
-        GETTER(Protocol, protocol, Protocol)
-        GETTER(std::string, method, Method)
-        GETTER(std::string, url, Url)
-        GETTER(std::string, host, Host)
-        GETTER(std::string, path, Path)
-        GETTER(json, query, Query)
-        GETTER(json, headers, Headers)
-        GETTER(std::string, body, Body)
-        GETTER(ContentType, bodyContentType, BodyContentType)
-        GETTER(int, statusCode, StatusCode)
-        GETTER(std::string, response, Response)
-        GETTER(ContentType, responseContentType, ResponseContentType)
-        HttpContent m_simplifiedBodyCache;
-        HttpContent m_simplifiedResponseCache;
+        bool isPaused() const;
+        bool hasResponse() const;
+        void resetCache();
+    private:
+        static HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original, HttpContent& cache);
+        static HttpContent simplifyContent(const std::string& path, const HttpContent& content);
+        static ContentType determineContentType(const std::string& path, const std::string& content, const bool isBody = false);
+        static json parseCocosHeaders(const std::vector<char>* headers);
+        static json parseCocosHeaders(const std::vector<gd::string>& headers);
+        static bool shouldPause();
+
+        GETTER(Request*, request, Request)
+        GETTER(Response*, response, Response)
         bool m_paused;
 
         HttpInfo(CCHttpRequest* request);
         HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url);
-        HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& original, HttpContent& cache);
-        HttpContent simplifyContent(const HttpContent& content);
-        ContentType determineContentType(const std::string& content, const bool isBody = false);
-        std::string determineMethod(CCHttpRequest::HttpRequestType method);
-        bool isDomain(const std::string& domain);
-        bool shouldPause();
         void resume();
-        void determineOrigin();
-        void parseUrl();
 
-        friend struct ProxyHandler;
+        friend class ProxyHandler;
     };
 
     #undef GETTER

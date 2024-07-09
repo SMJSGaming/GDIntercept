@@ -3,7 +3,8 @@
 #include "Converter.hpp"
 
 namespace proxy::converters {
-    struct RobTopToJson : public Converter<json> {
+    class RobTopToJson : public Converter<json> {
+    public:
         bool canConvert(const std::string& path, const std::string& original) override;
         json convert(const std::string& path, const std::string& original) override;
     private:
@@ -18,7 +19,8 @@ namespace proxy::converters {
         };
 
         // The only reason why const char* is involved here is because std::string basically sees everything as a string ctor so overloading with it was almost impossible
-        struct ObjParser {
+        class ObjParser {
+        public:
             ObjParser(const char* delimiter, const char* entryDelimiter = "");
             ObjParser(const std::vector<std::string>& tupleKeys, const char* delimiter = "", const char* entryDelimiter = "");
             virtual json parse(const std::string& str) const;
@@ -34,7 +36,8 @@ namespace proxy::converters {
             json parseEntry(const std::string& str) const;
         };
 
-        struct Parser : public ObjParser {
+        class Parser : public ObjParser {
+        public:
             Parser(const char* delimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});
             Parser(const std::vector<std::string>& tupleKeys, const char* delimiter = "", const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});
             Parser(const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});

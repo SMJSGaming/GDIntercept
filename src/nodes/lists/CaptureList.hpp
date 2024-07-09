@@ -3,7 +3,8 @@
 #include "../../include.hpp"
 #include "../cells/CaptureCell.hpp"
 
-struct CaptureList : public CCNode {
+class CaptureList : public CCNode {
+public:
     static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo);
 private:
     static HttpInfo* active;

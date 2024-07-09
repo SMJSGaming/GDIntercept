@@ -50,16 +50,17 @@
 $execute {
     new EventListener([=](RequestEvent* event) {
         if (Mod::get()->getSettingValue<bool>("log-requests")) {
-            HttpInfo* request = event->getRequest();
+            const HttpInfo::Request* request = event->getRequest();
+            const HttpInfo::URL url = request->getURL();
 
             log::info("Sending request:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}",
-                request->getMethod(),
-                request->stringifyProtocol(),
-                request->getHost(),
-                request->getPath(),
-                request->stringifyQuery(),
+                url.getMethod(),
+                url.stringifyProtocol(),
+                url.getHost(),
+                url.getPath(),
+                url.stringifyQuery(),
                 request->stringifyHeaders(),
-                request->getBodyContent(false).contents
+                request->getBodyContent().contents
             );
         }
 

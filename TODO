@@ -21,7 +21,9 @@ Alpha 3 Todo:
   ✔ @low Add modding API support @done(24-07-02 15:10)
   ✔ @high Add mod request support @done(24-07-07 14:45)
   ✔ @critical Fix pause member not being toggled on resume @done(24-07-07 16:25)
+  ✔ @high Split up requests and responses into a single info object @done(24-07-08 21:00)
 Release Todo:
+  ☐ Rescale path labels
   ☐ Add inputs to the json code block
   ☐ Add a formatted text to original in the converters
 Nice To Haves:

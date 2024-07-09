@@ -16,7 +16,8 @@ namespace proxy::converters {
     json getPrimitiveJsonType(const std::string& key, const std::string& str);
 
     template<typename T>
-    struct Converter {
+    class Converter {
+    public:
         virtual bool canConvert(const std::string& path, const std::string& original) = 0;
         virtual T convert(const std::string& path, const std::string& original) = 0;
     };

@@ -58,29 +58,34 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
 }
 
 void CodeBlock::onBody(CCObject* sender) {
-    if (m_request) {
-        this->setCode(m_request->getBodyContent(Mod::get()->getSettingValue<bool>("raw-data")));
+    if (m_info) {
+        this->setCode(m_info->getRequest()->getBodyContent(Mod::get()->getSettingValue<bool>("raw-data")));
         this->updateDataTypeColor('B');
     }
 }
 
 void CodeBlock::onQuery(CCObject* sender) {
-    if (m_request) {
-        this->setCode({ HttpInfo::JSON, m_request->stringifyQuery() });
+    if (m_info) {
+        this->setCode({ HttpInfo::JSON, m_info->getRequest()->getURL().stringifyQuery() });
         this->updateDataTypeColor('Q');
     }
 }
 
 void CodeBlock::onHeaders(CCObject* sender) {
-    if (m_request) {
-        this->setCode({ HttpInfo::JSON, m_request->stringifyHeaders() });
+    if (m_info) {
+        this->setCode({ HttpInfo::JSON, m_info->getRequest()->stringifyHeaders() });
         this->updateDataTypeColor('H');
     }
 }
 
 void CodeBlock::onResponse(CCObject* sender) {
-    if (m_request) {
-        this->setCode(m_request->getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
+    if (m_info) {
+        if (m_info->hasResponse()) {
+            this->setCode(m_info->getResponse()->getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
+        } else {
+            this->setCode({ HttpInfo::UNKNOWN_CONTENT, "No response available yet." });
+        }
+
         this->updateDataTypeColor('R');
     }
 }
@@ -97,10 +102,10 @@ void CodeBlock::updateDataTypeColor(const char type) {
     }
 }
 
-void CodeBlock::updateRequest(HttpInfo* request) {
-    m_request = request;
+void CodeBlock::updateInfo(HttpInfo* info) {
+    m_info = info;
 
-    if (request) {
+    if (info) {
         switch (currentDataType) {
             case 'B': this->onBody(nullptr); break;
             case 'Q': this->onQuery(nullptr); break;

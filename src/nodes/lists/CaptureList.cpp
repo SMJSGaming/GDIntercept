@@ -26,9 +26,12 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     bool activated = false;
 
     for (ProxyHandler* proxy : ProxyHandler::getFilteredProxies()) {
-        HttpInfo* request = proxy->getInfo();
-        CaptureCell* capture = CaptureCell::create(request, { size.width, cellHeight }, [this, request, switchInfo](CaptureCell* cell) {
-            switchInfo(CaptureList::active = request);
+        HttpInfo* info = proxy->getInfo();
+        CaptureCell* capture = CaptureCell::create(info->getRequest()->getURL(), {
+            size.width,
+            cellHeight
+        }, [this, info, switchInfo](CaptureCell* cell) {
+            switchInfo(CaptureList::active = info);
 
             if (m_list) {
                 CCArrayExt<CaptureCell*> entries(m_list->m_entries);
@@ -41,7 +44,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
             }
         });
 
-        if (request == CaptureList::active) {
+        if (info == CaptureList::active) {
             activated = true;
             capture->activate();
         }

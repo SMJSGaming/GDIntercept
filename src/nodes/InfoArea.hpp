@@ -2,9 +2,11 @@
 
 #include "../include.hpp"
 
-struct InfoArea : public Border {
+class InfoArea : public Border {
+public:
     static InfoArea* create(const CCSize& size);
-    void updateRequest(HttpInfo* request);
+
+    void updateInfo(HttpInfo* info);
 private:
     bool init(const CCSize& size);
 };

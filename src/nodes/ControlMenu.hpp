@@ -2,7 +2,8 @@
 
 #include "../include.hpp"
 
-struct ControlMenu : public Border {
+class ControlMenu : public Border {
+public:
     // FYI: I don't like using *& here, geode please expose the settings node
     static ControlMenu* create(const CCSize& size, FLAlertLayer*& settings);
 private:

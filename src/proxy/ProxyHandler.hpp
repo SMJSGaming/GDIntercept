@@ -10,7 +10,8 @@
             type m_##name;
 
 namespace proxy {
-    struct ProxyHandler : public CCObject {
+    class ProxyHandler : public CCObject {
+    public:
         static std::vector<ProxyHandler*> getProxies();
         static std::vector<ProxyHandler*> getFilteredProxies();
         static ProxyHandler* create(CCHttpRequest* request);
@@ -31,6 +32,6 @@ namespace proxy {
         ProxyHandler(CCHttpRequest* request);
         ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);
         void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);
-        void onModResponse(web::WebResponse result);
+        void onModResponse(web::WebResponse* result);
     };
 }

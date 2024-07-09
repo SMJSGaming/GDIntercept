@@ -5,18 +5,19 @@
 #include "lists/JSONCodeBlock.hpp"
 #include "../objects/ThemeStyle.hpp"
 
-struct CodeBlock : public JSONCodeBlock {
+class CodeBlock : public JSONCodeBlock {
+public:
     static size_t buttonCount;
 
     static CodeBlock* create(const CCSize& size, const CCSize& buttonBarSize);
 
-    void updateRequest(HttpInfo* request);
+    void updateInfo(HttpInfo* info);
 private:
     static std::vector<std::pair<char, SEL_MenuHandler>> dataTypes;
     static char currentDataType;
 
     std::unordered_map<char, CCLabelBMFont*> m_labels;
-    HttpInfo* m_request;
+    HttpInfo* m_info;
 
     bool init(const CCSize& size, const CCSize& buttonBarSize);
     void doNothing(CCObject* sender);

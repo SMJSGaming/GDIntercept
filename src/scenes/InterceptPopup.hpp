@@ -10,7 +10,8 @@
 #include "../nodes/lists/CaptureList.hpp"
 #include "../nodes/lists/JSONCodeBlock.hpp"
 
-struct InterceptPopup : public Popup<> {
+class InterceptPopup : public Popup<> {
+public:
     static InterceptPopup* get();
     static void scene();
 

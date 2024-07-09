@@ -1,7 +1,7 @@
 #include "CaptureCell.hpp"
 
-CaptureCell* CaptureCell::create(HttpInfo* request, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) {
-    CaptureCell* instance = new CaptureCell(request, size, switchCell);
+CaptureCell* CaptureCell::create(const HttpInfo::URL& url, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) {
+    CaptureCell* instance = new CaptureCell(url, size, switchCell);
 
     if (instance && instance->init(size)) {
         return instance;
@@ -12,19 +12,19 @@ CaptureCell* CaptureCell::create(HttpInfo* request, const CCSize& size, const st
     }
 }
 
-CaptureCell::CaptureCell(HttpInfo* request, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) : GenericListCell("", size),
-m_request(request),
+CaptureCell::CaptureCell(const HttpInfo::URL& url, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) : GenericListCell("", size),
+m_url(url),
 m_switchCell(switchCell) {
     this->setID("capture"_spr);
 }
 
 bool CaptureCell::init(const CCSize& size) {
-    const std::string method(m_request->getMethod());
-    std::string path(m_request->getPath());
-    std::string cutoffPath(path.substr(path.find_last_of('/')));
+    const std::string method(m_url.getMethod());
+    const std::string path(m_url.getPath());
+    std::string cutoffPath(path == "/" ? "" : path.substr(path.substr(0, path.size() - 1).find_last_of('/')));
 
-    if (cutoffPath.size() == 1) {
-        cutoffPath = m_request->getHost();
+    if (cutoffPath.empty()) {
+        cutoffPath = m_url.getHost();
     }
 
     CCLabelBMFont* label = CCLabelBMFont::create((method + ' ' + cutoffPath).c_str(), "bigFont.fnt", 0, kCCTextAlignmentLeft);
@@ -61,7 +61,7 @@ bool CaptureCell::init(const CCSize& size) {
 }
 
 ccColor3B CaptureCell::colorForMethod() {
-    const std::string& method(m_request->getMethod());
+    const std::string& method(m_url.getMethod());
 
     if (method == "GET") {
         return { 0xA8, 0x96, 0xFF };

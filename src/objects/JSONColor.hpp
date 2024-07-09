@@ -3,7 +3,8 @@
 #include "../include.hpp"
 #include "../objects/ThemeStyle.hpp"
 
-struct JSONColor {
+class JSONColor {
+public:
     enum Token {
         UNKNOWN,
         KEY,

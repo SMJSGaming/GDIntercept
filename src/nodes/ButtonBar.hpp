@@ -3,7 +3,8 @@
 #include "../include.hpp"
 #include "../objects/ThemeStyle.hpp"
 
-struct ButtonBar : public CCNode {
+class ButtonBar : public CCNode {
+public:
     static ButtonBar* create(const char* bgSprite, const float spriteScale, const CCSize& size, const std::vector<CCMenuItemSpriteExtra*>& items);
 private:
     size_t m_itemCount;
