@@ -127,8 +127,8 @@ namespace proxy {
         static HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original, HttpContent& cache);
         static HttpContent simplifyContent(const std::string& path, const HttpContent& content);
         static ContentType determineContentType(const std::string& path, const std::string& content, const bool isBody = false);
-        static json parseCocosHeaders(const std::vector<char>* headers);
-        static json parseCocosHeaders(const std::vector<gd::string>& headers);
+        static json parseCocosHeaders(const gd::vector<char>* headers);
+        static json parseCocosHeaders(const gd::vector<gd::string>& headers);
         static bool shouldPause();
 
         GETTER(size_t, id, ID)
