@@ -68,8 +68,8 @@ nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* header
     std::stringstream headerStream(std::string(headers->begin(), headers->end()));
     gd::vector<gd::string> headerStrings;
 
-    for (gd::string header; std::getline(headerStream, header, '\n');) {
-        headerStrings.push_back(header);
+    for (std::string header; std::getline(headerStream, header, '\n');) {
+        headerStrings.push_back(gd::string(header.c_str()));
     }
 
     return HttpInfo::parseCocosHeaders(headerStrings);
