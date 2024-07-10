@@ -64,7 +64,7 @@ proxy::HttpInfo::ContentType proxy::HttpInfo::determineContentType(const std::st
     }
 }
 
-nlohmann::json proxy::HttpInfo::parseCocosHeaders(const std::vector<char>* headers) {
+nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
     std::stringstream headerStream(std::string(headers->begin(), headers->end()));
     std::vector<std::string> headerStrings;
 
