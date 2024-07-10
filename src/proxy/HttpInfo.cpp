@@ -66,16 +66,16 @@ proxy::HttpInfo::ContentType proxy::HttpInfo::determineContentType(const std::st
 
 nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
     std::stringstream headerStream(std::string(headers->begin(), headers->end()));
-    std::vector<std::string> headerStrings;
+    gd::vector<gd::string> headerStrings;
 
-    for (std::string header; std::getline(headerStream, header, '\n');) {
+    for (gd::string header; std::getline(headerStream, header, '\n');) {
         headerStrings.push_back(header);
     }
 
     return HttpInfo::parseCocosHeaders(headerStrings);
 }
 
-nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<std::string>& headers) {
+nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<gd::string>& headers) {
     json parsed = json::object();
 
      // CCHttp headers technically allow for weird header formats, but I'm assuming they're all key-value pairs separated by a colon since this is the standard
