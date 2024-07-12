@@ -104,28 +104,35 @@ m_originalProxy(nullptr) {
 
         while (Mod::get()->getSettingValue<bool>("pause-requests")) {
             if (cancelled()) {
-                return web::WebTask::Cancel();
-            }
+                m_info->m_response.m_statusCode = -3;
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
-        }
-
-        m_modRequest->send(m_info->getRequest().getURL().getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
-            response = new web::WebResponse(*taskResponse);
-        }, [progress](web::WebProgress* taskProgress) {
-            progress(*taskProgress);
-        });
-        m_info->resume();
-
-        while (!response) {
-            if (cancelled()) {
                 return web::WebTask::Cancel();
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
+        web::WebTask task = m_modRequest->send(m_info->getRequest().getURL().getMethod(), url);
+        m_info->resume();
+
+        task.listen([&response](web::WebResponse* taskResponse) {
+            response = new web::WebResponse(*taskResponse);
+        }, [progress](web::WebProgress* taskProgress) {
+            progress(*taskProgress);
+        });
+
+        while (!response) {
+            if (cancelled()) {
+                break;
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+
         if (cancelled()) {
+            task.cancel();
+            m_info->m_response.m_statusCode = -3;
+
             return web::WebTask::Cancel();
         } else {
             this->onModResponse(response);

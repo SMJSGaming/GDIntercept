@@ -221,7 +221,7 @@ void CodeBlock::onResponse(CCObject* sender) {
         if (m_info->responseReceived()) {
             this->setCode(m_info->getResponse().getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
         } else {
-            this->setCode({ HttpInfo::UNKNOWN_CONTENT, "No response available yet." });
+            this->setCode({ HttpInfo::UNKNOWN_CONTENT, m_info->getResponse().stringifyStatusCode() });
         }
 
         this->updateDataTypeColor('R');

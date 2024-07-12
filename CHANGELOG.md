@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.3.2-alpha.3 (2024-07-12) - Cancel Support
+
+- Added support for cancelling requests
+
 ## v0.3.1-alpha.3 (2024-07-12) - Bugfix Update
 
 - Fixed a bug where certain requests would cause an unallocated reference exception

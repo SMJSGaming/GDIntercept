@@ -324,7 +324,10 @@ std::string proxy::HttpInfo::Response::stringifyHeaders() const {
 
 std::string proxy::HttpInfo::Response::stringifyStatusCode() const {
     switch (m_statusCode) {
+        case -3: return "Request Cancelled";
+        case -2: return "Request Timeout";
         case -1: return "Request Error";
+        case 0: return "No response available yet";
         default: return std::to_string(m_statusCode);
     }
 }

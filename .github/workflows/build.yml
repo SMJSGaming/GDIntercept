@@ -48,5 +48,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: GD Intercept Build
+          name: GDIntercept Build
           path: ${{ steps.build.outputs.build-output }}

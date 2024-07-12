@@ -1,6 +1,6 @@
 #include "CaptureList.hpp"
 
-size_t CaptureList::active = 1;
+size_t CaptureList::active = 0;
 
 CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
     CaptureList* instance = new CaptureList();
@@ -59,7 +59,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
         }, "previous_packet"_spr);
     #endif
 
-    const CCSize listSize = size - 2;
+    const CCSize listSize = size - 1;
     CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
     bool activated = false;
 
@@ -67,7 +67,8 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
         return false;
     }
 
-    this->setPadding(1);
+    this->setPaddingTop(1);
+    this->setPaddingLeft(1);
 
     for (ProxyHandler* proxy : ProxyHandler::getFilteredProxies()) {
         HttpInfo* info = proxy->getInfo();
