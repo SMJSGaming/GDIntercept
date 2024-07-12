@@ -88,5 +88,5 @@ void ControlMenu::onSend(CCObject* sender) {
         request.header(name, value.get<std::string>());
     }
 
-    (void) request.send(url.getMethod(), url.getRaw());
+    (void) request.send(url.getMethod(), url.getOriginal());
 }

@@ -157,32 +157,34 @@ proxy::HttpInfo::Origin proxy::HttpInfo::URL::determineOrigin(const std::string&
         return Origin::NEWGROUNDS;
     } else if (isDomain("geode-sdk.org")) {
         return Origin::GEODE;
+    } else if (isDomain("localhost")) {
+        return Origin::LOCALHOST;
     } else {
         return Origin::OTHER;
     }
 }
 
 proxy::HttpInfo::URL::URL(CCHttpRequest* request) : m_method(URL::stringifyMethod(request->getRequestType())),
-m_raw(request->getUrl()),
+m_original(request->getUrl()),
 m_query(json::object()) {
     this->parse();
 }
 
 proxy::HttpInfo::URL::URL(web::WebRequest* request, const std::string& method, const std::string& url) : m_method(method),
-m_raw(url),
+m_original(url),
 m_query(json::object()) {
     const std::unordered_map<std::string, std::string> params = request->getUrlParams();
 
-    if (params.size() && m_raw.find('?') == std::string::npos) {
-        m_raw += "?";
+    if (params.size() && m_original.find('?') == std::string::npos) {
+        m_original += "?";
     }
 
     for (const auto& [key, value] : params) {
-        m_raw += key + '=' + value + '&';
+        m_original += key + '=' + value + '&';
     }
 
-    if (m_raw.ends_with('&')) {
-        m_raw.pop_back();
+    if (m_original.ends_with('&')) {
+        m_original.pop_back();
     }
 
     this->parse();
@@ -200,17 +202,27 @@ std::string proxy::HttpInfo::URL::stringifyQuery() const {
     return m_query.dump(2);
 }
 
+std::string proxy::HttpInfo::URL::getPortHost() const {
+    if (m_origin != LOCALHOST && ((m_port == 80 && m_protocol == Protocol::HTTP) || (m_port == 443 && m_protocol == Protocol::HTTPS))) {
+        return m_host;
+    } else {
+        return m_host + ":" + std::to_string(m_port);
+    }
+}
+
 void proxy::HttpInfo::URL::parse() {
-    const size_t protocolEnd = m_raw.find("://");
-    const size_t queryStart = m_raw.find('?');
+    const size_t protocolEnd = m_original.find("://");
+    const size_t queryStart = m_original.find('?');
+    std::string rawHost;
     size_t pathStart;
+    size_t portStart;
 
     if (protocolEnd == std::string::npos) {
-        pathStart = m_raw.find('/');
+        pathStart = m_original.find('/');
         m_protocol = Protocol::UNKNOWN_PROTOCOL;
-        m_host = m_raw.substr(0, pathStart == std::string::npos ? queryStart : pathStart);
+        rawHost = m_original.substr(0, pathStart == std::string::npos ? queryStart : pathStart);
     } else {
-        const std::string protocol(m_raw.substr(0, protocolEnd));
+        const std::string protocol(m_original.substr(0, protocolEnd));
 
         if (protocol == "https") {
             m_protocol = Protocol::HTTPS;
@@ -220,21 +232,30 @@ void proxy::HttpInfo::URL::parse() {
             m_protocol = Protocol::UNKNOWN_PROTOCOL;
         }
 
-        pathStart = m_raw.find('/', protocolEnd + 3);
-        m_host = m_raw.substr(protocolEnd + 3, (pathStart == std::string::npos ? queryStart : pathStart) - protocolEnd - 3);
+        pathStart = m_original.find('/', protocolEnd + 3);
+        rawHost = m_original.substr(protocolEnd + 3, (pathStart == std::string::npos ? queryStart : pathStart) - protocolEnd - 3);
     }
 
     if (pathStart == std::string::npos) {
         m_path = "/";
     } else {
-        m_path = m_raw.substr(pathStart, queryStart == std::string::npos ? std::string::npos : queryStart - pathStart);
+        m_path = m_original.substr(pathStart, queryStart == std::string::npos ? std::string::npos : queryStart - pathStart);
     }
 
     if (queryStart != std::string::npos) {
-        m_query = HttpInfo::formToJson.convert(m_path, m_raw.substr(queryStart + 1));
+        m_query = HttpInfo::formToJson.convert(m_path, m_original.substr(queryStart + 1));
     }
 
+    portStart = rawHost.find(':');
+    m_host = rawHost.substr(0, portStart);
     m_origin = URL::determineOrigin(m_host);
+    m_queryLess = m_original.substr(0, queryStart);
+
+    if (portStart == std::string::npos) {
+        m_port = m_protocol == Protocol::HTTPS ? 443 : 80;
+    } else {
+        m_port = std::stoi(rawHost.substr(portStart + 1));
+    }
 }
 
 proxy::HttpInfo::Request::Request(CCHttpRequest* request) : m_url(request), 

@@ -12,7 +12,7 @@
     "SMJSGaming",
     "RobTop"
   ],
-  "description": "A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X HttpClient.",
+  "description": "A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X or Geode web clients.",
   "repository": "https://github.com/SMJSGaming/GDIntercept",
   "links": {
     "community": "https://discord.gg/VqFpjF5mJe",
@@ -38,7 +38,7 @@
   "dependencies": [
     {
       "id": "geode.custom-keybinds",
-      "version": "1.6.0",
+      "version": "1.6.4",
       "importance": "required",
       "platforms": [
         "win"
@@ -79,6 +79,7 @@
         "RobtopGames Server",
         "Newgrounds CDN",
         "Geode Server",
+        "Localhost",
         "Unknown Origin"
       ]
     },

@@ -33,6 +33,7 @@ namespace proxy {
             ROBTOP_GAMES,
             NEWGROUNDS,
             GEODE,
+            LOCALHOST,
             OTHER
         };
 
@@ -53,6 +54,7 @@ namespace proxy {
         public:
             std::string stringifyProtocol() const;
             std::string stringifyQuery() const;
+            std::string getPortHost() const;
         private:
             static std::string stringifyMethod(const CCHttpRequest::HttpRequestType method);
             static Origin determineOrigin(const std::string& host);
@@ -60,8 +62,10 @@ namespace proxy {
             GETTER(Origin, origin, Origin)
             GETTER(Protocol, protocol, Protocol)
             GETTER(std::string, method, Method)
-            GETTER(std::string, raw, Raw)
+            GETTER(std::string, original, Original)
+            GETTER(std::string, queryLess, QueryLess)
             GETTER(std::string, host, Host)
+            GETTER(int, port, Port)
             GETTER(std::string, path, Path)
             GETTER(json, query, Query)
 
@@ -96,7 +100,7 @@ namespace proxy {
             std::string stringifyHeaders() const;
             std::string stringifyStatusCode() const;
             HttpContent getResponseContent() const;
-            HttpContent getResponseContent(const bool raw = true);
+            HttpContent getResponseContent(const bool raw);
             bool received() const;
             void resetCache();
         private:

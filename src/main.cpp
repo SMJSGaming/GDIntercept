@@ -95,7 +95,7 @@
             "GD Intercept/Code Block"
         });
 
-        new EventListener([=](InvokeBindEvent* event) {
+        new EventListener([=](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 InterceptPopup::scene();
             }
@@ -106,7 +106,7 @@
 #endif
 
 $execute {
-    new EventListener([=](RequestEvent* event) {
+    new EventListener([=](const RequestEvent* event) {
         OPT(InterceptPopup::get())->reload();
 
         if (Mod::get()->getSettingValue<bool>("log-requests")) {
@@ -116,7 +116,7 @@ $execute {
             log::info("Sending request:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}",
                 url.getMethod(),
                 url.stringifyProtocol(),
-                url.getHost(),
+                url.getPortHost(),
                 url.getPath(),
                 url.stringifyQuery(),
                 request.stringifyHeaders(),

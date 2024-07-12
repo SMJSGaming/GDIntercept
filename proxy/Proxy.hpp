@@ -6,18 +6,20 @@
 namespace proxy {
     using namespace geode::prelude;
 
-    enum SourceFilter {
+    enum OriginFilter {
         GD,
         GD_CDN,
         ROBTOP_GAMES,
         NEWGROUNDS,
         GEODE,
+        LOCALHOST,
         OTHER,
         ALL
     };
 
     class ProxyEvent : public Event {
     public:
+        HttpInfo* getInfo() const;
         HttpInfo::Request getRequest() const;
     protected:
         HttpInfo* m_info;
@@ -49,10 +51,13 @@ namespace proxy {
     public:
         ListenerResult handle(MiniFunction<ListenerResult(T*)> callback, T* event) {
             const HttpInfo::URL url = event->getRequest().getURL();
+            const std::string raw = url.getQueryLess();
 
             if (
-                (m_urls.empty() || std::find(m_urls.begin(), m_urls.end(), url.getRaw()) != m_urls.end()) &&
-                (m_source == ALL || as<int>(m_source) == as<int>(url.getOrigin()))
+                (m_urlParts.empty() || std::any_of(m_urlParts.begin(), m_urlParts.end(), [raw](std::string part) {
+                    return raw.find(part) != std::string::npos;
+                })) &&
+                (m_origin == ALL || as<int>(m_origin) == as<int>(url.getOrigin()))
             ) {
                 return callback(event);
             } else {
@@ -60,28 +65,28 @@ namespace proxy {
             }
         }
     protected:
-        SourceFilter m_source;
-        std::vector<std::string> m_urls;
+        OriginFilter m_origin;
+        std::vector<std::string> m_urlParts;
 
-        ProxyFilter(const SourceFilter source = ALL) : m_source(source) { };
-        ProxyFilter(const std::initializer_list<std::string>& urls) : m_source(ALL), m_urls(urls) { };
-        ProxyFilter(CCNode* target, const SourceFilter source) : m_source(source) { };
-        ProxyFilter(CCNode* target, const std::initializer_list<std::string>& urls) : m_source(ALL), m_urls(urls) { };
+        ProxyFilter(const OriginFilter origin = ALL) : m_origin(origin) { };
+        ProxyFilter(const std::vector<std::string>& urlParts) : m_origin(ALL), m_urlParts(urlParts) { };
+        ProxyFilter(CCNode* target, const OriginFilter origin = ALL) : m_origin(origin) { };
+        ProxyFilter(CCNode* target, const std::vector<std::string>& urlParts) : m_origin(ALL), m_urlParts(urlParts) { };
     };
 
     class RequestFilter : public ProxyFilter<RequestEvent> {
     public:
-        RequestFilter(const SourceFilter source = ALL);
-        RequestFilter(const std::initializer_list<std::string>& urls);
-        RequestFilter(CCNode* target, const SourceFilter source = ALL);
-        RequestFilter(CCNode* target, const std::initializer_list<std::string>& urls);
+        RequestFilter(const OriginFilter origin = ALL);
+        RequestFilter(const std::vector<std::string>& urlParts);
+        RequestFilter(CCNode* target, const OriginFilter origin = ALL);
+        RequestFilter(CCNode* target, const std::vector<std::string>& urlParts);
     };
 
     class ResponseFilter : public ProxyFilter<ResponseEvent> {
     public:
-        ResponseFilter(const SourceFilter source = ALL);
-        ResponseFilter(const std::initializer_list<std::string>& urls);
-        ResponseFilter(CCNode* target, const SourceFilter source = ALL);
-        ResponseFilter(CCNode* target, const std::initializer_list<std::string>& urls);
+        ResponseFilter(const OriginFilter origin = ALL);
+        ResponseFilter(const std::vector<std::string>& urlParts);
+        ResponseFilter(CCNode* target, const OriginFilter origin = ALL);
+        ResponseFilter(CCNode* target, const std::vector<std::string>& urlParts);
     };
 }

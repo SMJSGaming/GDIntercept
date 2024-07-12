@@ -57,7 +57,7 @@ void InfoArea::updateInfo(HttpInfo* info) {
         status,
         url.getMethod(),
         url.stringifyProtocol(),
-        url.getHost(),
+        url.getPortHost(),
         url.getPath()
     ));
 }

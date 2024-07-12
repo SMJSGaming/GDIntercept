@@ -31,6 +31,9 @@ std::vector<ProxyHandler*> ProxyHandler::getFilteredProxies() {
             case HttpInfo::Origin::GEODE: if (filter == "Geode Server") {
                 proxies.push_back(proxy);
             } break;
+            case HttpInfo::LOCALHOST: if (filter == "Localhost") {
+                proxies.push_back(proxy);
+            } break;
             case HttpInfo::Origin::OTHER: if (filter == "Unknown Origin") {
                 proxies.push_back(proxy);
             } break;
