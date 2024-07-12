@@ -4,6 +4,8 @@ CaptureCell* CaptureCell::create(const HttpInfo::URL& url, const CCSize& size, c
     CaptureCell* instance = new CaptureCell(url, size, switchCell);
 
     if (instance && instance->init(size)) {
+        instance->autorelease();
+
         return instance;
     } else {
         CC_SAFE_DELETE(instance);

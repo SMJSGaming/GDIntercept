@@ -17,6 +17,24 @@ ControlMenu* ControlMenu::create(const CCSize& size, FLAlertLayer*& settings) {
 ControlMenu::ControlMenu(FLAlertLayer*& settings) : m_settings(settings) { }
 
 bool ControlMenu::init(const CCSize& size) {
+    #ifdef KEYBINDS_ENABLED
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
+            if (event->isDown()) {
+                this->onPause(nullptr);
+            }
+
+            return ListenerResult::Propagate;
+        }, "toggle_pause"_spr);
+
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
+            if (event->isDown()) {
+                this->onSend(nullptr);
+            }
+
+            return ListenerResult::Propagate;
+        }, "resend"_spr);
+    #endif
+
     const CCSize menuSize(size - PADDING * 2);
     const CCSize buttonSize(ccp(menuSize.width - PADDING * 6, (menuSize.height - PADDING * 3) / 2));
     CCScale9Sprite* infoBg = CCScale9Sprite::create("square02b_001.png");

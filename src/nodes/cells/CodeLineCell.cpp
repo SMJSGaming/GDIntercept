@@ -4,6 +4,8 @@ CodeLineCell* CodeLineCell::create(const HttpInfo::HttpContent& code, const size
     CodeLineCell* instance = new CodeLineCell(lineNumberWidth, color);
 
     if (instance && instance->init(code.type, code.contents, lineNumber)) {
+        instance->autorelease();
+
         return instance;
     } else {
         CC_SAFE_DELETE(instance);

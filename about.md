@@ -2,16 +2,22 @@
 
 A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X HttpClient.
 
+## API
+
+Check the [API documentation](https://github.com/SMJSGaming/GDIntercept/wiki).
+
 ## Features
 
-- Logging and listing for all requests made by the game through the Cocos2D-X engine.
-- Converting requests to the JSON format.
+- Logging and listing all requests made by the game through the Cocos2D-X engine.
+- Logging and listing all requires made by the geode web client.
+- Converting requests to a JSON format.
 - Obscuring sensitive data.
-- Capturing requests before they are encrypted.
-- Pausing requests to modify them (Disabled in ALPHA.1).
-- Modifying requests (Disabled in ALPHA.1).
-- Blocking requests (Disabled in Alpha.1).
-- Sending custom requests (Disabled in Alpha.1).
+- Capturing requests before they are encrypted using SSL.
+- Pausing requests to modify them.
+- Sending custom requests.
+- Built in request and response API for other mods.
+- Modifying requests (Disabled in ALPHA).
+- Blocking requests (Disabled in Alpha).
 
 ## Notes
 
@@ -24,6 +30,10 @@ Request manipulation has for the time being been disabled due to security concer
 ### ALPHA.2
 
 This version has yet to enable request manipulation due to the official penetration test still being in progress. This version mostly aims to simplify the use of settings and fixing a lot of bugs. Some features requested by the community have also been added.
+
+### ALPHA.3
+
+Some minor request manipulation features have been re-enabled. This version also adds Geode and API support. This means that in the future GDIntercept will also be useable for other mods. Check [the wiki](https://github.com/SMJSGaming/GDIntercept/wiki) for more details.
 
 ## Credits
 

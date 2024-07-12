@@ -6,6 +6,7 @@
 #include "proxy/ProxyHandler.hpp"
 
 #ifdef GEODE_IS_WINDOWS
+    #define KEYBINDS_ENABLED
     #include <geode.custom-keybinds/include/Keybinds.hpp>
 
     using namespace keybinds;

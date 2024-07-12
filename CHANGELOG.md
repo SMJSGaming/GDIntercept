@@ -1,5 +1,14 @@
 # GDIntercept Changelog
 
+## v0.3.0-alpha.3 (2024-07-11) - API, Geode and Request Flow Support
+
+- Added support for Geode web API
+- Added support for request pausing, resuming and resending
+- Added API support for other mods
+- Added a lot more keybinds
+- Added a filter setting
+- Fixed several bugs
+
 ## v0.2.3-alpha.2 (2024-06-25) - More Android Fixes
 
 - Fixed Android having a lot of touch priority issues

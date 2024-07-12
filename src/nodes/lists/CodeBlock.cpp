@@ -26,8 +26,8 @@ CodeBlock* CodeBlock::create(const CCSize& size, const CCSize& buttonBarSize) {
 }
 
 bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
-    #ifdef GEODE_IS_WINDOWS
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+    #ifdef KEYBINDS_ENABLED
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 TextAlertPopup* alert = TextAlertPopup::create("Code Copied", 0.5f, 0.6f, 150, "");
 
@@ -39,7 +39,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
             return ListenerResult::Propagate;
         }, "copy_code_block"_spr);
 
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 this->scroll(-this->getCellHeight());
             }
@@ -47,7 +47,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
             return ListenerResult::Propagate;
         }, "code_line_up"_spr);
 
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 this->scroll(-as<ListView*>(this->getNode())->m_height);
             }
@@ -55,7 +55,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
             return ListenerResult::Propagate;
         }, "code_page_up"_spr);
 
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 this->scroll(this->getCellHeight());
             }
@@ -63,7 +63,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
             return ListenerResult::Propagate;
         }, "code_line_down"_spr);
 
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 this->scroll(as<ListView*>(this->getNode())->m_height);
             }

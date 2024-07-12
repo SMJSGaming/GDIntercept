@@ -29,7 +29,7 @@ void InterceptPopup::scene() {
         if (instance && instance->initAnchored(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
             instance->m_noElasticity = true;
             instance->setID("intercept_popup"_spr);
-            instance->retain();
+            instance->autorelease();
             instance->show();
         } else {
             CC_SAFE_DELETE(instance);

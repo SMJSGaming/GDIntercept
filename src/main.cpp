@@ -2,7 +2,7 @@
 #include "include.hpp"
 #include "scenes/InterceptPopup.hpp"
 
-#ifdef GEODE_IS_WINDOWS
+#ifdef KEYBINDS_ENABLED
     $execute {
         BindManager* manager = BindManager::get();
 
@@ -31,6 +31,23 @@
                 // This will clash with steam overlay, but I'll leave it to the user to fix that
                 Keybind::create(KEY_Tab, Modifier::Shift),
                 Keybind::create(KEY_Up, Modifier::Shift)
+            },
+            "GD Intercept"
+        });
+        manager->registerBindable({
+            "toggle_pause"_spr,
+            "Toggle Pause",
+            "Pauses or resumes packets captured by the proxy",
+            { Keybind::create(KEY_Space) },
+            "GD Intercept"
+        });
+        manager->registerBindable({
+            "resend"_spr,
+            "Resend",
+            "Resends the current packet shown in the capture menu",
+            {
+                Keybind::create(KEY_R, Modifier::Control),
+                Keybind::create(KEY_R, Modifier::Command)
             },
             "GD Intercept"
         });

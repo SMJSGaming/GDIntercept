@@ -15,8 +15,8 @@ InfoArea* InfoArea::create(const CCSize& size) {
 }
 
 bool InfoArea::init(const CCSize& size) {
-    #ifdef GEODE_IS_WINDOWS
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+    #ifdef KEYBINDS_ENABLED
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 TextAlertPopup* alert = TextAlertPopup::create("Code Copied", 0.5f, 0.6f, 150, "");
 

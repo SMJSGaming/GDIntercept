@@ -17,8 +17,8 @@ CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, con
 }
 
 bool CaptureList::init(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
-    #ifdef GEODE_IS_WINDOWS
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+    #ifdef KEYBINDS_ENABLED
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 std::vector<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
 
@@ -38,7 +38,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
             return ListenerResult::Propagate;
         }, "next_packet"_spr);
 
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
+        this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 std::vector<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
 
