@@ -48,7 +48,6 @@ ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
 
     request->retain();
     instance->retain();
-    ProxyHandler::registerProxy(instance);
     RequestEvent(instance->getInfo()).post();
 
     return instance;
@@ -58,7 +57,6 @@ ProxyHandler* ProxyHandler::create(web::WebRequest* request, const std::string& 
     ProxyHandler* instance = new ProxyHandler(request, method, url);
 
     instance->retain();
-    ProxyHandler::registerProxy(instance);
     RequestEvent(instance->getInfo()).post();
 
     return instance;
@@ -74,12 +72,14 @@ void ProxyHandler::registerProxy(ProxyHandler* proxy) {
     ProxyHandler::cachedProxies.insert(ProxyHandler::cachedProxies.begin(), proxy);
 }
 
-ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_info(new HttpInfo(request)),
+ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_modRequest(nullptr),
 m_cocosRequest(request),
-m_modRequest(nullptr),
+m_info(new HttpInfo(request)),
 m_originalTarget(request->getTarget()),
 m_originalProxy(request->getSelector()) {
     request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
+
+    ProxyHandler::registerProxy(this);
 
     std::thread([this, request]() {
         while (Mod::get()->getSettingValue<bool>("pause-requests")) {
@@ -91,10 +91,13 @@ m_originalProxy(request->getSelector()) {
     }).detach();
 }
 
-ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_cocosRequest(nullptr),
+ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_modRequest(new web::WebRequest(*request)),
+m_cocosRequest(nullptr),
 m_originalTarget(nullptr),
 m_originalProxy(nullptr) {
-    m_info = new HttpInfo(m_modRequest = new web::WebRequest(*request), method, url);
+    m_info = new HttpInfo(m_modRequest, method, url);
+
+    ProxyHandler::registerProxy(this);
 
     m_modTask = web::WebTask::run([this, method, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse* response = nullptr;
@@ -109,7 +112,7 @@ m_originalProxy(nullptr) {
 
         m_modRequest->send(m_info->getRequest().getURL().getMethod(), url).listen([&response](web::WebResponse* taskResponse) {
             response = new web::WebResponse(*taskResponse);
-        }, [&progress](web::WebProgress* taskProgress) {
+        }, [progress](web::WebProgress* taskProgress) {
             progress(*taskProgress);
         });
         m_info->resume();

@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 
-project(GDIntercept VERSION 0.2.3)
+project(GDIntercept VERSION 0.3.1)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_library(${PROJECT_NAME} SHARED ${SOURCES})

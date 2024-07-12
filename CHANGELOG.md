@@ -1,8 +1,13 @@
 # GDIntercept Changelog
 
-## v0.3.0-alpha.3 (2024-07-11) - API, Geode and Request Flow Support
+## v0.3.1-alpha.3 (2024-07-12) - Bugfix Update
 
-- Added support for Geode web API
+- Fixed a bug where certain requests would cause an unallocated reference exception
+- Optimized the content loading
+
+## v0.3.0-alpha.3 (2024-07-12) - API, Geode and Request Flow Support
+
+- Added support for the Geode web API
 - Added support for request pausing, resuming and resending
 - Added API support for other mods
 - Added a lot more keybinds

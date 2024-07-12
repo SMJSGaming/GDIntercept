@@ -28,5 +28,7 @@ Release Todo:
   ☐ Add a formatted text to original converter in the converters
   ☐ Add a copy button to the code block and info block
   ☐ Add badges to the capture cells (e.g. pause, finished, source)
+  ☐ Add a way to variably limit the amount of requests cached
+  ☐ Add window ratio support
 Nice To Haves:
   ☐ Custom theme support
