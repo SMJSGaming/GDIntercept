@@ -8,5 +8,7 @@ public:
 
     void updateInfo(HttpInfo* info);
 private:
+    SimpleTextArea* m_textArea;
+
     bool init(const CCSize& size);
 };

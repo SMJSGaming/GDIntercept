@@ -32,5 +32,6 @@ private:
     void onQuery(CCObject* sender);
     void onHeaders(CCObject* sender);
     void onResponse(CCObject* sender);
+    void update(float delta) override;
     void draw() override;
 };

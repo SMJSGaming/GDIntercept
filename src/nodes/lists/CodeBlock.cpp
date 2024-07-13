@@ -26,6 +26,8 @@ CodeBlock* CodeBlock::create(const CCSize& size, const CCSize& buttonBarSize) {
 }
 
 bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
+    this->m_pScheduler->scheduleUpdateForTarget(this, 1, false);
+
     #ifdef KEYBINDS_ENABLED
         this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
@@ -228,11 +230,10 @@ void CodeBlock::onResponse(CCObject* sender) {
     }
 }
 
-void CodeBlock::draw() {
-    const ThemeStyle& theme = ThemeStyle::getTheme();
+void CodeBlock::update(float delta) {
     const ListView* list = as<ListView*>(this->getNode());
     const CCSize& contentSize = this->getContentSize();
-    const float x = contentSize.width - PADDING;
+    
     const float listDelta = list->m_tableView->getContentHeight() - list->m_tableView->m_contentLayer->getContentHeight();
 
     if (list->m_tableView->m_contentLayer->getChildrenCount() == 1) {
@@ -243,6 +244,13 @@ void CodeBlock::draw() {
             list->m_tableView->getContentHeight() - list->m_tableView->m_contentLayer->getContentHeight()
         )));
     }
+
+    Border::update(delta);
+}
+
+void CodeBlock::draw() {
+    const ThemeStyle& theme = ThemeStyle::getTheme();
+    const float x = this->getContentWidth() - PADDING;
 
     Border::draw();
 

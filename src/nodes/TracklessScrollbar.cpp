@@ -15,6 +15,8 @@ TracklessScrollbar* TracklessScrollbar::create(const CCSize& size, ListView* lis
 }
 
 bool TracklessScrollbar::init(const CCSize& size, ListView* list) {
+    this->m_pScheduler->scheduleUpdateForTarget(this, 1, false);
+
     if (!Scrollbar::init(list->m_tableView)) {
         return false;
     }
@@ -30,11 +32,13 @@ bool TracklessScrollbar::init(const CCSize& size, ListView* list) {
     return true;
 }
 
-void TracklessScrollbar::draw() {
+void TracklessScrollbar::update(float delta) {
     const CCSize& size = this->getContentSize();
     const float targetHeight = m_target->getContentHeight();
     const float targetContentHeight = m_target->m_contentLayer->getContentHeight();
     const float listDelta = std::max(targetContentHeight - targetHeight, 0.0f);
+
+    Scrollbar::update(delta);
 
     m_thumb->setScaledContentSize({ size.width, std::min(targetHeight / targetContentHeight * size.height, size.height) });
     m_thumb->setPosition({
@@ -50,4 +54,8 @@ void TracklessScrollbar::draw() {
     } else {
         m_thumb->setOpacity(120);
     }
+}
+
+void TracklessScrollbar::draw() {
+    // Do nothing
 }
