@@ -1,6 +1,10 @@
 # GDIntercept Changelog
 
-## v0.4.0-alpha.4 (2024-07-13) - Stability Update V2
+## v0.3.5-alpha.3 (2024-07-13) - Stability Update V3
+
+- Fixed cocos getting so trigger happy that it cleaned up a request before it could even be read
+
+## v0.3.4-alpha.3 (2024-07-13) - Stability Update V2
 
 - Fixed an issue where cocos requests would be released before the thread was done with them
 

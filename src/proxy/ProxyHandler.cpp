@@ -47,6 +47,7 @@ ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
 
     instance->retain();
+    request->retain();
     RequestEvent(instance->getInfo()).post();
 
     return instance;
