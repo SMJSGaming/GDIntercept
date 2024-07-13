@@ -66,10 +66,10 @@ proxy::HttpInfo::ContentType proxy::HttpInfo::determineContentType(const std::st
 
 nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
     std::stringstream headerStream(std::string(headers->begin(), headers->end()));
-    gd::vector<gd::string> headerStrings;
+    std::vector<gd::string> headerStrings;
 
     for (std::string header; std::getline(headerStream, header, '\n');) {
-        headerStrings.push_back(gd::string(header.c_str()));
+        headerStrings.push_back(header);
     }
 
     return HttpInfo::parseCocosHeaders(headerStrings);
@@ -78,7 +78,7 @@ nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* header
 nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<gd::string>& headers) {
     json parsed = json::object();
 
-     // CCHttp headers technically allow for weird header formats, but I'm assuming they're all key-value pairs separated by a colon since this is the standard
+    // CCHttp headers technically allow for weird header formats, but I'm assuming they're all key-value pairs separated by a colon since this is the standard
     // If you don't follow the standard, I'm not going to care that you get shitty results
     for (const gd::string& header : headers) {
         const std::string headerString(header.c_str());
@@ -293,7 +293,7 @@ void proxy::HttpInfo::Request::resetCache() {
     m_simplifiedBodyCache = { ContentType::UNKNOWN_CONTENT, "" };
 }
 
-proxy::HttpInfo::Response::Response() : m_received(false) { };
+proxy::HttpInfo::Response::Response() : m_statusCode(0), m_received(false) { };
 
 proxy::HttpInfo::Response::Response(Request* request, CCHttpResponse* response) : m_received(true),
 m_request(request),

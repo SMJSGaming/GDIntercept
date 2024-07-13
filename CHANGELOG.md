@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.3.7-alpha.3 (2024-07-13) - Stability Update V5
+
+- Changed the way Android NDK specific objects are initialized
+
 ## v0.3.6-alpha.3 (2024-07-13) - Stability Update V4
 
 - Removed the use of CCHttpClient threading because either Android breaks from it or the Android fix breaks windows
