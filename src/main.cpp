@@ -150,6 +150,12 @@ $execute {
         }
     });
 
+    listenForSettingChanges("pause-requests", +[](const bool value) {
+        if (!value) {
+            ProxyHandler::resumeAll();
+        }
+    });
+
     listenForAllSettingChanges(+[](SettingValue* event) {
         if (event->getKey() != "cache") {
             OPT(InterceptPopup::get())->reload();

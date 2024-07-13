@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.3.6-alpha.3 (2024-07-13) - Stability Update V4
+
+- Removed the use of CCHttpClient threading because either Android breaks from it or the Android fix breaks windows
+
 ## v0.3.5-alpha.3 (2024-07-13) - Stability Update V3
 
 - Fixed cocos getting so trigger happy that it cleaned up a request before it could even be read

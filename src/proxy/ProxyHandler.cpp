@@ -46,8 +46,8 @@ std::vector<ProxyHandler*> ProxyHandler::getFilteredProxies() {
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
 
-    instance->retain();
     request->retain();
+    instance->retain();
     RequestEvent(instance->getInfo()).post();
 
     return instance;
@@ -68,12 +68,25 @@ void ProxyHandler::resetCache() {
     }
 }
 
+void ProxyHandler::resumeAll() {
+    for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
+        HttpInfo* info = proxy->getInfo();
+        CCHttpRequest* cocosRequest = proxy->getCocosRequest();
+
+        if (proxy->getCocosRequest() && info->isPaused()) {
+            CCHttpClient::getInstance()->send(cocosRequest);
+            info->resume();
+        }
+        
+    }
+}
+
 void ProxyHandler::registerProxy(ProxyHandler* proxy) {
     ProxyHandler::cachedProxies.insert(ProxyHandler::cachedProxies.begin(), proxy);
 }
 
 ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_modRequest(nullptr),
-m_cocosRequest(new CCHttpRequest(*request)),
+m_cocosRequest(request),
 m_info(new HttpInfo(request)),
 m_originalTarget(request->getTarget()),
 m_originalProxy(request->getSelector()) {
@@ -82,14 +95,9 @@ m_originalProxy(request->getSelector()) {
 
     ProxyHandler::registerProxy(this);
 
-    std::thread([this]() {
-        while (Mod::get()->getSettingValue<bool>("pause-requests")) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
-        }
-
+    if (!m_info->isPaused()) {
         CCHttpClient::getInstance()->send(m_cocosRequest);
-        m_info->resume();
-    }).detach();
+    }
 }
 
 ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_modRequest(new web::WebRequest(*request)),

@@ -17,6 +17,7 @@ namespace proxy {
         static ProxyHandler* create(CCHttpRequest* request);
         static ProxyHandler* create(web::WebRequest* request, const std::string& method, const std::string& url);
         static void resetCache();
+        static void resumeAll();
     private:
         static std::vector<ProxyHandler*> cachedProxies;
 
