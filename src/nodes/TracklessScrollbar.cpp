@@ -15,7 +15,7 @@ TracklessScrollbar* TracklessScrollbar::create(const CCSize& size, ListView* lis
 }
 
 bool TracklessScrollbar::init(const CCSize& size, ListView* list) {
-    this->m_pScheduler->scheduleUpdateForTarget(this, 1, false);
+    this->m_pScheduler->scheduleSelector(schedule_selector(TracklessScrollbar::update), this, 0, false);
 
     if (!Scrollbar::init(list->m_tableView)) {
         return false;

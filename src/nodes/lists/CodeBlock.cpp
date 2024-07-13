@@ -26,7 +26,7 @@ CodeBlock* CodeBlock::create(const CCSize& size, const CCSize& buttonBarSize) {
 }
 
 bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
-    this->m_pScheduler->scheduleUpdateForTarget(this, 1, false);
+    this->m_pScheduler->scheduleSelector(schedule_selector(CodeBlock::update), this, 0, false);
 
     #ifdef KEYBINDS_ENABLED
         this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
