@@ -46,7 +46,6 @@ std::vector<ProxyHandler*> ProxyHandler::getFilteredProxies() {
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
 
-    request->retain();
     instance->retain();
     RequestEvent(instance->getInfo()).post();
 
@@ -73,20 +72,21 @@ void ProxyHandler::registerProxy(ProxyHandler* proxy) {
 }
 
 ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_modRequest(nullptr),
-m_cocosRequest(request),
+m_cocosRequest(new CCHttpRequest(*request)),
 m_info(new HttpInfo(request)),
 m_originalTarget(request->getTarget()),
 m_originalProxy(request->getSelector()) {
-    request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
+    m_cocosRequest->retain();
+    m_cocosRequest->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
 
     ProxyHandler::registerProxy(this);
 
-    std::thread([this, request]() {
+    std::thread([this]() {
         while (Mod::get()->getSettingValue<bool>("pause-requests")) {
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
 
-        CCHttpClient::getInstance()->send(request);
+        CCHttpClient::getInstance()->send(m_cocosRequest);
         m_info->resume();
     }).detach();
 }

@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.4.0-alpha.4 (2024-07-13) - Stability Update V2
+
+- Fixed an issue where cocos requests would be released before the thread was done with them
+
 ## v0.3.3-alpha.3 (2024-07-13) - Stability Update
 
 - Changed the way per frame updates are handled to prevent crashes
