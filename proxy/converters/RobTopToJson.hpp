@@ -3,10 +3,10 @@
 #include "Converter.hpp"
 
 namespace proxy::converters {
-    class RobTopToJson : public Converter<json> {
+    class RobTopToJson : public Converter<nlohmann::json> {
     public:
         bool canConvert(const std::string& path, const std::string& original) override;
-        json convert(const std::string& path, const std::string& original) override;
+        nlohmann::json convert(const std::string& path, const std::string& original) override;
     private:
         enum ObjectType {
             OBJECT,
@@ -23,7 +23,7 @@ namespace proxy::converters {
         public:
             ObjParser(const char* delimiter, const char* entryDelimiter = "");
             ObjParser(const std::vector<std::string>& tupleKeys, const char* delimiter = "", const char* entryDelimiter = "");
-            virtual json parse(const std::string& str) const;
+            virtual nlohmann::json parse(const std::string& str) const;
         private:
             ObjectType m_bodyType;
             SeparatorType m_separatorType;
@@ -33,7 +33,7 @@ namespace proxy::converters {
 
             static std::vector<std::string> split(const std::string& str, const std::string& delimiter);
 
-            json parseEntry(const std::string& str) const;
+            nlohmann::json parseEntry(const std::string& str) const;
         };
 
         class Parser : public ObjParser {
@@ -42,7 +42,7 @@ namespace proxy::converters {
             Parser(const std::vector<std::string>& tupleKeys, const char* delimiter = "", const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});
             Parser(const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});
             Parser(const std::vector<std::string>& tupleKeys, const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});
-            json parse(const std::string& str) const override;
+            nlohmann::json parse(const std::string& str) const override;
         private:
             std::vector<std::tuple<std::string, ObjParser>> m_metadata;
         };

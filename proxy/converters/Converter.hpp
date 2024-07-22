@@ -4,16 +4,13 @@
 #include "../../lib/json.hpp"
 
 namespace proxy::converters {
-    using namespace geode::prelude;
-    using namespace nlohmann;
-
     bool isInt(const std::string& str);
     bool isNumber(const std::string& str);
     bool isBool(const std::string& str);
     bool isNull(const std::string& str);
     bool isString(const std::string& str);
     bool isJson(const std::string& str);
-    json getPrimitiveJsonType(const std::string& key, const std::string& str);
+    nlohmann::json getPrimitiveJsonType(const std::string& key, const std::string& str);
 
     template<typename T>
     class Converter {

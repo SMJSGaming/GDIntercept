@@ -1,5 +1,8 @@
 #include "../../proxy/Proxy.hpp"
 
+using namespace nlohmann;
+using namespace geode::prelude;
+
 proxy::ProxyEvent::ProxyEvent(HttpInfo* info) : m_info(info) { }
 
 proxy::HttpInfo* proxy::ProxyEvent::getInfo() const {

@@ -22,13 +22,15 @@ Alpha 3 Todo:
   ✔ @high Add mod request support @done(24-07-07 14:45)
   ✔ @critical Fix pause member not being toggled on resume @done(24-07-07 16:25)
   ✔ @high Split up requests and responses into a single info object @done(24-07-08 21:00)
+Alpha 4 Todo:
+  ✔ @critical Add node culling @done(24-07-22 22:19)
+  ✔ @critical Add a way to variably limit the amount of requests cached @done(24-07-22 22:19)
 Release Todo:
   ☐ Rescale path labels
   ☐ Add inputs to the json code block
   ☐ Add a formatted text to original converter in the converters
   ☐ Add a copy button to the code block and info block
   ☐ Add badges to the capture cells (e.g. pause, finished, source)
-  ☐ Add a way to variably limit the amount of requests cached
   ☐ Add window ratio support
 Nice To Haves:
   ☐ Custom theme support

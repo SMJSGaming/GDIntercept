@@ -1,12 +1,20 @@
 #pragma once
 
 #include "../../include.hpp"
-#include "../../objects/JSONColor.hpp"
+#include "CullingCell.hpp"
 #include "../../objects/ThemeStyle.hpp"
+#include "../../objects/JSONTokenizer.hpp"
 
-class CodeLineCell : public CCLayer {
+class CodeLineCell : public CullingCell {
 public:
-    static CodeLineCell* create(const HttpInfo::HttpContent& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color);
+    static CodeLineCell* create(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::HttpContent& code, JSONTokenizer& tokenizer);
+protected:
+    void initRender() override;
 private:
-    bool init(const HttpInfo::HttpContent& code, const size_t lineNumber, const float lineNumberWidth, JSONColor& color);
+    HttpInfo::HttpContent m_code;
+    size_t m_lineNumber;
+    float m_lineNumberWidth;
+    std::vector<JSONTokenizer::TokenOffset> m_tokens;
+
+    CodeLineCell(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::HttpContent& code, JSONTokenizer& tokenizer);
 };

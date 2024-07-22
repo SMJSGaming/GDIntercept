@@ -2,12 +2,12 @@
 
 #include <Geode/ui/GeodeUI.hpp>
 #include "../include.hpp"
-#include "../nodes/InfoArea.hpp"
 #include "../nodes/ButtonBar.hpp"
-#include "../nodes/ControlMenu.hpp"
 #include "../objects/ThemeStyle.hpp"
-#include "../nodes/lists/CodeBlock.hpp"
-#include "../nodes/lists/CaptureList.hpp"
+#include "../nodes/menus/InfoArea.hpp"
+#include "../nodes/menus/CodeBlock.hpp"
+#include "../nodes/menus/CaptureList.hpp"
+#include "../nodes/menus/ControlMenu.hpp"
 
 class InterceptPopup : public Popup<> {
 public:
@@ -19,8 +19,7 @@ protected:
     bool setup() override;
     void onClose(CCObject* obj) override;
 private:
-    static float uiWidth;
-    static float uiHeight;
+    static CCSize uiSize;
     static float uiPadding;
     static float captureCellWidth;
     static float captureCellHeight;

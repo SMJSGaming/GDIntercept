@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include.hpp"
+#include "../../include.hpp"
 
 class ControlMenu : public Border {
 public:

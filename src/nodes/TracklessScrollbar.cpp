@@ -1,9 +1,9 @@
 #include "TracklessScrollbar.hpp"
 
-TracklessScrollbar* TracklessScrollbar::create(const CCSize& size, ListView* list) {
+TracklessScrollbar* TracklessScrollbar::create(const CCSize& size, CCScrollLayerExt* scrollLayer) {
     TracklessScrollbar* scrollbar = new TracklessScrollbar();
 
-    if (scrollbar && scrollbar->init(size, list)) {
+    if (scrollbar && scrollbar->init(size, scrollLayer)) {
         scrollbar->autorelease();
 
         return scrollbar;
@@ -14,17 +14,17 @@ TracklessScrollbar* TracklessScrollbar::create(const CCSize& size, ListView* lis
     }
 }
 
-bool TracklessScrollbar::init(const CCSize& size, ListView* list) {
+bool TracklessScrollbar::init(const CCSize& size, CCScrollLayerExt* scrollLayer) {
     this->m_pScheduler->scheduleSelector(schedule_selector(TracklessScrollbar::update), this, 0, false);
 
-    if (!Scrollbar::init(list->m_tableView)) {
+    if (!Scrollbar::init(scrollLayer)) {
         return false;
     }
 
     m_track->removeFromParentAndCleanup(true);
     m_thumb->removeFromParentAndCleanup(true);
     this->addChild(m_thumb = CCScale9Sprite::createWithSpriteFrameName("d_largeSquare_01_001.png"));
-    m_thumb->setScale(0.1f);
+    m_thumb->setScale(0.01f);
     m_thumb->setColor(ThemeStyle::getTheme().lineNum);
     m_thumb->setAnchorPoint(TOP_LEFT);
     this->setContentSize({ size.width, size.height });

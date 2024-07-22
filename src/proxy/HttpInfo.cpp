@@ -1,5 +1,8 @@
 #include "../../proxy/HttpInfo.hpp"
 
+using namespace nlohmann;
+using namespace geode::prelude;
+
 static size_t globalIndexCounter = 1;
 
 proxy::converters::FormToJson proxy::HttpInfo::formToJson;
@@ -8,41 +11,27 @@ proxy::converters::RobTopToJson proxy::HttpInfo::robtopToJson;
 
 proxy::converters::BinaryToRaw proxy::HttpInfo::binaryToRaw;
 
-proxy::HttpInfo::HttpContent proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original, HttpContent& cache) {
+proxy::HttpInfo::HttpContent proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original) {
     if (raw) {
         return { originalContentType, original };
-    } else if (cache.contents.empty()) {
-        const HttpContent simplified = HttpInfo::simplifyContent(path, { originalContentType, original });
-
-        if (Mod::get()->getSettingValue<bool>("cache")) {
-            cache = simplified;
-        }
-
-        return simplified;
-    } else {
-        return cache;
-    }
-}
-
-proxy::HttpInfo::HttpContent proxy::HttpInfo::simplifyContent(const std::string& path, const HttpContent& content) {
-    switch (content.type) {
+    } else switch (originalContentType) {
         case ContentType::JSON: return {
             ContentType::JSON,
-            json::parse(content.contents).dump(2)
+            json::parse(original).dump(2)
         };
         case ContentType::FORM: return {
             ContentType::JSON,
-            HttpInfo::formToJson.convert(path, content.contents).dump(2)
+            HttpInfo::formToJson.convert(path, original).dump(2)
         };
         case ContentType::ROBTOP: return {
             ContentType::JSON,
-            HttpInfo::robtopToJson.convert(path, content.contents).dump(2)
+            HttpInfo::robtopToJson.convert(path, original).dump(2)
         };
         case ContentType::BINARY: return {
             ContentType::BINARY,
-            HttpInfo::binaryToRaw.convert(path, content.contents)
+            HttpInfo::binaryToRaw.convert(path, original)
         };
-        default: return content;
+        default: return { originalContentType, original };
     }
 }
 
@@ -114,14 +103,6 @@ bool proxy::HttpInfo::isPaused() const {
 
 bool proxy::HttpInfo::responseReceived() const {
     return m_response.received();
-}
-
-void proxy::HttpInfo::resetCache() {
-    m_request.resetCache();
-
-    if (this->responseReceived()) {
-        m_response.resetCache();
-    }
 }
 
 void proxy::HttpInfo::resume() {
@@ -261,12 +242,10 @@ void proxy::HttpInfo::URL::parse() {
 proxy::HttpInfo::Request::Request(CCHttpRequest* request) : m_url(request), 
 m_headers(HttpInfo::parseCocosHeaders(request->getHeaders())),
 m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
-m_contentType(HttpInfo::determineContentType(m_url.getPath(), m_body, true)),
-m_simplifiedBodyCache({ ContentType::UNKNOWN_CONTENT, "" }) { }
+m_contentType(HttpInfo::determineContentType(m_url.getPath(), m_body, true)) { }
 
 proxy::HttpInfo::Request::Request(web::WebRequest* request, const std::string& method, const std::string& url) : m_url(request, method, url),
-m_headers(json::object()),
-m_simplifiedBodyCache({ ContentType::UNKNOWN_CONTENT, "" }) {
+m_headers(json::object()) {
     const ByteVector body = request->getBody().value_or(ByteVector());
 
     for (const auto& [key, value] : request->getHeaders()) {
@@ -281,16 +260,8 @@ std::string proxy::HttpInfo::Request::stringifyHeaders() const {
     return m_headers.dump(2);
 }
 
-proxy::HttpInfo::HttpContent proxy::HttpInfo::Request::getBodyContent() const {
-    return { m_contentType, m_body };
-}
-
-proxy::HttpInfo::HttpContent proxy::HttpInfo::Request::getBodyContent(const bool raw) {
-    return HttpInfo::getContent(raw, m_contentType, m_url.getPath(), m_body, m_simplifiedBodyCache);
-}
-
-void proxy::HttpInfo::Request::resetCache() {
-    m_simplifiedBodyCache = { ContentType::UNKNOWN_CONTENT, "" };
+proxy::HttpInfo::HttpContent proxy::HttpInfo::Request::getBodyContent(const bool raw) const {
+    return HttpInfo::getContent(raw, m_contentType, m_url.getPath(), m_body);
 }
 
 proxy::HttpInfo::Response::Response() : m_statusCode(0), m_received(false) { };
@@ -298,8 +269,7 @@ proxy::HttpInfo::Response::Response() : m_statusCode(0), m_received(false) { };
 proxy::HttpInfo::Response::Response(Request* request, CCHttpResponse* response) : m_received(true),
 m_request(request),
 m_headers(HttpInfo::parseCocosHeaders(response->getResponseHeader())),
-m_statusCode(response->getResponseCode()),
-m_simplifiedResponseCache({ ContentType::UNKNOWN_CONTENT, "" }) {
+m_statusCode(response->getResponseCode()) {
     gd::vector<char>* data = response->getResponseData();
 
     m_response = std::string(data->begin(), data->end());
@@ -311,8 +281,7 @@ m_request(request),
 m_headers(json::object()),
 m_statusCode(response->code()),
 m_response(response->string().unwrapOrDefault()),
-m_contentType(HttpInfo::determineContentType(request->m_url.getPath(), m_response)),
-m_simplifiedResponseCache({ ContentType::UNKNOWN_CONTENT, "" }) {
+m_contentType(HttpInfo::determineContentType(request->m_url.getPath(), m_response)) {
     for (const std::string& key : response->headers()) {
         m_headers[key] = json(response->header(key).value_or(""));
     }
@@ -332,18 +301,10 @@ std::string proxy::HttpInfo::Response::stringifyStatusCode() const {
     }
 }
 
-proxy::HttpInfo::HttpContent proxy::HttpInfo::Response::getResponseContent() const {
-    return { m_contentType, m_response };
-}
-
-proxy::HttpInfo::HttpContent proxy::HttpInfo::Response::getResponseContent(const bool raw) {
-    return HttpInfo::getContent(raw, m_contentType, m_request->getURL().getPath(), m_response, m_simplifiedResponseCache);
+proxy::HttpInfo::HttpContent proxy::HttpInfo::Response::getResponseContent(const bool raw) const {
+    return HttpInfo::getContent(raw, m_contentType, m_request->getURL().getPath(), m_response);
 }
 
 bool proxy::HttpInfo::Response::received() const {
     return m_received;
-}
-
-void proxy::HttpInfo::Response::resetCache() {
-    m_simplifiedResponseCache = { ContentType::UNKNOWN_CONTENT, "" };
 }

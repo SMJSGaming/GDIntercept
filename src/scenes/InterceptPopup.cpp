@@ -1,16 +1,14 @@
 #include "InterceptPopup.hpp"
 
-float InterceptPopup::uiWidth = 500;
-
-float InterceptPopup::uiHeight = 280;
+CCSize InterceptPopup::uiSize = CCDirector::sharedDirector()->getWinSize() - ccp(60, 40);
 
 float InterceptPopup::uiPadding = 2 + PADDING;
 
-float InterceptPopup::captureCellWidth = 170;
+float InterceptPopup::captureCellWidth = InterceptPopup::uiSize.width / 3;
 
 float InterceptPopup::captureCellHeight = 20;
 
-float InterceptPopup::infoWidth = 160;
+float InterceptPopup::infoWidth = InterceptPopup::uiSize.width / 3;
 
 float InterceptPopup::infoRowHeight = 65;
 
@@ -26,7 +24,7 @@ void InterceptPopup::scene() {
     if (!InterceptPopup::get()) {
         InterceptPopup* instance = new InterceptPopup();
 
-        if (instance && instance->initAnchored(InterceptPopup::uiWidth, InterceptPopup::uiHeight)) {
+        if (instance && instance->initAnchored(InterceptPopup::uiSize.width, InterceptPopup::uiSize.height)) {
             instance->m_noElasticity = true;
             instance->setID("intercept_popup"_spr);
             instance->autorelease();
@@ -48,7 +46,7 @@ bool InterceptPopup::setup() {
     CCMenuItemSpriteExtra* item = CCMenuItemSpriteExtra::create(settingsSprite, this, menu_selector(InterceptPopup::onSettings));
 
     item->setPosition({
-        InterceptPopup::uiWidth - InterceptPopup::uiPadding - settingsSprite->getContentWidth() * settingsSprite->getScale() / 2,
+        InterceptPopup::uiSize.width - InterceptPopup::uiPadding - settingsSprite->getContentWidth() * settingsSprite->getScale() / 2,
         m_title->getPositionY()
     });
     m_buttonMenu->addChild(item);
@@ -109,7 +107,7 @@ ControlMenu* InterceptPopup::setupControls() {
     const float xPosition = m_infoArea->getPositionX() + m_infoArea->getContentWidth() + PADDING;
 
     ControlMenu* controls = ControlMenu::create({
-        InterceptPopup::uiWidth - xPosition - InterceptPopup::uiPadding,
+        InterceptPopup::uiSize.width - xPosition - InterceptPopup::uiPadding,
         InterceptPopup::infoRowHeight
     }, this->m_settings);
 
@@ -121,7 +119,7 @@ ControlMenu* InterceptPopup::setupControls() {
 
 CodeBlock* InterceptPopup::setupCodeBlock() {
     CodeBlock* codeBlock = CodeBlock::create({
-        InterceptPopup::uiWidth - InterceptPopup::middleColumnXPosition - InterceptPopup::uiPadding,
+        InterceptPopup::uiSize.width - InterceptPopup::middleColumnXPosition - InterceptPopup::uiPadding,
         this->getPageHeight() - InterceptPopup::infoRowHeight - PADDING
     }, {
         CodeBlock::buttonCount * InterceptPopup::codeBlockButtonHeight,

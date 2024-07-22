@@ -1,5 +1,13 @@
 # GDIntercept Changelog
 
+## v0.4.0-alpha.4 (2024-07-22) - Optimization Update
+
+- Added node culling to only show the visible nodes
+- Added request limiting to prevent excessive RAM usage
+- Removed conversion caching as they significantly increase RAM usage
+- Optimized the binary parser
+- Fixed scroll resets when pausing/resuming requests
+
 ## v0.3.7-alpha.3 (2024-07-13) - Stability Update V5
 
 - Changed the way Android NDK specific objects are initialized

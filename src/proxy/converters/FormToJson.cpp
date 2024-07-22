@@ -1,5 +1,7 @@
 #include "../../../proxy/converters/FormToJson.hpp"
 
+using namespace nlohmann;
+
 bool proxy::converters::FormToJson::canConvert(const std::string& path, const std::string& original) {
     std::stringstream stream(original);
     std::string section;

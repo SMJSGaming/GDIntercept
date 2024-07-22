@@ -1,5 +1,7 @@
 #include "../../../proxy/converters/RobTopToJson.hpp"
 
+using namespace nlohmann;
+
 const std::unordered_map<std::string, proxy::converters::RobTopToJson::Parser> proxy::converters::RobTopToJson::parsers({
     // Accounts
     { "/database/accounts/syncGJAccountNew.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) },

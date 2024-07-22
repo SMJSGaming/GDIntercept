@@ -2,6 +2,7 @@
 
 #include <Geode/Geode.hpp>
 #include "../lib/json.hpp"
+#include "macro_utils.hpp"
 #include "../proxy/Proxy.hpp"
 #include "proxy/ProxyHandler.hpp"
 
@@ -39,5 +40,3 @@ constexpr ccColor3B BROWN_3B({ 0xA0, 0x54, 0x34 });
 constexpr ccColor4B BROWN_4B({ 0xA0, 0x54, 0x34, FULL_OPACITY });
 constexpr ccColor3B DARK_BROWN_3B({ 0x82, 0x40, 0x21 });
 constexpr ccColor4B DARK_BROWN_4B({ 0x82, 0x40, 0x21, FULL_OPACITY });
-
-#define OPT(expr) if (auto _opt_ = expr) _opt_

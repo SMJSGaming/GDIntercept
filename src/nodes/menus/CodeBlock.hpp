@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../ButtonBar.hpp"
 #include "../../include.hpp"
+#include "../ButtonBar.hpp"
+#include "../CullingList.hpp"
 #include "../TracklessScrollbar.hpp"
 #include "../cells/CodeLineCell.hpp"
-#include "../../objects/JSONColor.hpp"
 #include "../../objects/ThemeStyle.hpp"
+#include "../../objects/JSONTokenizer.hpp"
 
 class CodeBlock : public Border {
 public:
@@ -32,6 +33,5 @@ private:
     void onQuery(CCObject* sender);
     void onHeaders(CCObject* sender);
     void onResponse(CCObject* sender);
-    void update(float delta) override;
     void draw() override;
 };

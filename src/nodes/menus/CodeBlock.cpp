@@ -26,8 +26,6 @@ CodeBlock* CodeBlock::create(const CCSize& size, const CCSize& buttonBarSize) {
 }
 
 bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
-    this->m_pScheduler->scheduleSelector(schedule_selector(CodeBlock::update), this, 0, false);
-
     #ifdef KEYBINDS_ENABLED
         this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
@@ -83,6 +81,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
 
     this->setPaddingY(PADDING / 2);
     this->setPaddingRight(PADDING * 1.2f);
+    this->setNode(CullingList::create(this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2));
     this->setCode({ HttpInfo::UNKNOWN_CONTENT, "" });
 
     for (size_t i = 0; i < buttonCount; i++) {
@@ -101,52 +100,40 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
     }
 
     ButtonBar* buttonBar = ButtonBar::create("square02_001.png", 0.2f, buttonBarSize, buttons);
+    TracklessScrollbar* scrollbar = TracklessScrollbar::create({
+        PADDING,
+        this->getContentHeight() - 2
+    }, as<CullingList*>(this->getNode())->getView());
 
+    scrollbar->setAnchorPoint(BOTTOM_LEFT);
+    scrollbar->setPosition({ this->getContentWidth() - PADDING, 1 });
     buttonBar->setPosition({ size.width - PADDING * 1.5f, size.height - PADDING });
     buttonBar->setAnchorPoint(TOP_RIGHT);
     this->addChild(buttonBar);
+    this->addChild(scrollbar);
 
     return true;
 }
 
 void CodeBlock::setCode(const HttpInfo::HttpContent& code) {
     const ThemeStyle& theme = ThemeStyle::getTheme();
-    const CCSize size = this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2;
-    const float cellHeight = this->getCellHeight();
-    const float lineNumberWidth = this->getTrueFontSize().width * 4;
-    CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
-    CCArray* cells = CCArray::create();
+    CullingList* list = as<CullingList*>(this->getNode());
+    const CCSize cellSize = { list->getContentWidth(), this->getCellHeight() };
+    const float lineNumberWidth = this->getTrueFontSize().width * std::to_string(
+        std::count(code.contents.begin(), code.contents.end(), '\n')
+    ).size() + PADDING;
     std::stringstream stream(m_code = code.contents);
+    std::vector<CullingCell*> cells;
     std::string line;
-    JSONColor color;
-
-    OPT(this->getChildByID("scrollbar"_spr))->removeFromParentAndCleanup(true);
+    JSONTokenizer tokenizer;
 
     for (size_t i = 1; std::getline(stream, line) || i == 1; i++) {
-        if ((code.type == HttpInfo::BINARY || code.type == HttpInfo::UNKNOWN_CONTENT) && i == 999) {
-            cells->addObject(CodeLineCell::create({ HttpInfo::UNKNOWN_CONTENT, "..." }, i, lineNumberWidth, color));
+        CodeLineCell* cell = CodeLineCell::create(cellSize, i, lineNumberWidth, { code.type, line }, tokenizer);
 
-            break;
-        } else {
-            cells->addObject(CodeLineCell::create({ code.type, line }, i, lineNumberWidth, color));
-        }
+        cells.push_back(cell);
     }
 
-    ListView* list = ListView::create(cells, cellHeight, size.width, size.height);
-    TracklessScrollbar* scrollbar = TracklessScrollbar::create({ PADDING, this->getContentHeight() - 2 }, list);
-
-    list->setCellOpacity(0);
-    list->setCellBorderColor({ 0, 0, 0, 0 });
-    scrollbar->setID("scrollbar"_spr);
-    scrollbar->setAnchorPoint(BOTTOM_LEFT);
-    scrollbar->setPosition({ this->getContentWidth() - PADDING, 1 });
-
-    for (size_t i = 0; i < cells->count(); i++) {
-        as<CodeLineCell*>(cells->objectAtIndex(i))->setContentSize({ size.width, cellHeight });
-    }
-
-    this->setNode(list);
-    this->addChild(scrollbar);
+    list->setCells(cells);
     this->setBackgroundColor({ theme.background.r, theme.background.g, theme.background.b, FULL_OPACITY });
 }
 
@@ -167,10 +154,10 @@ void CodeBlock::updateInfo(HttpInfo* info) {
 
     if (info) {
         switch (currentDataType) {
-            case 'B': this->onBody(nullptr); break;
-            case 'Q': this->onQuery(nullptr); break;
-            case 'H': this->onHeaders(nullptr); break;
-            case 'R': this->onResponse(nullptr); break;
+            case 'B': CASE_BREAK(this->onBody(nullptr));
+            case 'Q': CASE_BREAK(this->onQuery(nullptr));
+            case 'H': CASE_BREAK(this->onHeaders(nullptr));
+            case 'R': CASE_BREAK(this->onResponse(nullptr));
         }
     } else {
         this->updateDataTypeColor('-');
@@ -228,24 +215,6 @@ void CodeBlock::onResponse(CCObject* sender) {
 
         this->updateDataTypeColor('R');
     }
-}
-
-void CodeBlock::update(float delta) {
-    const ListView* list = as<ListView*>(this->getNode());
-    const CCSize& contentSize = this->getContentSize();
-    
-    const float listDelta = list->m_tableView->getContentHeight() - list->m_tableView->m_contentLayer->getContentHeight();
-
-    if (list->m_tableView->m_contentLayer->getChildrenCount() == 1) {
-        list->m_tableView->m_contentLayer->setPositionY(list->m_height);
-    } else if (listDelta < 0) {
-        list->m_tableView->m_contentLayer->setPositionY(std::min(0.0f, std::max(
-            list->m_tableView->m_contentLayer->getPositionY(),
-            list->m_tableView->getContentHeight() - list->m_tableView->m_contentLayer->getContentHeight()
-        )));
-    }
-
-    Border::update(delta);
 }
 
 void CodeBlock::draw() {

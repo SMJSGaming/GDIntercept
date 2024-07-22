@@ -7,14 +7,9 @@
 #include "converters/RobTopToJson.hpp"
 
 namespace proxy {
-    #define GETTER(type, name, capital_name) \
-        public: \
-            type get##capital_name() const { return m_##name; } \
-        private: \
-            type m_##name;
-
-    using namespace geode::prelude;
-    using namespace nlohmann;
+    #define PROXY_GETTER(type, name, capital_name) \
+        public: type get##capital_name() const { return m_##name; } \
+        private: type m_##name
 
     class HttpInfo {
     public:
@@ -56,21 +51,21 @@ namespace proxy {
             std::string stringifyQuery() const;
             std::string getPortHost() const;
         private:
-            static std::string stringifyMethod(const CCHttpRequest::HttpRequestType method);
+            static std::string stringifyMethod(const cocos2d::extension::CCHttpRequest::HttpRequestType method);
             static Origin determineOrigin(const std::string& host);
 
-            GETTER(Origin, origin, Origin)
-            GETTER(Protocol, protocol, Protocol)
-            GETTER(std::string, method, Method)
-            GETTER(std::string, original, Original)
-            GETTER(std::string, queryLess, QueryLess)
-            GETTER(std::string, host, Host)
-            GETTER(int, port, Port)
-            GETTER(std::string, path, Path)
-            GETTER(json, query, Query)
+            PROXY_GETTER(Origin, origin, Origin);
+            PROXY_GETTER(Protocol, protocol, Protocol);
+            PROXY_GETTER(std::string, method, Method);
+            PROXY_GETTER(std::string, original, Original);
+            PROXY_GETTER(std::string, queryLess, QueryLess);
+            PROXY_GETTER(std::string, host, Host);
+            PROXY_GETTER(int, port, Port);
+            PROXY_GETTER(std::string, path, Path);
+            PROXY_GETTER(nlohmann::json, query, Query);
 
-            URL(CCHttpRequest* request);
-            URL(web::WebRequest* request, const std::string& method, const std::string& url);
+            URL(cocos2d::extension::CCHttpRequest* request);
+            URL(geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
             void parse();
 
             friend class HttpInfo::Request;
@@ -79,18 +74,15 @@ namespace proxy {
         class Request {
         public:
             std::string stringifyHeaders() const;
-            HttpContent getBodyContent() const;
-            HttpContent getBodyContent(const bool raw);
-            void resetCache();
+            HttpContent getBodyContent(const bool raw = true) const;
         private:
-            GETTER(URL, url, URL)
-            GETTER(json, headers, Headers)
-            GETTER(std::string, body, Body)
-            GETTER(ContentType, contentType, ContentType)
-            HttpContent m_simplifiedBodyCache;
+            PROXY_GETTER(URL, url, URL);
+            PROXY_GETTER(nlohmann::json, headers, Headers);
+            PROXY_GETTER(std::string, body, Body);
+            PROXY_GETTER(ContentType, contentType, ContentType);
 
-            Request(CCHttpRequest* request);
-            Request(web::WebRequest* request, const std::string& method, const std::string& url);
+            Request(cocos2d::extension::CCHttpRequest* request);
+            Request(geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
 
             friend class HttpInfo;
         };
@@ -99,22 +91,19 @@ namespace proxy {
         public:
             std::string stringifyHeaders() const;
             std::string stringifyStatusCode() const;
-            HttpContent getResponseContent() const;
-            HttpContent getResponseContent(const bool raw);
+            HttpContent getResponseContent(const bool raw = true) const;
             bool received() const;
-            void resetCache();
         private:
-            GETTER(json, headers, Headers)
-            GETTER(int, statusCode, StatusCode)
-            GETTER(std::string, response, Response)
-            GETTER(ContentType, contentType, ContentType)
-            HttpContent m_simplifiedResponseCache;
+            PROXY_GETTER(nlohmann::json, headers, Headers);
+            PROXY_GETTER(int, statusCode, StatusCode);
+            PROXY_GETTER(std::string, response, Response);
+            PROXY_GETTER(ContentType, contentType, ContentType);
             Request* m_request;
             bool m_received;
 
             Response();
-            Response(Request* request, CCHttpResponse* response);
-            Response(Request* request, web::WebResponse* response);
+            Response(Request* request, cocos2d::extension::CCHttpResponse* response);
+            Response(Request* request, geode::utils::web::WebResponse* response);
 
             friend class ProxyHandler;
             friend class HttpInfo;
@@ -126,26 +115,24 @@ namespace proxy {
 
         bool isPaused() const;
         bool responseReceived() const;
-        void resetCache();
     private:
-        static HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original, HttpContent& cache);
-        static HttpContent simplifyContent(const std::string& path, const HttpContent& content);
+        static HttpContent getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original);
         static ContentType determineContentType(const std::string& path, const std::string& content, const bool isBody = false);
-        static json parseCocosHeaders(const gd::vector<char>* headers);
-        static json parseCocosHeaders(const gd::vector<gd::string>& headers);
+        static nlohmann::json parseCocosHeaders(const gd::vector<char>* headers);
+        static nlohmann::json parseCocosHeaders(const gd::vector<gd::string>& headers);
         static bool shouldPause();
 
-        GETTER(size_t, id, ID)
-        GETTER(Request, request, Request)
-        GETTER(Response, response, Response)
+        PROXY_GETTER(size_t, id, ID);
+        PROXY_GETTER(Request, request, Request);
+        PROXY_GETTER(Response, response, Response);
         bool m_paused;
 
-        HttpInfo(CCHttpRequest* request);
-        HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url);
+        HttpInfo(cocos2d::extension::CCHttpRequest* request);
+        HttpInfo(geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
         void resume();
 
         friend class ProxyHandler;
     };
 
-    #undef GETTER
+    #undef PROXY_GETTER
 }

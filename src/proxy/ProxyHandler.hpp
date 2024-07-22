@@ -2,37 +2,38 @@
 
 #include <Geode/utils/web.hpp>
 #include "../include.hpp"
+#include "../macro_utils.hpp"
 
-#define GETTER(type, name, capital_name) \
-        public: \
-            type get##capital_name() const { return m_##name; } \
-        private: \
-            type m_##name;
+using namespace nlohmann;
+using namespace geode::prelude;
 
 namespace proxy {
     class ProxyHandler : public CCObject {
     public:
-        static std::vector<ProxyHandler*> getProxies();
-        static std::vector<ProxyHandler*> getFilteredProxies();
+        static std::deque<ProxyHandler*> getProxies();
+        static std::deque<ProxyHandler*> getFilteredProxies();
         static ProxyHandler* create(CCHttpRequest* request);
         static ProxyHandler* create(web::WebRequest* request, const std::string& method, const std::string& url);
-        static void resetCache();
+        static void setCacheLimit(const int64_t limit);
         static void resumeAll();
     private:
-        static std::vector<ProxyHandler*> cachedProxies;
+        static std::deque<ProxyHandler*> cachedProxies;
+        static std::vector<ProxyHandler*> pausedProxies;
 
         static void registerProxy(ProxyHandler* proxy);
 
-        GETTER(HttpInfo*, info, Info)
-        GETTER(CCHttpRequest*, cocosRequest, CocosRequest)
-        GETTER(web::WebRequest*, modRequest, ModRequest)
-        GETTER(web::WebTask, modTask, ModTask)
+        GETTER(HttpInfo*, info, Info);
+        GETTER(CCHttpRequest*, cocosRequest, CocosRequest);
+        GETTER(web::WebRequest*, modRequest, ModRequest);
+        GETTER(web::WebTask, modTask, ModTask);
         CCObject* m_originalTarget;
         SEL_HttpResponse m_originalProxy;
 
         ProxyHandler(CCHttpRequest* request);
         ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);
+        ~ProxyHandler();
         void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);
-        void onModResponse(web::WebResponse* result);
+        void onModResponse(web::WebResponse* response);
+        void onResponse();
     };
 }

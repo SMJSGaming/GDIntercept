@@ -8,6 +8,7 @@ bool ModMenuLayer::init() {
     CCSprite* logo = CCSprite::create("GDI-round.png"_spr);
 
     logo->setScale(0.4f);
+    logo->setID("blame-overcharged-menu"_spr);
 
     CCNode* closeMenu = this->getChildByID("close-menu");
 

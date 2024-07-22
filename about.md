@@ -35,6 +35,10 @@ This version has yet to enable request manipulation due to the official penetrat
 
 Some minor request manipulation features have been re-enabled. This version also adds Geode and API support. This means that in the future GDIntercept will also be useable for other mods. Check [the wiki](https://github.com/SMJSGaming/GDIntercept/wiki) for more details.
 
+## ALPHA.4
+
+This version significantly improves the performance of the mod and removes as much RAM usage as possible. The exposed API path has also been fixed.
+
 ## Credits
 
 - [RobTop](user:71) - Some UI tips, providing source code and help with determining the sensitive data keys.

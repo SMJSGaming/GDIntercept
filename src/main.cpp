@@ -144,10 +144,10 @@ $execute {
         return ListenerResult::Propagate;
     }, RequestFilter());
 
-    listenForSettingChanges("cache", +[](const bool value) {
-        if (!value) {
-            ProxyHandler::resetCache();
-        }
+    listenForSettingChanges("cache-limit", +[](const int64_t value) {
+        ProxyHandler::setCacheLimit(value);
+
+        OPT(InterceptPopup::get())->reload();
     });
 
     listenForSettingChanges("pause-requests", +[](const bool value) {
@@ -157,7 +157,13 @@ $execute {
     });
 
     listenForAllSettingChanges(+[](SettingValue* event) {
-        if (event->getKey() != "cache") {
+        const static std::vector<std::string> blacklist = {
+            "cache-limit",
+            "pause-requests",
+            "log-requests"
+        };
+
+        if (std::find(blacklist.begin(), blacklist.end(), event->getKey()) == blacklist.end()) {
             OPT(InterceptPopup::get())->reload();
         }
     });

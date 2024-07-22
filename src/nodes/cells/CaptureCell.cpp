@@ -29,7 +29,7 @@ bool CaptureCell::init(const CCSize& size) {
         cutoffPath = m_url.getPortHost();
     }
 
-    CCLabelBMFont* label = CCLabelBMFont::create((method + ' ' + cutoffPath).c_str(), "bigFont.fnt", 0, kCCTextAlignmentLeft);
+    CCLabelBMFont* label = CCLabelBMFont::create((method + ' ' + cutoffPath).c_str(), "bigFont.fnt");
     ButtonSprite* button = ButtonSprite::create("View", "bigFont.fnt", "GJ_button_01.png");
     CCMenu* menu = CCMenu::createWithItem(CCMenuItemSpriteExtra::create(
         button,
@@ -42,18 +42,12 @@ bool CaptureCell::init(const CCSize& size) {
     menu->setScale(0.3f);
     button->setID("view"_spr);
     label->setAnchorPoint(CENTER_LEFT);
-    label->setPosition({ 5, size.height / 2 });
-    label->setScale(0.2f);
+    label->setPosition({ PADDING, size.height / 2 });
+    label->limitLabelWidth(menu->getPositionX() - button->getContentWidth() * menu->getScale() / 2 - PADDING * 2, 0.2f, 0.05f);
     m_mainLayer->addChild(label);
     m_mainLayer->addChild(menu);
 
-    for (size_t i = 0; i < cutoffPath.size(); i++) {
-        if (cocos::getChild<CCSprite>(label, i)->getPositionX() * label->getScale() > menu->getPositionX() - button->getContentWidth() * menu->getScale() / 2 - 10) {
-            label->setString((std::string(label->getString()).substr(0, i - 3) + "...").c_str());
 
-            break;
-        }
-    }
 
     for (size_t i = 0; i < method.size(); i++) {
         cocos::getChild<CCSprite>(label, i)->setColor(this->colorForMethod());

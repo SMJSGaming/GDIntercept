@@ -1,5 +1,8 @@
 #include "../../../proxy/converters/Converter.hpp"
 
+using namespace nlohmann;
+using namespace geode::prelude;
+
 bool proxy::converters::isInt(const std::string& str) {
     if (str.empty()) {
         return false;

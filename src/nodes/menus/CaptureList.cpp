@@ -20,19 +20,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     #ifdef KEYBINDS_ENABLED
         this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
-                std::vector<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
-
-                for (size_t i = 0; i < proxies.size(); i++) {
-                    if (proxies[i]->getInfo()->getID() == CaptureList::active) {
-                        if (i == proxies.size() - 1) {
-                            m_cells[0]->activate();
-                        } else {
-                            m_cells[i + 1]->activate();
-                        }
-
-                        break;
-                    }
-                }
+                this->tabCell(true);
             }
 
             return ListenerResult::Propagate;
@@ -40,19 +28,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
 
         this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
-                std::vector<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
-
-                for (size_t i = 0; i < proxies.size(); i++) {
-                    if (proxies[i]->getInfo()->getID() == CaptureList::active) {
-                        if (i == 0) {
-                            m_cells[m_cells.size() - 1]->activate();
-                        } else {
-                            m_cells[i - 1]->activate();
-                        }
-
-                        break;
-                    }
-                }
+                this->tabCell(false);
             }
 
             return ListenerResult::Propagate;
@@ -80,10 +56,8 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
 
             switchInfo(info);
 
-            if (m_list) {
-                CCArrayExt<CaptureCell*> entries(m_list->m_entries);
-
-                for (CaptureCell* entry : entries) {
+            if (this->getNode()) {
+                for (CaptureCell* entry : m_cells) {
                     if (entry != cell) {
                         entry->deactivate();
                     }
@@ -99,11 +73,34 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
         m_cells.push_back(capture);
     }
 
+    ListView* list = ListView::create(m_cells.inner(), cellHeight, listSize.width, listSize.height);
+
     if ((!active || !activated) && m_cells.size()) {
         m_cells[0]->activate();
     }
 
-    this->setNode(m_list = ListView::create(m_cells.inner(), cellHeight, listSize.width, listSize.height));
+    // The code block takes priority over the capture list
+    list->m_tableView->setMouseEnabled(false);
+
+    this->setNode(list);
 
     return true;
+}
+
+void CaptureList::tabCell(const bool forward) {
+    std::deque<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
+
+    for (size_t i = 0; i < proxies.size(); i++) {
+        if (proxies[i]->getInfo()->getID() == CaptureList::active) {
+            if (!forward && i == 0) {
+                m_cells[m_cells.size() - 1]->activate();
+            } else if (forward && i == proxies.size() - 1) {
+                m_cells[0]->activate();
+            } else {
+                m_cells[i + (forward ? 1 : -1)]->activate();
+            }
+
+            break;
+        }
+    }
 }

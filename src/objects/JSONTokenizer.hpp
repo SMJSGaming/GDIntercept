@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../include.hpp"
-#include "../objects/ThemeStyle.hpp"
 
-class JSONColor {
+class JSONTokenizer {
 public:
     enum Token {
         UNKNOWN,
+        CORRUPT,
         KEY,
         STRING,
         NUMBER,
@@ -15,15 +15,20 @@ public:
         KEY_TERMINATOR
     };
 
-    JSONColor();
-    void parseLine(const std::string& code, CCLabelBMFont* label);
+    struct TokenOffset {
+        size_t offset;
+        size_t length;
+        Token token;
+    };
+
+    JSONTokenizer();
+    std::vector<TokenOffset> parseLine(const std::string& code);
 private:
     Token m_token;
     Token m_futureToken;
     char m_openQuote;
     bool m_escape;
     bool m_hasDecimal;
-    size_t m_line;
     size_t m_constantSize;
     size_t m_constantCounter;
     std::string m_closesExpected;

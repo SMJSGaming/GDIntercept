@@ -1,11 +1,11 @@
 {
-  "geode": "3.2.0",
-  "version": "v0.3.7-alpha.3",
+  "geode": "3.3.0",
+  "version": "v0.4.0-alpha.4",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "api": {
     "include": [
-      "include/*.hpp"
+      "proxy/*.hpp"
     ]
   },
   "developers": [
@@ -83,6 +83,14 @@
         "Unknown Origin"
       ]
     },
+    "cache-limit": {
+      "name": "Cache Limit",
+      "description": "The amount of requests to cache before removing the oldest one.",
+      "type": "int",
+      "default": 25,
+      "min": 1,
+      "max": 1000
+    },
     "pause-requests": {
       "name": "Pause Requests",
       "description": "Pauses all requests and sets their timeout to infinite.",
@@ -100,12 +108,6 @@
       "description": "Displays data in its raw state without any manipulation of the text besides capping the amount of rendered characters.",
       "type": "bool",
       "default": false
-    },
-    "cache": {
-      "name": "Cache",
-      "description": "Caches all converted request bodies/responses to speed up the view process. This only happens when you view the request in the UI.\n\n<cy>WARNING</c>: This can take up a lot of memory if you have a lot of requests cached.",
-      "type": "bool",
-      "default": true
     },
     "log-requests": {
       "name": "Log Requests",

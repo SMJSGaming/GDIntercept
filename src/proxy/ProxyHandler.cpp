@@ -1,47 +1,8 @@
 #include "ProxyHandler.hpp"
 
-std::vector<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
+std::deque<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
 
-std::vector<ProxyHandler*> ProxyHandler::getProxies() {
-    return ProxyHandler::cachedProxies;
-}
-
-std::vector<ProxyHandler*> ProxyHandler::getFilteredProxies() {
-    const std::string filter(Mod::get()->getSettingValue<std::string>("filter"));
-    std::vector<ProxyHandler*> proxies;
-
-    if (ProxyHandler::cachedProxies.empty() || filter == "None") {
-        return ProxyHandler::cachedProxies;
-    }
-
-    for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
-        switch (proxy->m_info->getRequest().getURL().getOrigin()) {
-            case HttpInfo::Origin::GD: if (filter == "Geometry Dash Server") {
-                proxies.push_back(proxy);
-            } break;
-            case HttpInfo::Origin::GD_CDN: if (filter == "Geometry Dash CDN") {
-                proxies.push_back(proxy);
-            } break;
-            case HttpInfo::Origin::ROBTOP_GAMES: if (filter == "RobtopGames Server") {
-                proxies.push_back(proxy);
-            } break;
-            case HttpInfo::Origin::NEWGROUNDS: if (filter == "Newgrounds CDN") {
-                proxies.push_back(proxy);
-            } break;
-            case HttpInfo::Origin::GEODE: if (filter == "Geode Server") {
-                proxies.push_back(proxy);
-            } break;
-            case HttpInfo::LOCALHOST: if (filter == "Localhost") {
-                proxies.push_back(proxy);
-            } break;
-            case HttpInfo::Origin::OTHER: if (filter == "Unknown Origin") {
-                proxies.push_back(proxy);
-            } break;
-        }
-    }
-
-    return proxies;
-}
+std::vector<ProxyHandler*> proxy::ProxyHandler::pausedProxies;
 
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
@@ -62,27 +23,97 @@ ProxyHandler* ProxyHandler::create(web::WebRequest* request, const std::string& 
     return instance;
 }
 
-void ProxyHandler::resetCache() {
+std::deque<ProxyHandler*> ProxyHandler::getProxies() {
+    return ProxyHandler::cachedProxies;
+}
+
+std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
+    const std::string filter(Mod::get()->getSettingValue<std::string>("filter"));
+    std::deque<ProxyHandler*> proxies;
+
+    if (ProxyHandler::cachedProxies.empty() || filter == "None") {
+        return ProxyHandler::cachedProxies;
+    }
+
     for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
-        proxy->getInfo()->resetCache();
+        switch (proxy->m_info->getRequest().getURL().getOrigin()) {
+            case HttpInfo::Origin::GD: CASE_BREAK(if (filter == "Geometry Dash Server") {
+                proxies.push_back(proxy);
+            });
+            case HttpInfo::Origin::GD_CDN: CASE_BREAK(if (filter == "Geometry Dash CDN") {
+                proxies.push_back(proxy);
+            });
+            case HttpInfo::Origin::ROBTOP_GAMES: CASE_BREAK(if (filter == "RobtopGames Server") {
+                proxies.push_back(proxy);
+            });
+            case HttpInfo::Origin::NEWGROUNDS: CASE_BREAK(if (filter == "Newgrounds CDN") {
+                proxies.push_back(proxy);
+            });
+            case HttpInfo::Origin::GEODE: CASE_BREAK(if (filter == "Geode Server") {
+                proxies.push_back(proxy);
+            });
+            case HttpInfo::LOCALHOST: CASE_BREAK(if (filter == "Localhost") {
+                proxies.push_back(proxy);
+            });
+            case HttpInfo::Origin::OTHER: CASE_BREAK(if (filter == "Unknown Origin") {
+                proxies.push_back(proxy);
+            });
+        }
+    }
+
+    return proxies;
+}
+
+void ProxyHandler::setCacheLimit(const int64_t limit) {
+    const size_t size = ProxyHandler::cachedProxies.size();
+
+    if (size > limit) {
+        for (size_t i = limit; i < size; i++) {
+            ProxyHandler* proxy = ProxyHandler::cachedProxies.at(i);
+
+            if (proxy->getInfo()->responseReceived()) {
+                delete proxy;
+            }
+        }
+
+        ProxyHandler::cachedProxies.resize(limit);
     }
 }
 
 void ProxyHandler::resumeAll() {
-    for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
-        HttpInfo* info = proxy->getInfo();
-        CCHttpRequest* cocosRequest = proxy->getCocosRequest();
+    const std::vector<ProxyHandler*> paused = std::vector<ProxyHandler*>(ProxyHandler::pausedProxies);
 
-        if (proxy->getCocosRequest() && info->isPaused()) {
-            CCHttpClient::getInstance()->send(cocosRequest);
-            info->resume();
+    std::thread([paused]{
+        for (ProxyHandler* proxy : paused) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+            proxy->getInfo()->resume();
+
+            if (CCHttpRequest* cocosRequest = proxy->getCocosRequest()) {
+                Loader::get()->queueInMainThread([cocosRequest]{ CCHttpClient::getInstance()->send(cocosRequest); });
+            }
         }
-        
-    }
+    }).detach();
+
+    ProxyHandler::pausedProxies.clear();
 }
 
 void ProxyHandler::registerProxy(ProxyHandler* proxy) {
-    ProxyHandler::cachedProxies.insert(ProxyHandler::cachedProxies.begin(), proxy);
+    ProxyHandler::cachedProxies.push_front(proxy);
+
+    if (proxy->getInfo()->isPaused()) {
+        ProxyHandler::pausedProxies.push_back(proxy);
+    }
+    
+    if (ProxyHandler::cachedProxies.size() > Mod::get()->getSettingValue<int64_t>("cache-limit")) {
+        ProxyHandler* last = ProxyHandler::cachedProxies.back();
+
+        ProxyHandler::cachedProxies.pop_back();
+
+        if (last->getInfo()->responseReceived()) {
+            delete last;
+        }
+    }
 }
 
 ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_modRequest(nullptr),
@@ -102,6 +133,7 @@ m_originalProxy(request->getSelector()) {
 
 ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_modRequest(new web::WebRequest(*request)),
 m_cocosRequest(nullptr),
+m_info(nullptr),
 m_originalTarget(nullptr),
 m_originalProxy(nullptr) {
     m_info = new HttpInfo(m_modRequest, method, url);
@@ -111,7 +143,7 @@ m_originalProxy(nullptr) {
     m_modTask = web::WebTask::run([this, method, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse* response = nullptr;
 
-        while (Mod::get()->getSettingValue<bool>("pause-requests")) {
+        while (m_info->isPaused()) {
             if (cancelled()) {
                 m_info->m_response.m_statusCode = -3;
 
@@ -122,7 +154,6 @@ m_originalProxy(nullptr) {
         }
 
         web::WebTask task = m_modRequest->send(m_info->getRequest().getURL().getMethod(), url);
-        m_info->resume();
 
         task.listen([&response](web::WebResponse* taskResponse) {
             response = new web::WebResponse(*taskResponse);
@@ -131,9 +162,7 @@ m_originalProxy(nullptr) {
         });
 
         while (!response) {
-            if (cancelled()) {
-                break;
-            }
+            BREAK_WHEN(cancelled());
 
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
@@ -151,15 +180,33 @@ m_originalProxy(nullptr) {
     }, fmt::format("Proxy for {} {}", method, url));
 }
 
+ProxyHandler::~ProxyHandler() {
+    delete m_cocosRequest;
+
+    if (m_modRequest) {
+        delete m_modRequest;
+    }
+
+    delete m_info;
+}
+
 void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* response) {
     m_info->m_response = HttpInfo::Response(&m_info->m_request, response);
 
     (m_originalTarget->*m_originalProxy)(client, response);
-    ResponseEvent(m_info).post();
+    this->onResponse();
 }
 
-void ProxyHandler::onModResponse(web::WebResponse* result) {
-    m_info->m_response = HttpInfo::Response(&m_info->m_request, result);
+void ProxyHandler::onModResponse(web::WebResponse* response) {
+    m_info->m_response = HttpInfo::Response(&m_info->m_request, response);
 
+    this->onResponse();    
+}
+
+void ProxyHandler::onResponse() {
     ResponseEvent(m_info).post();
+
+    if (std::find(ProxyHandler::cachedProxies.begin(), ProxyHandler::cachedProxies.end(), this) == ProxyHandler::cachedProxies.end()) {
+        delete this;
+    }
 }

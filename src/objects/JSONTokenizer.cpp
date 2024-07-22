@@ -1,14 +1,13 @@
-#include "JSONColor.hpp"
+#include "JSONTokenizer.hpp"
 
-JSONColor::JSONColor() : m_token(UNKNOWN), m_futureToken(UNKNOWN), m_line(0), m_constantSize(0) {
+JSONTokenizer::JSONTokenizer() : m_token(UNKNOWN), m_futureToken(UNKNOWN), m_constantSize(0) {
     this->reset();
 }
 
-void JSONColor::parseLine(const std::string& code, CCLabelBMFont* label) {
-    const ThemeStyle& theme = ThemeStyle::getTheme();
-    const size_t labelLength = label->getChildrenCount();
+std::vector<JSONTokenizer::TokenOffset> JSONTokenizer::parseLine(const std::string& code) {
     const size_t length = code.size();
     bool previousWasAccepted = true;
+    std::vector<TokenOffset> tokens;
 
     if (m_token == STRING || m_token == NUMBER || m_token == CONSTANT) {
         m_token = m_futureToken = TERMINATOR;
@@ -20,45 +19,42 @@ void JSONColor::parseLine(const std::string& code, CCLabelBMFont* label) {
         this->reset();
     }
 
+    tokens.push_back({ 0, 0, m_token });
+
     for (size_t i = 0; i < length; i++) {
+        TokenOffset& back = tokens.back();
+
         if (code[i] != ' ' || (m_token == STRING || m_token == NUMBER)) {
             if (previousWasAccepted && m_token == STRING) {
-                const size_t originalI = i;
-                const size_t end = std::min(i = code.find_first_of(std::string() + m_openQuote + '\\', i), labelLength);
-
-                for (size_t j = originalI; j < end; j++) {
-                    cocos::getChild<CCSprite>(label, j)->setColor(theme.string);
-                }
+                back.length = (i = code.find_first_of(std::string() + m_openQuote + '\\', i)) - back.offset;
             }
-
-            CCSprite* child = cocos::getChild<CCSprite>(label, i);
 
             previousWasAccepted = this->determineCharToken(code[i], code.substr(i), previousWasAccepted);
 
-            if (child) {
-                switch (m_token) {
-                    case KEY: child->setColor(theme.key); break;
-                    case STRING: child->setColor(theme.string); break;
-                    case NUMBER: child->setColor(theme.number); break;
-                    case CONSTANT: child->setColor(theme.constant); break;
-                    default: child->setColor(theme.text);
+            if (previousWasAccepted) {
+                if (back.token == m_token) {
+                    back.length++;
+                } else {
+                    tokens.push_back(TokenOffset({ i, 1, m_token }));
                 }
-
-                if (!previousWasAccepted) {
-                    child->setColor(theme.error);
-                }
+            } else if (back.token == CORRUPT) {
+                back.length++;
+            } else {
+                tokens.push_back(TokenOffset({ i, 1, CORRUPT }));
             }
 
             if (m_futureToken != m_token) {
                 this->reset();
             }
+        } else {
+            back.length++;
         }
     }
 
-    m_line++;
+    return tokens;
 }
 
-bool JSONColor::determineCharToken(const char character, const std::string& truncatedCode, const bool previousWasAccepted) {
+bool JSONTokenizer::determineCharToken(const char character, const std::string& truncatedCode, const bool previousWasAccepted) {
     if (m_token == KEY_TERMINATOR) {
         if (character == ':') {
             m_futureToken = UNKNOWN;
@@ -81,21 +77,19 @@ bool JSONColor::determineCharToken(const char character, const std::string& trun
         bool accepted = true;
 
         switch (m_token) {
-            case STRING: {
-                accepted = !previousWasAccepted || this->checkString(character, truncatedCode.size());
-            } break;
-            case NUMBER: if (character == ' ') {
+            case STRING: CASE_BREAK(accepted = !previousWasAccepted || this->checkString(character, truncatedCode.size()));
+            case NUMBER: CASE_BREAK(if (character == ' ') {
                 m_token = m_futureToken = TERMINATOR;
             } else if (!previousWasAccepted || (!isdigit(character) && (character != '.' || m_hasDecimal))) {
                 accepted = false;
             } else if (character == '.') {
                 m_hasDecimal = true;
                 accepted = truncatedCode.size() > 1;
-            } break;
-            case CONSTANT: if (m_constantSize == ++m_constantCounter) {
+            });
+            case CONSTANT: CASE_BREAK(if (m_constantSize == ++m_constantCounter) {
                 m_futureToken = TERMINATOR;
-            } break;
-            case UNKNOWN: {
+            });
+            case UNKNOWN: CASE_BREAK({
                 const bool startsWithFalse = truncatedCode.starts_with("false");
 
                 if (startsWithFalse || truncatedCode.starts_with("true") || truncatedCode.starts_with("null")) {
@@ -114,10 +108,8 @@ bool JSONColor::determineCharToken(const char character, const std::string& trun
                 } else {
                     accepted = character == ' ';
                 }
-            } break;
-            default: {
-                accepted = false;
-            }
+            });
+            default: CASE_BREAK(accepted = false);
         }
 
         if (accepted || m_openQuote != 0) {
@@ -133,7 +125,7 @@ bool JSONColor::determineCharToken(const char character, const std::string& trun
     }
 }
 
-bool JSONColor::checkString(const char character, const size_t charactersLeft) {
+bool JSONTokenizer::checkString(const char character, const size_t charactersLeft) {
     if (character == '\\') {
         m_escape = !m_escape;
     } else if (character == m_openQuote && !m_escape) {
@@ -147,7 +139,7 @@ bool JSONColor::checkString(const char character, const size_t charactersLeft) {
     return true;
 }
 
-bool JSONColor::checkObjectTerminator(const char character) {
+bool JSONTokenizer::checkObjectTerminator(const char character) {
     if (m_closesExpected.ends_with(character)) {
         m_token = m_futureToken = TERMINATOR;
         m_closesExpected.pop_back();
@@ -158,7 +150,7 @@ bool JSONColor::checkObjectTerminator(const char character) {
     }
 }
 
-void JSONColor::reset() {
+void JSONTokenizer::reset() {
     m_openQuote = 0;
     m_escape = false;
     m_hasDecimal = false;
