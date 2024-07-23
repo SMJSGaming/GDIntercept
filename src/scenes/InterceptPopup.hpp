@@ -19,21 +19,23 @@ protected:
     bool setup() override;
     void onClose(CCObject* obj) override;
 private:
-    static CCSize uiSize;
+    static CCSize popupPadding;
     static float uiPadding;
-    static float captureCellWidth;
     static float captureCellHeight;
-    static float infoWidth;
     static float infoRowHeight;
-    static float middleColumnXPosition;
     static float codeBlockButtonHeight;
 
+
+    float m_captureCellWidth;
+    float m_infoWidth;
+    float m_middleColumnXPosition;
     InfoArea* m_infoArea;
     CodeBlock* m_codeBlock;
     ControlMenu* m_controls;
     CaptureList* m_list;
     FLAlertLayer* m_settings;
 
+    InterceptPopup(const CCSize& size);
     InfoArea* setupInfo();
     CaptureList* setupList();
     ControlMenu* setupControls();

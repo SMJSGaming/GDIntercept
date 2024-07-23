@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.4.2-alpha.4 (2024-07-23) - UI Scaling Update
+
+- Added compatibility for different aspect ratios and resolution changes
+
 ## v0.4.1-alpha.4 (2024-07-23) - Pause/Resume Safety Update
 
 - Added checks to prevent pause/resume from accidentally triggering a recursive loop

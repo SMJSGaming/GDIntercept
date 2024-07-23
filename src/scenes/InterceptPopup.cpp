@@ -1,30 +1,26 @@
 #include "InterceptPopup.hpp"
 
-CCSize InterceptPopup::uiSize = CCDirector::sharedDirector()->getWinSize() - ccp(60, 40);
+CCSize InterceptPopup::popupPadding = { 60, 40 };
 
 float InterceptPopup::uiPadding = 2 + PADDING;
 
-float InterceptPopup::captureCellWidth = InterceptPopup::uiSize.width / 3;
-
 float InterceptPopup::captureCellHeight = 20;
-
-float InterceptPopup::infoWidth = InterceptPopup::uiSize.width / 3;
 
 float InterceptPopup::infoRowHeight = 65;
 
 float InterceptPopup::codeBlockButtonHeight = 15;
-
-float InterceptPopup::middleColumnXPosition = InterceptPopup::uiPadding + PADDING + InterceptPopup::captureCellWidth;
 
 InterceptPopup* InterceptPopup::get() {
     return as<InterceptPopup*>(CCDirector::sharedDirector()->getRunningScene()->getChildByID("intercept_popup"_spr));
 }
 
 void InterceptPopup::scene() {
-    if (!InterceptPopup::get()) {
-        InterceptPopup* instance = new InterceptPopup();
+    CCSize uiSize = CCDirector::sharedDirector()->getWinSize() - InterceptPopup::popupPadding;
 
-        if (instance && instance->initAnchored(InterceptPopup::uiSize.width, InterceptPopup::uiSize.height)) {
+    if (!InterceptPopup::get()) {
+        InterceptPopup* instance = new InterceptPopup(uiSize);
+
+        if (instance && instance->initAnchored(uiSize.width, uiSize.height)) {
             instance->m_noElasticity = true;
             instance->setID("intercept_popup"_spr);
             instance->autorelease();
@@ -34,6 +30,15 @@ void InterceptPopup::scene() {
         }
     }
 }
+
+InterceptPopup::InterceptPopup(const CCSize& size) : m_captureCellWidth(size.width / 3),
+m_infoWidth(size.width / 3),
+m_middleColumnXPosition(InterceptPopup::uiPadding + PADDING + m_captureCellWidth),
+m_infoArea(nullptr),
+m_controls(nullptr),
+m_codeBlock(nullptr),
+m_list(nullptr),
+m_settings(nullptr) { }
 
 bool InterceptPopup::setup() {
     this->setTitle("Intercepted Requests");
@@ -46,7 +51,7 @@ bool InterceptPopup::setup() {
     CCMenuItemSpriteExtra* item = CCMenuItemSpriteExtra::create(settingsSprite, this, menu_selector(InterceptPopup::onSettings));
 
     item->setPosition({
-        InterceptPopup::uiSize.width - InterceptPopup::uiPadding - settingsSprite->getContentWidth() * settingsSprite->getScale() / 2,
+        m_size.width - InterceptPopup::uiPadding - settingsSprite->getContentWidth() * settingsSprite->getScale() / 2,
         m_title->getPositionY()
     });
     m_buttonMenu->addChild(item);
@@ -75,11 +80,11 @@ void InterceptPopup::reload() {
 }
 
 InfoArea* InterceptPopup::setupInfo() {
-    InfoArea* infoArea = InfoArea::create({ InterceptPopup::infoWidth, InterceptPopup::infoRowHeight });
+    InfoArea* infoArea = InfoArea::create({ m_infoWidth, InterceptPopup::infoRowHeight });
 
     m_mainLayer->addChild(infoArea);
     infoArea->setPosition({
-        InterceptPopup::middleColumnXPosition,
+        m_middleColumnXPosition,
         this->getComponentYPosition(0, InterceptPopup::infoRowHeight)
     });
 
@@ -88,7 +93,7 @@ InfoArea* InterceptPopup::setupInfo() {
 
 CaptureList* InterceptPopup::setupList() {
     CaptureList* list = CaptureList::create({
-        InterceptPopup::captureCellWidth,
+        m_captureCellWidth,
         this->getPageHeight()
     }, InterceptPopup::captureCellHeight, [this](HttpInfo* info) {
         m_infoArea->updateInfo(info);
@@ -107,7 +112,7 @@ ControlMenu* InterceptPopup::setupControls() {
     const float xPosition = m_infoArea->getPositionX() + m_infoArea->getContentWidth() + PADDING;
 
     ControlMenu* controls = ControlMenu::create({
-        InterceptPopup::uiSize.width - xPosition - InterceptPopup::uiPadding,
+        m_size.width - xPosition - InterceptPopup::uiPadding,
         InterceptPopup::infoRowHeight
     }, this->m_settings);
 
@@ -119,14 +124,14 @@ ControlMenu* InterceptPopup::setupControls() {
 
 CodeBlock* InterceptPopup::setupCodeBlock() {
     CodeBlock* codeBlock = CodeBlock::create({
-        InterceptPopup::uiSize.width - InterceptPopup::middleColumnXPosition - InterceptPopup::uiPadding,
+        m_size.width - m_middleColumnXPosition - InterceptPopup::uiPadding,
         this->getPageHeight() - InterceptPopup::infoRowHeight - PADDING
     }, {
         CodeBlock::buttonCount * InterceptPopup::codeBlockButtonHeight,
         InterceptPopup::codeBlockButtonHeight
     });
 
-    codeBlock->setPosition({ InterceptPopup::middleColumnXPosition, InterceptPopup::uiPadding });
+    codeBlock->setPosition({ m_middleColumnXPosition, InterceptPopup::uiPadding });
     m_mainLayer->addChild(codeBlock);
 
     return codeBlock;
