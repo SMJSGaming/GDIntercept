@@ -4,7 +4,7 @@
 web::WebTask WebRequest_send(web::WebRequest* request, std::string_view method, std::string_view url) {
     bool isProxy = false;
 
-    for (ProxyHandler* proxy : ProxyHandler::getProxies()) {
+    for (ProxyHandler* proxy : ProxyHandler::getAliveProxies()) {
         if (proxy->getModRequest() == request) {
             isProxy = true;
 

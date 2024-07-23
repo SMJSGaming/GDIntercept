@@ -1,6 +1,6 @@
 {
   "geode": "3.3.0",
-  "version": "v0.4.0-alpha.4",
+  "version": "v0.4.1-alpha.4",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "api": {

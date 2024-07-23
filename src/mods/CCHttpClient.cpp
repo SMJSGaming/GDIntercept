@@ -3,7 +3,7 @@
 void ModCCHttpClient::send(CCHttpRequest* request) {
     bool isProxy = false;
 
-    for (ProxyHandler* proxy : ProxyHandler::getProxies()) {
+    for (ProxyHandler* proxy : ProxyHandler::getAliveProxies()) {
         if (proxy->getCocosRequest() == request) {
             isProxy = true;
 

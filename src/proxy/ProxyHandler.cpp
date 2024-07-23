@@ -1,5 +1,7 @@
 #include "ProxyHandler.hpp"
 
+std::deque<ProxyHandler*> proxy::ProxyHandler::aliveProxies;
+
 std::deque<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
 
 std::vector<ProxyHandler*> proxy::ProxyHandler::pausedProxies;
@@ -25,6 +27,10 @@ ProxyHandler* ProxyHandler::create(web::WebRequest* request, const std::string& 
 
 std::deque<ProxyHandler*> ProxyHandler::getProxies() {
     return ProxyHandler::cachedProxies;
+}
+
+std::deque<ProxyHandler*> ProxyHandler::getAliveProxies() {
+    return ProxyHandler::aliveProxies;
 }
 
 std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
@@ -100,6 +106,7 @@ void ProxyHandler::resumeAll() {
 
 void ProxyHandler::registerProxy(ProxyHandler* proxy) {
     ProxyHandler::cachedProxies.push_front(proxy);
+    ProxyHandler::aliveProxies.push_back(proxy);
 
     if (proxy->getInfo()->isPaused()) {
         ProxyHandler::pausedProxies.push_back(proxy);
@@ -181,7 +188,11 @@ m_originalProxy(nullptr) {
 }
 
 ProxyHandler::~ProxyHandler() {
-    delete m_cocosRequest;
+    ProxyHandler::aliveProxies.erase(std::find(ProxyHandler::aliveProxies.begin(), ProxyHandler::aliveProxies.end(), this));
+
+    if (m_cocosRequest) {
+        delete m_cocosRequest;
+    }
 
     if (m_modRequest) {
         delete m_modRequest;
@@ -200,7 +211,7 @@ void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* respons
 void ProxyHandler::onModResponse(web::WebResponse* response) {
     m_info->m_response = HttpInfo::Response(&m_info->m_request, response);
 
-    this->onResponse();    
+    this->onResponse();
 }
 
 void ProxyHandler::onResponse() {

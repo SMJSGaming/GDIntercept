@@ -98,6 +98,8 @@ void ControlMenu::onSend(CCObject* sender) {
     const std::string body = original.getBody();
     web::WebRequest request;
 
+    m_settings = nullptr;
+
     if (method == "POST" || body.size()) {
         request.bodyString(original.getBody());
     }

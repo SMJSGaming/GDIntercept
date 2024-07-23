@@ -1,5 +1,10 @@
 # GDIntercept Changelog
 
+## v0.4.1-alpha.4 (2024-07-23) - Pause/Resume Safety Update
+
+- Added checks to prevent pause/resume from accidentally triggering a recursive loop
+- Fixed settings overlapping the send button once closed
+
 ## v0.4.0-alpha.4 (2024-07-22) - Optimization Update
 
 - Added node culling to only show the visible nodes
