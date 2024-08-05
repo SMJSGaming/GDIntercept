@@ -147,7 +147,7 @@ json proxy::converters::RobTopToJson::ObjParser::parseEntry(const std::string& s
 
             object[key] = getPrimitiveJsonType(key, parts.at(i));
         } else if (i % 2 == 0) {
-            object[lastKey = parts.at(i)] = json();
+            object[lastKey = parts.at(i)] = json("");
         } else {
             object[lastKey] = getPrimitiveJsonType(lastKey, parts.at(i));
         }
@@ -162,7 +162,7 @@ std::string proxy::converters::RobTopToJson::ObjParser::toRaw(const json& json) 
     if (m_entryDelimiter.empty()) {
         stream << toRawEntry(json);
     } else {
-        for (const basic_json<>& entry : json) {
+        for (const auto& entry : json) {
             if (stream.tellp() != 0) {
                 stream << m_entryDelimiter;
             }
@@ -226,7 +226,7 @@ std::string proxy::converters::RobTopToJson::Parser::toRaw(const json& json) con
     if (m_metadata.empty()) {
         return ObjParser::toRaw(json);
     } else {
-        const basic_json<>& content = json.at("content");
+        const auto& content = json.at("content");
         std::stringstream stream;
 
         stream << ObjParser::toRaw(content);

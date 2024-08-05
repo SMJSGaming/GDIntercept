@@ -1,4 +1,4 @@
-# GDIntercept ![hi alk](smjs.gdintercept/normal1.png)
+# GDIntercept ![hi alk](smjs.gdintercept/normal.png)
 
 A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X HttpClient.
 

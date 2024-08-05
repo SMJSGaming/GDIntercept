@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.5.2-alpha.5 (2024-08-05) - Alpha.5 Hotfix 2
+
+- Replaced nulls with empty strings in the form and Robtop conversions to prevent incorrect to raw conversions
+
 ## v0.5.1-alpha.5 (2024-08-05) - Alpha.5 Hotfix
 
 - Fixed a bug where certain query strings may cause crashes
