@@ -31,12 +31,11 @@ std::string proxy::converters::FormToJson::convert(const std::string& path, cons
 
     while (std::getline(stream, section, '&')) {
         const size_t equalPos = section.find('=');
+        const std::string key = section.substr(0, equalPos);
 
         if (equalPos == std::string::npos) {
-            return json();
+            object[key] = json();
         } else {
-            const std::string key(section.substr(0, equalPos));
-
             object[key] = getPrimitiveJsonType(key, section.substr(equalPos + 1));
         }
     }
