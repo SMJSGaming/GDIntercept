@@ -1,6 +1,10 @@
 # GDIntercept Changelog
 
-## v0.5.0-alpha.5 (2024-07-25) - Badges Update
+## v0.5.1-alpha.5 (2024-08-05) - Alpha.5 Hotfix
+
+- Fixed a bug where certain query strings may cause crashes
+
+## v0.5.0-alpha.5 (2024-08-05) - Badges Update
 
 - Added badges to the request list
 - Added several API changes for better conversion support and repeat detection
