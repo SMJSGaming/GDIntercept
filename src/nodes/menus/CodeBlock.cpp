@@ -1,6 +1,6 @@
 #include "CodeBlock.hpp"
 
-std::vector<std::pair<char, SEL_MenuHandler>> CodeBlock::dataTypes({
+LookupTable<char, SEL_MenuHandler> CodeBlock::dataTypes({
     { 'B', menu_selector(CodeBlock::onBody) },
     { 'Q', menu_selector(CodeBlock::onQuery) },
     { 'H', menu_selector(CodeBlock::onHeaders) },
@@ -9,7 +9,7 @@ std::vector<std::pair<char, SEL_MenuHandler>> CodeBlock::dataTypes({
 
 size_t CodeBlock::buttonCount = CodeBlock::dataTypes.size();
 
-char CodeBlock::currentDataType = CodeBlock::dataTypes.at(0).first;
+char CodeBlock::currentDataType = 'B';
 
 CodeBlock* CodeBlock::create(const CCSize& size, const CCSize& buttonBarSize) {
     CodeBlock* instance = new CodeBlock();
@@ -81,8 +81,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
     this->setNode(CullingList::create(this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2));
     this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
 
-    for (size_t i = 0; i < buttonCount; i++) {
-        const auto& [key, selector] = CodeBlock::dataTypes.at(i);
+    for (const auto& [key, selector] : CodeBlock::dataTypes) {
         std::string keyStr(1, key);
         CCLabelBMFont* label = CCLabelBMFont::create(keyStr.c_str(), "consola.fnt"_spr);
 
@@ -91,7 +90,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
         label->setAnchorPoint(CENTER);
         label->setColor(ThemeStyle::getTheme().lineNum);
         label->setPosition(ccp(buttonBarSize.width / buttonCount, buttonBarSize.height) / 2);
-        m_buttons.insert(key, label);
+        m_buttons.insert({ key, label });
 
         cocos::getChild<CCSprite>(label, 0)->setPositionY(buttonBarSize.height / 2);
     }

@@ -18,11 +18,11 @@ public:
     void updateInfo(const HttpInfo* info);
     void setCode(const HttpInfo::HttpContent& code);
 private:
-    static std::vector<std::pair<char, SEL_MenuHandler>> dataTypes;
+    static LookupTable<char, SEL_MenuHandler> dataTypes;
     static char currentDataType;
 
     const HttpInfo* m_info;
-    LookupTable<char, CCLabelBMFont*> m_buttons;
+    std::unordered_map<char, CCLabelBMFont*> m_buttons;
     std::string m_code;
 
     bool init(const CCSize& size, const CCSize& buttonBarSize);
