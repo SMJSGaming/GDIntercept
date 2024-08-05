@@ -91,7 +91,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
         label->setAnchorPoint(CENTER);
         label->setColor(ThemeStyle::getTheme().lineNum);
         label->setPosition(ccp(buttonBarSize.width / buttonCount, buttonBarSize.height) / 2);
-        m_buttons.insert({ key, label });
+        m_buttons.insert(key, label);
 
         cocos::getChild<CCSprite>(label, 0)->setPositionY(buttonBarSize.height / 2);
     }

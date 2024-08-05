@@ -7,13 +7,13 @@ using namespace proxy::prelude;
 
 static size_t globalIndexCounter = 1;
 
-const std::unordered_map<ContentType, proxy::converters::Converter*> proxy::HttpInfo::converters = {
+const LookupTable<ContentType, proxy::converters::Converter*> proxy::HttpInfo::converters({
     { ContentType::XML, new XmlToXml() },
     { ContentType::JSON, new JsonToJson() },
     { ContentType::ROBTOP, new RobTopToJson() },
     { ContentType::FORM, new FormToJson() },
     { ContentType::BINARY, new RawToBinary() }
-};
+});
 
 proxy::HttpInfo::HttpContent proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original) {
     if (HttpInfo::converters.contains(originalContentType)) {

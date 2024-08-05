@@ -4,6 +4,7 @@
 #include <Geode/utils/web.hpp>
 #include "../lib/json.hpp"
 #include "Enums.hpp"
+#include "LookupTable.hpp"
 #include "converters/Converter.hpp"
 #include "converters/XmlToXml.hpp"
 #include "converters/FormToJson.hpp"
@@ -93,7 +94,7 @@ namespace proxy {
         bool isRepeat() const;
         bool responseReceived() const;
     private:
-        static const std::unordered_map<enums::ContentType, converters::Converter*> converters;
+        static const LookupTable<enums::ContentType, converters::Converter*> converters;
 
         static HttpContent getContent(const bool raw, const enums::ContentType originalContentType, const std::string& path, const std::string& original);
         static enums::ContentType determineContentType(const std::string& path, const bool isBody, const std::string& content);

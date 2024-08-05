@@ -22,7 +22,7 @@ private:
     static char currentDataType;
 
     const HttpInfo* m_info;
-    std::unordered_map<char, CCLabelBMFont*> m_buttons;
+    LookupTable<char, CCLabelBMFont*> m_buttons;
     std::string m_code;
 
     bool init(const CCSize& size, const CCSize& buttonBarSize);
