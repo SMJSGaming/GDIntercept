@@ -15,6 +15,7 @@ public:
     static void scene();
 
     void reload();
+    void softReload();
 protected:
     bool setup() override;
     void onClose(CCObject* obj) override;
@@ -22,9 +23,9 @@ private:
     static CCSize popupPadding;
     static float uiPadding;
     static float captureCellHeight;
+    static float captureCellBadgeHeight;
     static float infoRowHeight;
     static float codeBlockButtonHeight;
-
 
     float m_captureCellWidth;
     float m_infoWidth;
@@ -42,5 +43,6 @@ private:
     CodeBlock* setupCodeBlock();
     float getPageHeight();
     float getComponentYPosition(float offset, float itemHeight);
+    void postReload();
     void onSettings(CCObject* obj);
 };

@@ -4,16 +4,11 @@
 #include "HttpInfo.hpp"
 
 namespace proxy {
-    enum OriginFilter {
-        GD,
-        GD_CDN,
-        ROBTOP_GAMES,
-        NEWGROUNDS,
-        GEODE,
-        LOCALHOST,
-        OTHER,
-        ALL
-    };
+    namespace prelude {
+        using namespace proxy;
+        using namespace proxy::enums;
+        using namespace proxy::converters;
+    }
 
     class ProxyEvent : public geode::Event {
     public:
@@ -55,7 +50,7 @@ namespace proxy {
                 (m_urlParts.empty() || std::any_of(m_urlParts.begin(), m_urlParts.end(), [raw](std::string part) {
                     return raw.find(part) != std::string::npos;
                 })) &&
-                (m_origin == ALL || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))
+                (m_origin == enums::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))
             ) {
                 return callback(event);
             } else {
@@ -63,28 +58,28 @@ namespace proxy {
             }
         }
     protected:
-        OriginFilter m_origin;
+        enums::OriginFilter m_origin;
         std::vector<std::string> m_urlParts;
 
-        ProxyFilter(const OriginFilter origin = ALL) : m_origin(origin) { };
-        ProxyFilter(const std::vector<std::string>& urlParts) : m_origin(ALL), m_urlParts(urlParts) { };
-        ProxyFilter(cocos2d::CCNode* target, const OriginFilter origin = ALL) : m_origin(origin) { };
-        ProxyFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts) : m_origin(ALL), m_urlParts(urlParts) { };
+        ProxyFilter(const enums::OriginFilter origin = enums::ALL_FILTER) : m_origin(origin) { };
+        ProxyFilter(const std::vector<std::string>& urlParts) : m_origin(enums::ALL_FILTER), m_urlParts(urlParts) { };
+        ProxyFilter(cocos2d::CCNode* target, const enums::OriginFilter origin = enums::ALL_FILTER) : m_origin(origin) { };
+        ProxyFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts) : m_origin(enums::ALL_FILTER), m_urlParts(urlParts) { };
     };
 
     class RequestFilter : public ProxyFilter<RequestEvent> {
     public:
-        RequestFilter(const OriginFilter origin = ALL);
+        RequestFilter(const enums::OriginFilter origin = enums::ALL_FILTER);
         RequestFilter(const std::vector<std::string>& urlParts);
-        RequestFilter(cocos2d::CCNode* target, const OriginFilter origin = ALL);
+        RequestFilter(cocos2d::CCNode* target, const enums::OriginFilter origin = enums::ALL_FILTER);
         RequestFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts);
     };
 
     class ResponseFilter : public ProxyFilter<ResponseEvent> {
     public:
-        ResponseFilter(const OriginFilter origin = ALL);
+        ResponseFilter(const enums::OriginFilter origin = enums::ALL_FILTER);
         ResponseFilter(const std::vector<std::string>& urlParts);
-        ResponseFilter(cocos2d::CCNode* target, const OriginFilter origin = ALL);
+        ResponseFilter(cocos2d::CCNode* target, const enums::OriginFilter origin = enums::ALL_FILTER);
         ResponseFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts);
     };
 }

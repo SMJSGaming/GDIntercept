@@ -20,7 +20,7 @@ bool proxy::converters::isNumber(const std::string& str) {
 
     const size_t decimalPos = str.find('.');
 
-    return isInt(str.substr(0, decimalPos)) && (
+    return converters::isInt(str.substr(0, decimalPos)) && (
         decimalPos == std::string::npos ||
         str.substr(decimalPos + 1).find_first_not_of("0123456789") == std::string::npos
     );
@@ -60,29 +60,42 @@ bool proxy::converters::isString(const std::string& str) {
     }
 }
 
-bool proxy::converters::isJson(const std::string& str) {
-    return str.starts_with('{') ||
-        str.starts_with('[') ||
-        isNumber(str) ||
-        isString(str) ||
-        isBool(str) ||
-        isNull(str);
+bool proxy::converters::shouldSanitize(const std::string& key) {
+    static const std::vector<std::string> sensitiveKeys = {
+        "password",
+        "pass",
+        "passwd",
+        "pwd",
+        "token",
+        "tkn",
+        "sID",
+        "gjp",
+        "gjp2"
+    };
+
+    return Mod::get()->getSettingValue<bool>("censor-data") && std::find(sensitiveKeys.begin(), sensitiveKeys.end(), key) != sensitiveKeys.end();
+}
+
+std::string proxy::converters::safeDump(const nlohmann::json& json, const size_t indent, const bool quoteless) {
+    if (quoteless && json.is_string()) {
+        return json.get<std::string>();
+    } else {
+        return json.dump(indent, ' ', true, json::error_handler_t::replace);
+    }
 }
 
 nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string& key, const std::string& str) {
-    static const std::vector<std::string> sensitiveKeys({ "password", "pass", "passwd", "pwd", "token", "tkn", "sID", "gjp", "gjp2" });
-
-    if (Mod::get()->getSettingValue<bool>("censor-data") && std::find(sensitiveKeys.begin(), sensitiveKeys.end(), key) != sensitiveKeys.end()) {
+    if (converters::shouldSanitize(key)) {
         return json("********");
-    } else if (isNull(str)) {
+    } else if (converters::isNull(str)) {
         return json();
-    } else if (isBool(str)) {
+    } else if (converters::isBool(str)) {
         return json(str == "true");
-    } else if (isInt(str)) {
+    } else if (converters::isInt(str)) {
         return json(std::stoll(str));
-    } else if (isNumber(str)) {
+    } else if (converters::isNumber(str)) {
         return json(std::stold(str));
-    } else if (isString(str)) {
+    } else if (converters::isString(str)) {
         return json(str.substr(1, str.size() - 2));
     } else {
         return json(str);

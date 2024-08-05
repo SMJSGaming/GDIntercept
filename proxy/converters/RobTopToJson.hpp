@@ -3,19 +3,17 @@
 #include "Converter.hpp"
 
 namespace proxy::converters {
-    class RobTopToJson : public Converter<nlohmann::json> {
+    class RobTopToJson : public Converter {
     public:
-        bool canConvert(const std::string& path, const std::string& original) override;
-        nlohmann::json convert(const std::string& path, const std::string& original) override;
+        enums::ContentType resultContentType() const override;
+        bool needsSanitization() const override;
+        bool canConvert(const std::string& path, const bool isBody, const std::string& original) const override;
+        std::string convert(const std::string& path, const std::string& original) const override;
+        std::string toRaw(const std::string& path, const std::string& original) const override;
     private:
         enum ObjectType {
             OBJECT,
             ARRAY
-        };
-
-        enum SeparatorType {
-            KEY_VALUE,
-            TUPLE
         };
 
         // The only reason why const char* is involved here is because std::string basically sees everything as a string ctor so overloading with it was almost impossible
@@ -24,9 +22,9 @@ namespace proxy::converters {
             ObjParser(const char* delimiter, const char* entryDelimiter = "");
             ObjParser(const std::vector<std::string>& tupleKeys, const char* delimiter = "", const char* entryDelimiter = "");
             virtual nlohmann::json parse(const std::string& str) const;
+            virtual std::string toRaw(const nlohmann::json& json) const;
         private:
             ObjectType m_bodyType;
-            SeparatorType m_separatorType;
             std::string m_delimiter;
             std::string m_entryDelimiter;
             std::vector<std::string> m_tupleKeys;
@@ -34,6 +32,7 @@ namespace proxy::converters {
             static std::vector<std::string> split(const std::string& str, const std::string& delimiter);
 
             nlohmann::json parseEntry(const std::string& str) const;
+            std::string toRawEntry(const nlohmann::json& json) const;
         };
 
         class Parser : public ObjParser {
@@ -43,6 +42,7 @@ namespace proxy::converters {
             Parser(const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});
             Parser(const std::vector<std::string>& tupleKeys, const char* delimiter, const char* entryDelimiter, const std::vector<std::tuple<std::string, ObjParser>>& metadataKeys = {});
             nlohmann::json parse(const std::string& str) const override;
+            std::string toRaw(const nlohmann::json& json) const override;
         private:
             std::vector<std::tuple<std::string, ObjParser>> m_metadata;
         };

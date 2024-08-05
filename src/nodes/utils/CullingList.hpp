@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include.hpp"
-#include "cells/CullingCell.hpp"
+#include "../../include.hpp"
+#include "../cells/CullingCell.hpp"
 
 class CullingList : public CCLayerColor, public TableViewDelegate, public TableViewDataSource {
 public:

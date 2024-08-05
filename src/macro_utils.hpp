@@ -4,7 +4,6 @@
 #define ESCAPE_WHEN(expr, ret) if (expr) return ret
 #define CONTINUE_WHEN(expr) if (expr) continue
 #define BREAK_WHEN(expr) if (expr) break
-#define CASE_BREAK(expr) expr; break
 
 #define __GETTER(type, name, capital_name) type get##capital_name() const { return m_##name; }
 #define __SETTER(type, name, capital_name) void set##capital_name(type name) { m_##name = name; }

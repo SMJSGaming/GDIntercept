@@ -5,12 +5,12 @@
 
 class CaptureList : public Border {
 public:
-    static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo);
+    static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(const HttpInfo*)>& switchInfo);
 private:
     static size_t active;
 
     CCArrayExt<CaptureCell*> m_cells;
 
-    bool init(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo);
+    bool init(const CCSize& size, const float cellHeight, const std::function<void(const HttpInfo*)>& switchInfo);
     void tabCell(const bool forward);
 };

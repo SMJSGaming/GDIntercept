@@ -3,7 +3,7 @@
 #include "Converter.hpp"
 
 namespace proxy::converters {
-    class FormToJson : public Converter {
+    class XmlToXml : public Converter {
     public:
         enums::ContentType resultContentType() const override;
         bool needsSanitization() const override;

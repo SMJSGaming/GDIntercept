@@ -1,5 +1,5 @@
 {
-  "geode": "3.3.0",
+  "geode": "3.4.0",
   "version": "v0.4.2-alpha.4",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
@@ -9,7 +9,7 @@
     ]
   },
   "developers": [
-    "SMJSGaming",
+    "SMJS",
     "RobTop"
   ],
   "description": "A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X or Geode web clients.",
@@ -108,6 +108,18 @@
       "description": "Displays data in its raw state without any manipulation of the text besides capping the amount of rendered characters.",
       "type": "bool",
       "default": false
+    },
+    "hide-badges": {
+      "name": "Hide Badges",
+      "description": "Hides the badge icons in the request list.",
+      "type": "bool",
+      "default": false
+    },
+    "hide-copy-buttons": {
+      "name": "Hide Copy Buttons",
+      "description": "Hides the copy buttons in the code block and info block.",
+      "type": "bool",
+      "default": true
     },
     "log-requests": {
       "name": "Log Requests",

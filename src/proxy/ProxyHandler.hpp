@@ -6,10 +6,12 @@
 
 using namespace nlohmann;
 using namespace geode::prelude;
+using namespace proxy::prelude;
 
 namespace proxy {
     class ProxyHandler : public CCObject {
     public:
+        static std::string getCopyHandshake();
         static std::deque<ProxyHandler*> getProxies();
         static std::deque<ProxyHandler*> getFilteredProxies();
         static std::deque<ProxyHandler*> getAliveProxies();
@@ -37,5 +39,6 @@ namespace proxy {
         void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);
         void onModResponse(web::WebResponse* response);
         void onResponse();
+        web::WebTask::Cancel onCancel();
     };
 }

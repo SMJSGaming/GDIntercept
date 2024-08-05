@@ -124,7 +124,7 @@
 
 $execute {
     new EventListener([=](const RequestEvent* event) {
-        OPT(InterceptPopup::get())->reload();
+        OPT(InterceptPopup::get())->softReload();
 
         if (Mod::get()->getSettingValue<bool>("log-requests")) {
             const HttpInfo::Request request = event->getRequest();
@@ -144,6 +144,12 @@ $execute {
         return ListenerResult::Propagate;
     }, RequestFilter());
 
+    new EventListener([=](const ResponseEvent* event) {
+        OPT(InterceptPopup::get())->softReload();
+
+        return ListenerResult::Propagate;
+    }, ResponseFilter());
+
     listenForSettingChanges("cache-limit", +[](const int64_t value) {
         ProxyHandler::setCacheLimit(value);
 
@@ -157,6 +163,9 @@ $execute {
     });
 
     listenForAllSettingChanges(+[](SettingValue* event) {
+        const static std::vector<std::string> softList = {
+            "hide-badges"
+        };
         const static std::vector<std::string> blacklist = {
             "cache-limit",
             "pause-requests",
@@ -164,7 +173,11 @@ $execute {
         };
 
         if (std::find(blacklist.begin(), blacklist.end(), event->getKey()) == blacklist.end()) {
-            OPT(InterceptPopup::get())->reload();
+            if (std::find(softList.begin(), softList.end(), event->getKey()) != softList.end()) {
+                OPT(InterceptPopup::get())->softReload();
+            } else {
+                OPT(InterceptPopup::get())->reload();
+            }
         }
     });
 }

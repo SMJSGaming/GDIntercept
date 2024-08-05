@@ -15,8 +15,6 @@ TracklessScrollbar* TracklessScrollbar::create(const CCSize& size, CCScrollLayer
 }
 
 bool TracklessScrollbar::init(const CCSize& size, CCScrollLayerExt* scrollLayer) {
-    this->m_pScheduler->scheduleSelector(schedule_selector(TracklessScrollbar::update), this, 0, false);
-
     if (!Scrollbar::init(scrollLayer)) {
         return false;
     }
@@ -28,6 +26,7 @@ bool TracklessScrollbar::init(const CCSize& size, CCScrollLayerExt* scrollLayer)
     m_thumb->setColor(ThemeStyle::getTheme().lineNum);
     m_thumb->setAnchorPoint(TOP_LEFT);
     this->setContentSize({ size.width, size.height });
+    this->scheduleUpdate();
 
     return true;
 }

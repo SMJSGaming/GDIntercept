@@ -1,4 +1,4 @@
-# GDIntercept
+# GDIntercept ![hi alk](smjs.gdintercept/normal1.png)
 
 A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X HttpClient.
 
@@ -39,10 +39,14 @@ Some minor request manipulation features have been re-enabled. This version also
 
 This version significantly improves the performance of the mod and removes as much RAM usage as possible. The exposed API path has also been fixed.
 
+## ALPHA.5
+
+This version contains a lot of reworks in the background which are needed for the final release. The only thing remaining is the input support for the code block and the final stage of the official penetration test.
+
 ## Credits
 
 - [RobTop](user:71) - Some UI tips, providing source code and help with determining the sensitive data keys.
 - [Alphalaneous](https://github.com/Alphalaneous) - Providing the scaled border fix.
 - [GD Endy](user:5115808) - Helping out with sprite scaling issues.
 - [HJfod](https://github.com/HJfod) - Helping out with issues and geode specific quirks.
-- [Justin](https://github.com/hiimjustin000) - Finding the cause of the Android crashes.
+- [Justin](https://github.com/hiimjustin000) - Finding the cause of the Android crashes and adding symbols to the release build.

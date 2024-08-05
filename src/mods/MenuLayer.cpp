@@ -8,15 +8,16 @@ bool ModMenuLayer::init() {
     CCSprite* logo = CCSprite::create("GDI-round.png"_spr);
 
     logo->setScale(0.4f);
-    logo->setID("blame-overcharged-menu"_spr);
 
     CCNode* closeMenu = this->getChildByID("close-menu");
+    CCMenuItemSpriteExtra* menuItem = CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick));
 
     if (!closeMenu) {
         closeMenu = this->getChildByID("top-right-menu");
     }
 
-    closeMenu->addChild(CCMenuItemSpriteExtra::create(logo, this, menu_selector(ModMenuLayer::onLogoClick)));
+    menuItem->setID("GDI"_spr);
+    closeMenu->addChild(menuItem);
     closeMenu->updateLayout();
 
     return true;

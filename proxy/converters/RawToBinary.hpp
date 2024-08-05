@@ -3,7 +3,8 @@
 #include "Converter.hpp"
 
 namespace proxy::converters {
-    class FormToJson : public Converter {
+    // What can I say? I like it raw
+    class RawToBinary : public Converter {
     public:
         enums::ContentType resultContentType() const override;
         bool needsSanitization() const override;

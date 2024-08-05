@@ -1,56 +1,46 @@
+#include "../../proxy/Proxy.hpp"
 #include "../../proxy/HttpInfo.hpp"
 
 using namespace nlohmann;
 using namespace geode::prelude;
+using namespace proxy::prelude;
 
 static size_t globalIndexCounter = 1;
 
-proxy::converters::FormToJson proxy::HttpInfo::formToJson;
-
-proxy::converters::RobTopToJson proxy::HttpInfo::robtopToJson;
-
-proxy::converters::BinaryToRaw proxy::HttpInfo::binaryToRaw;
+const std::unordered_map<ContentType, proxy::converters::Converter*> proxy::HttpInfo::converters = {
+    { ContentType::XML, new XmlToXml() },
+    { ContentType::JSON, new JsonToJson() },
+    { ContentType::ROBTOP, new RobTopToJson() },
+    { ContentType::FORM, new FormToJson() },
+    { ContentType::BINARY, new RawToBinary() }
+};
 
 proxy::HttpInfo::HttpContent proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original) {
-    if (raw) {
-        return { originalContentType, original };
-    } else switch (originalContentType) {
-        case ContentType::JSON: return {
-            ContentType::JSON,
-            json::parse(original).dump(2)
-        };
-        case ContentType::FORM: return {
-            ContentType::JSON,
-            HttpInfo::formToJson.convert(path, original).dump(2)
-        };
-        case ContentType::ROBTOP: return {
-            ContentType::JSON,
-            HttpInfo::robtopToJson.convert(path, original).dump(2)
-        };
-        case ContentType::BINARY: return {
-            ContentType::BINARY,
-            HttpInfo::binaryToRaw.convert(path, original)
-        };
-        default: return { originalContentType, original };
+    if (HttpInfo::converters.contains(originalContentType)) {
+        const converters::Converter* converter = HttpInfo::converters.at(originalContentType);
+
+        if (!raw) {
+            return { converter->resultContentType(), converter->convert(path, original) };
+        } else if (converter->needsSanitization()) {
+            return { originalContentType, converter->toRaw(path, converter->convert(path, original)) };
+        }
     }
+
+    return { originalContentType, original };
 }
 
-proxy::HttpInfo::ContentType proxy::HttpInfo::determineContentType(const std::string& path, const std::string& content, const bool isBody) {
+ContentType proxy::HttpInfo::determineContentType(const std::string& path, const bool isBody, const std::string& content) {
     if (content.empty()) {
         return ContentType::UNKNOWN_CONTENT;
-    } else if (HttpInfo::binaryToRaw.canConvert(path, content)) {
-        return ContentType::BINARY;
-    } else if (converters::isJson(content)) {
-        return ContentType::JSON;
-    } else if (content.starts_with('<')) {
-        return ContentType::XML;
-    } else if (!isBody && HttpInfo::robtopToJson.canConvert(path, content)) {
-        return ContentType::ROBTOP;
-    } else if (HttpInfo::formToJson.canConvert(path, content)) {
-        return ContentType::FORM;
-    } else {
-        return ContentType::UNKNOWN_CONTENT;
     }
+
+    for (const auto& [type, converter] : HttpInfo::converters) {
+        if (converter->canConvert(path, isBody, content)) {
+            return type;
+        }
+    }
+
+    return ContentType::UNKNOWN_CONTENT;
 }
 
 nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
@@ -90,23 +80,29 @@ bool proxy::HttpInfo::shouldPause() {
 }
 
 proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_id(globalIndexCounter++),
-m_paused(this->shouldPause()),
+m_state(this->shouldPause() ? State::PAUSED : State::IN_PROGRESS),
+m_repeat(false),
 m_request(request) { }
 
-proxy::HttpInfo::HttpInfo(web::WebRequest* request, const std::string& method, const std::string& url) : m_id(globalIndexCounter++),
-m_paused(this->shouldPause()),
+proxy::HttpInfo::HttpInfo(const bool repeat, web::WebRequest* request, const std::string& method, const std::string& url) : m_id(globalIndexCounter++),
+m_state(this->shouldPause() ? State::PAUSED : State::IN_PROGRESS),
+m_repeat(repeat),
 m_request(request, method, url) { }
 
 bool proxy::HttpInfo::isPaused() const {
-    return m_paused;
+    return m_state == State::PAUSED;
+}
+
+bool proxy::HttpInfo::isRepeat() const {
+    return m_repeat;
 }
 
 bool proxy::HttpInfo::responseReceived() const {
-    return m_response.received();
+    return m_state == State::COMPLETED || m_state == State::FAULTY;
 }
 
 void proxy::HttpInfo::resume() {
-    m_paused = false;
+    m_state = State::IN_PROGRESS;
 }
 
 std::string proxy::HttpInfo::URL::stringifyMethod(const CCHttpRequest::HttpRequestType method) {
@@ -119,7 +115,7 @@ std::string proxy::HttpInfo::URL::stringifyMethod(const CCHttpRequest::HttpReque
     }
 }
 
-proxy::HttpInfo::Origin proxy::HttpInfo::URL::determineOrigin(const std::string& host) {
+Origin proxy::HttpInfo::URL::determineOrigin(const std::string& host) {
     #define isDomain(domain) host == std::string(domain) || host.ends_with("." + std::string(domain))
 
     if (isDomain("boomlings.com") || isDomain("geometrydash.com")) {
@@ -180,7 +176,7 @@ std::string proxy::HttpInfo::URL::stringifyProtocol() const {
 }
 
 std::string proxy::HttpInfo::URL::stringifyQuery() const {
-    return m_query.dump(2);
+    return converters::safeDump(m_query);
 }
 
 std::string proxy::HttpInfo::URL::getPortHost() const {
@@ -224,7 +220,7 @@ void proxy::HttpInfo::URL::parse() {
     }
 
     if (queryStart != std::string::npos) {
-        m_query = HttpInfo::formToJson.convert(m_path, m_original.substr(queryStart + 1));
+        m_query = json::parse(HttpInfo::converters.at(ContentType::FORM)->convert(m_path, m_original.substr(queryStart + 1)));
     }
 
     portStart = rawHost.find(':');
@@ -242,7 +238,7 @@ void proxy::HttpInfo::URL::parse() {
 proxy::HttpInfo::Request::Request(CCHttpRequest* request) : m_url(request), 
 m_headers(HttpInfo::parseCocosHeaders(request->getHeaders())),
 m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
-m_contentType(HttpInfo::determineContentType(m_url.getPath(), m_body, true)) { }
+m_contentType(HttpInfo::determineContentType(m_url.getPath(), true, m_body)) { }
 
 proxy::HttpInfo::Request::Request(web::WebRequest* request, const std::string& method, const std::string& url) : m_url(request, method, url),
 m_headers(json::object()) {
@@ -253,11 +249,11 @@ m_headers(json::object()) {
     }
 
     m_body = std::string(body.begin(), body.end());
-    m_contentType = HttpInfo::determineContentType(m_url.getPath(), m_body, true);
+    m_contentType = HttpInfo::determineContentType(m_url.getPath(), true, m_body);
 }
 
 std::string proxy::HttpInfo::Request::stringifyHeaders() const {
-    return m_headers.dump(2);
+    return converters::safeDump(m_headers);
 }
 
 proxy::HttpInfo::HttpContent proxy::HttpInfo::Request::getBodyContent(const bool raw) const {
@@ -273,7 +269,7 @@ m_statusCode(response->getResponseCode()) {
     gd::vector<char>* data = response->getResponseData();
 
     m_response = std::string(data->begin(), data->end());
-    m_contentType = HttpInfo::determineContentType(request->m_url.getPath(), m_response);
+    m_contentType = HttpInfo::determineContentType(request->m_url.getPath(), false, m_response);
 }
 
 proxy::HttpInfo::Response::Response(Request* request, web::WebResponse* response) : m_received(true),
@@ -281,14 +277,14 @@ m_request(request),
 m_headers(json::object()),
 m_statusCode(response->code()),
 m_response(response->string().unwrapOrDefault()),
-m_contentType(HttpInfo::determineContentType(request->m_url.getPath(), m_response)) {
+m_contentType(HttpInfo::determineContentType(request->m_url.getPath(), false, m_response)) {
     for (const std::string& key : response->headers()) {
         m_headers[key] = json(response->header(key).value_or(""));
     }
 }
 
 std::string proxy::HttpInfo::Response::stringifyHeaders() const {
-    return m_headers.dump(2);
+    return converters::safeDump(m_headers);
 }
 
 std::string proxy::HttpInfo::Response::stringifyStatusCode() const {

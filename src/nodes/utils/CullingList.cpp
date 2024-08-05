@@ -35,8 +35,7 @@ bool CullingList::init(const CCSize& size) {
     this->reloadData();
     this->moveToTop();
     this->addChild(m_view);
-
-    m_pScheduler->scheduleSelector(schedule_selector(CullingList::update), this, 0, false);
+    this->scheduleUpdate();
 
     return true;
 }
@@ -48,7 +47,9 @@ void CullingList::reloadData() {
     m_view->m_contentLayer->setContentHeight(m_cellHeight * m_cells.size());
     m_view->m_contentLayer->setPositionY(oldY);
 
-    m_view->m_disableMovement = this->shouldDisableMovement();
+    if ((m_view->m_disableMovement = this->shouldDisableMovement())) {
+        m_view->m_contentLayer->setContentHeight(m_view->getContentHeight());
+    }
 }
 
 void CullingList::moveToTop() {

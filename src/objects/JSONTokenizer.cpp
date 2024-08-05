@@ -77,19 +77,19 @@ bool JSONTokenizer::determineCharToken(const char character, const std::string& 
         bool accepted = true;
 
         switch (m_token) {
-            case STRING: CASE_BREAK(accepted = !previousWasAccepted || this->checkString(character, truncatedCode.size()));
-            case NUMBER: CASE_BREAK(if (character == ' ') {
+            case STRING: accepted = !previousWasAccepted || this->checkString(character, truncatedCode.size()); break;
+            case NUMBER: if (character == ' ') {
                 m_token = m_futureToken = TERMINATOR;
             } else if (!previousWasAccepted || (!isdigit(character) && (character != '.' || m_hasDecimal))) {
                 accepted = false;
             } else if (character == '.') {
                 m_hasDecimal = true;
                 accepted = truncatedCode.size() > 1;
-            });
-            case CONSTANT: CASE_BREAK(if (m_constantSize == ++m_constantCounter) {
+            } break;
+            case CONSTANT: if (m_constantSize == ++m_constantCounter) {
                 m_futureToken = TERMINATOR;
-            });
-            case UNKNOWN: CASE_BREAK({
+            } break;
+            case UNKNOWN: {
                 const bool startsWithFalse = truncatedCode.starts_with("false");
 
                 if (startsWithFalse || truncatedCode.starts_with("true") || truncatedCode.starts_with("null")) {
@@ -108,8 +108,8 @@ bool JSONTokenizer::determineCharToken(const char character, const std::string& 
                 } else {
                     accepted = character == ' ';
                 }
-            });
-            default: CASE_BREAK(accepted = false);
+            } break;
+            default: accepted = false; break;
         }
 
         if (accepted || m_openQuote != 0) {

@@ -2,7 +2,15 @@
 
 using namespace nlohmann;
 
-bool proxy::converters::FormToJson::canConvert(const std::string& path, const std::string& original) {
+proxy::enums::ContentType proxy::converters::FormToJson::resultContentType() const {
+    return enums::ContentType::JSON;
+}
+
+bool proxy::converters::FormToJson::needsSanitization() const {
+    return true;
+}
+
+bool proxy::converters::FormToJson::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
     std::stringstream stream(original);
     std::string section;
 
@@ -16,7 +24,7 @@ bool proxy::converters::FormToJson::canConvert(const std::string& path, const st
     return true;
 }
 
-nlohmann::json proxy::converters::FormToJson::convert(const std::string& path, const std::string& original) {
+std::string proxy::converters::FormToJson::convert(const std::string& path, const std::string& original) const {
     json object(json::object());
     std::stringstream stream(original);
     std::string section;
@@ -33,5 +41,20 @@ nlohmann::json proxy::converters::FormToJson::convert(const std::string& path, c
         }
     }
 
-    return object;
+    return converters::safeDump(object);
+}
+
+std::string proxy::converters::FormToJson::toRaw(const std::string& path, const std::string& original) const {
+    const json object = json::parse(original);
+    std::stringstream result;
+
+    for (const auto& [key, value] : object.items()) {
+        if (result.tellp() > 0) {
+            result << '&';
+        }
+
+        result << key << '=' << converters::safeDump(value, 0, true);
+    }
+
+    return result.str();
 }

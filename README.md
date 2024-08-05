@@ -39,6 +39,10 @@ Some minor request manipulation features have been re-enabled. This version also
 
 This version significantly improves the performance of the mod and removes as much RAM usage as possible. The exposed API path has also been fixed.
 
+## ALPHA.5
+
+This version contains a lot of reworks in the background which are needed for the final release. The only thing remaining is the input support for the code block and the final stage of the official penetration test.
+
 ## Credits
 
 - [RobTop](https://www.youtube.com/@RobTopGames) - Some UI tips, providing source code and help with determining the sensitive data keys.

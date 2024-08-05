@@ -6,6 +6,8 @@ float InterceptPopup::uiPadding = 2 + PADDING;
 
 float InterceptPopup::captureCellHeight = 20;
 
+float InterceptPopup::captureCellBadgeHeight = 10;
+
 float InterceptPopup::infoRowHeight = 65;
 
 float InterceptPopup::codeBlockButtonHeight = 15;
@@ -59,10 +61,17 @@ bool InterceptPopup::setup() {
     return true;
 }
 
-void InterceptPopup::reload() {
-    CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
-    const size_t sceneNodeCount = scene->getChildrenCount();
+void InterceptPopup::softReload() {
+    OPT(m_infoArea)->removeFromParentAndCleanup(true);
+    OPT(m_list)->removeFromParentAndCleanup(true);
 
+    m_infoArea = this->setupInfo();
+    m_list = this->setupList();
+
+    this->postReload();
+}
+
+void InterceptPopup::reload() {
     OPT(m_infoArea)->removeFromParentAndCleanup(true);
     OPT(m_controls)->removeFromParentAndCleanup(true);
     OPT(m_codeBlock)->removeFromParentAndCleanup(true);
@@ -73,10 +82,7 @@ void InterceptPopup::reload() {
     m_codeBlock = this->setupCodeBlock();
     m_list = this->setupList();
 
-    if (m_settings) {
-        m_settings->removeFromParentAndCleanup(true);
-        this->onSettings(nullptr);
-    }
+    this->postReload();
 }
 
 InfoArea* InterceptPopup::setupInfo() {
@@ -95,7 +101,9 @@ CaptureList* InterceptPopup::setupList() {
     CaptureList* list = CaptureList::create({
         m_captureCellWidth,
         this->getPageHeight()
-    }, InterceptPopup::captureCellHeight, [this](HttpInfo* info) {
+    }, InterceptPopup::captureCellHeight + InterceptPopup::captureCellBadgeHeight * !Mod::get()->getSettingValue<bool>("hide-badges"), [
+        this
+    ](const HttpInfo* info) {
         m_infoArea->updateInfo(info);
         m_controls->updateInfo(info);
         m_codeBlock->updateInfo(info);
@@ -114,7 +122,7 @@ ControlMenu* InterceptPopup::setupControls() {
     ControlMenu* controls = ControlMenu::create({
         m_size.width - xPosition - InterceptPopup::uiPadding,
         InterceptPopup::infoRowHeight
-    }, this->m_settings);
+    }, m_settings);
 
     controls->setPosition({ xPosition, this->getComponentYPosition(0, InterceptPopup::infoRowHeight) });
     m_mainLayer->addChild(controls);
@@ -145,8 +153,15 @@ float InterceptPopup::getComponentYPosition(float offset, float itemHeight) {
     return InterceptPopup::uiPadding + this->getPageHeight() - itemHeight - offset;
 }
 
+void InterceptPopup::postReload() {
+    if (m_settings) {
+        m_settings->removeFromParentAndCleanup(true);
+        this->onSettings(nullptr);
+    }
+}
+
 void InterceptPopup::onClose(CCObject* obj) {
-    this->removeFromParent();
+    this->removeFromParentAndCleanup(true);
 }
 
 void InterceptPopup::onSettings(CCObject* obj) {

@@ -1,5 +1,19 @@
 # GDIntercept Changelog
 
+## v0.5.0-alpha.5 (2024-07-25) - Badges Update
+
+- Added badges to the request list
+- Added several API changes for better conversion support and repeat detection
+- Added soft reloading support for minor state changes
+- Added tooltips
+- Added hovering support
+- Added a new setting to disable the new badge system
+- Added a copy button to the code block and info block
+- Added a new setting to disable the new copy button
+- Fixed thread safety for API events
+- Fixed a bug where the raw data would not censor sensitive data
+- Fixed crashes occurring when a non ASCII character was anywhere in the request
+
 ## v0.4.2-alpha.4 (2024-07-23) - UI Scaling Update
 
 - Added compatibility for different aspect ratios and resolution changes

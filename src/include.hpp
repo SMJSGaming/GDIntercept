@@ -16,6 +16,7 @@
 using namespace proxy;
 using namespace nlohmann;
 using namespace geode::prelude;
+using namespace proxy::prelude;
 
 #define PADDING 5.0f
 #define FULL_OPACITY 0xFF

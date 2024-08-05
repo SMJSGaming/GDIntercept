@@ -26,7 +26,7 @@ m_lineNumberWidth(lineNumberWidth) {
         m_code.contents.replace(index, 1, "  ");
     }
 
-    if (code.type == HttpInfo::JSON) {
+    if (code.type == ContentType::JSON) {
         m_tokens = tokenizer.parseLine(code.contents);
     }
 }
@@ -44,21 +44,18 @@ void CodeLineCell::initRender() {
 
         BREAK_WHEN(tokenOffset.offset >= labelLength);
 
-        if (tokenOffset.offset >= labelLength) break;
-
         for (size_t i = tokenOffset.offset; i < truncatedCode.size() && i < tokenOffset.offset + tokenOffset.length; i++) {
             CCSprite* character = cocos::getChild<CCSprite>(codeLabel, i);
 
             switch (tokenOffset.token) {
-                case JSONTokenizer::CORRUPT: CASE_BREAK(character->setColor(theme.error));
-                case JSONTokenizer::KEY: CASE_BREAK(character->setColor(theme.key));
-                case JSONTokenizer::STRING: CASE_BREAK(character->setColor(theme.string));
-                case JSONTokenizer::NUMBER: CASE_BREAK(character->setColor(theme.number));
-                case JSONTokenizer::CONSTANT: CASE_BREAK(character->setColor(theme.constant));
-                default: CASE_BREAK(character->setColor(theme.text));
+                case JSONTokenizer::CORRUPT: OPT(character)->setColor(theme.error); break;
+                case JSONTokenizer::KEY: OPT(character)->setColor(theme.key); break;
+                case JSONTokenizer::STRING: OPT(character)->setColor(theme.string); break;
+                case JSONTokenizer::NUMBER: OPT(character)->setColor(theme.number); break;
+                case JSONTokenizer::CONSTANT: OPT(character)->setColor(theme.constant); break;
+                default: OPT(character)->setColor(theme.text); break;
             }
         }
-
     }
 
     lineNumberLabel->setScale(theme.fontSize);

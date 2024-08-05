@@ -2,7 +2,7 @@
 
 size_t CaptureList::active = 0;
 
-CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
+CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(const HttpInfo*)>& switchInfo) {
     CaptureList* instance = new CaptureList();
 
     if (instance && instance->init(size, cellHeight, switchInfo)) {
@@ -16,7 +16,7 @@ CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, con
     }
 }
 
-bool CaptureList::init(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
+bool CaptureList::init(const CCSize& size, const float cellHeight, const std::function<void(const HttpInfo*)>& switchInfo) {
     #ifdef KEYBINDS_ENABLED
         this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
@@ -37,6 +37,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
 
     const CCSize listSize = size - 1;
     CCTouchDispatcher* dispatcher = CCTouchDispatcher::get();
+    std::deque<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
     bool activated = false;
 
     if (!Border::init(LIGHTER_BROWN_4B, size)) {
@@ -46,9 +47,9 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     this->setPaddingTop(1);
     this->setPaddingLeft(1);
 
-    for (ProxyHandler* proxy : ProxyHandler::getFilteredProxies()) {
-        HttpInfo* info = proxy->getInfo();
-        CaptureCell* capture = CaptureCell::create(info->getRequest().getURL(), {
+    for (size_t i = 0; i < proxies.size(); i++) {
+        const HttpInfo* info = proxies.at(i)->getInfo();
+        CaptureCell* capture = CaptureCell::create(i, info, {
             listSize.width,
             cellHeight
         }, [this, info, switchInfo](CaptureCell* cell) {

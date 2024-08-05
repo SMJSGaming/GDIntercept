@@ -6,12 +6,16 @@ std::deque<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
 
 std::vector<ProxyHandler*> proxy::ProxyHandler::pausedProxies;
 
+std::string ProxyHandler::getCopyHandshake() {
+    return fmt::format("<{}>", "copied"_spr);
+}
+
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
 
     request->retain();
     instance->retain();
-    RequestEvent(instance->getInfo()).post();
+    Loader::get()->queueInMainThread([instance]{ RequestEvent(instance->getInfo()).post(); });
 
     return instance;
 }
@@ -20,7 +24,7 @@ ProxyHandler* ProxyHandler::create(web::WebRequest* request, const std::string& 
     ProxyHandler* instance = new ProxyHandler(request, method, url);
 
     instance->retain();
-    RequestEvent(instance->getInfo()).post();
+    Loader::get()->queueInMainThread([instance]{ RequestEvent(instance->getInfo()).post(); });
 
     return instance;
 }
@@ -43,27 +47,27 @@ std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
 
     for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
         switch (proxy->m_info->getRequest().getURL().getOrigin()) {
-            case HttpInfo::Origin::GD: CASE_BREAK(if (filter == "Geometry Dash Server") {
+            case Origin::GD: if (filter == "Geometry Dash Server") {
                 proxies.push_back(proxy);
-            });
-            case HttpInfo::Origin::GD_CDN: CASE_BREAK(if (filter == "Geometry Dash CDN") {
+            } break;
+            case Origin::GD_CDN: if (filter == "Geometry Dash CDN") {
                 proxies.push_back(proxy);
-            });
-            case HttpInfo::Origin::ROBTOP_GAMES: CASE_BREAK(if (filter == "RobtopGames Server") {
+            } break;
+            case Origin::ROBTOP_GAMES: if (filter == "RobtopGames Server") {
                 proxies.push_back(proxy);
-            });
-            case HttpInfo::Origin::NEWGROUNDS: CASE_BREAK(if (filter == "Newgrounds CDN") {
+            } break;
+            case Origin::NEWGROUNDS: if (filter == "Newgrounds CDN") {
                 proxies.push_back(proxy);
-            });
-            case HttpInfo::Origin::GEODE: CASE_BREAK(if (filter == "Geode Server") {
+            } break;
+            case Origin::GEODE: if (filter == "Geode Server") {
                 proxies.push_back(proxy);
-            });
-            case HttpInfo::LOCALHOST: CASE_BREAK(if (filter == "Localhost") {
+            } break;
+            case LOCALHOST: if (filter == "Localhost") {
                 proxies.push_back(proxy);
-            });
-            case HttpInfo::Origin::OTHER: CASE_BREAK(if (filter == "Unknown Origin") {
+            } break;
+            case Origin::OTHER: if (filter == "Unknown Origin") {
                 proxies.push_back(proxy);
-            });
+            } break;
         }
     }
 
@@ -91,7 +95,7 @@ void ProxyHandler::resumeAll() {
 
     std::thread([paused]{
         for (ProxyHandler* proxy : paused) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
             proxy->getInfo()->resume();
 
@@ -143,18 +147,21 @@ m_cocosRequest(nullptr),
 m_info(nullptr),
 m_originalTarget(nullptr),
 m_originalProxy(nullptr) {
-    m_info = new HttpInfo(m_modRequest, method, url);
+    const std::string resendSignature = ProxyHandler::getCopyHandshake();
+    const bool isRepeat = m_modRequest->getHeaders().contains(resendSignature);
+
+    m_modRequest->removeHeader(resendSignature);
+
+    m_info = new HttpInfo(isRepeat, m_modRequest, method, url);
 
     ProxyHandler::registerProxy(this);
 
-    m_modTask = web::WebTask::run([this, method, url](auto progress, auto cancelled) -> web::WebTask::Result {
+    m_modTask = web::WebTask::run([this, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse* response = nullptr;
 
         while (m_info->isPaused()) {
             if (cancelled()) {
-                m_info->m_response.m_statusCode = -3;
-
-                return web::WebTask::Cancel();
+                return this->onCancel();
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -176,9 +183,8 @@ m_originalProxy(nullptr) {
 
         if (cancelled()) {
             task.cancel();
-            m_info->m_response.m_statusCode = -3;
-
-            return web::WebTask::Cancel();
+            
+            return this->onCancel();
         } else {
             this->onModResponse(response);
 
@@ -215,9 +221,22 @@ void ProxyHandler::onModResponse(web::WebResponse* response) {
 }
 
 void ProxyHandler::onResponse() {
-    ResponseEvent(m_info).post();
+    Loader::get()->queueInMainThread([this]{ ResponseEvent(m_info).post(); });
+
+    if (m_info->m_response.m_statusCode < 0) {
+        m_info->m_state = State::FAULTY;
+    } else {
+        m_info->m_state = State::COMPLETED;
+    }
 
     if (std::find(ProxyHandler::cachedProxies.begin(), ProxyHandler::cachedProxies.end(), this) == ProxyHandler::cachedProxies.end()) {
         delete this;
     }
+}
+
+web::WebTask::Cancel ProxyHandler::onCancel() {
+    m_info->m_response.m_statusCode = -3;
+    m_info->m_state = State::CANCELLED;
+
+    return web::WebTask::Cancel();
 }

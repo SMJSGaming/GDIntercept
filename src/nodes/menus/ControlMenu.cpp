@@ -79,7 +79,7 @@ bool ControlMenu::init(const CCSize& size) {
     return true;
 }
 
-void ControlMenu::updateInfo(HttpInfo* info) {
+void ControlMenu::updateInfo(const HttpInfo* info) {
     m_info = info;
 }
 
@@ -103,6 +103,8 @@ void ControlMenu::onSend(CCObject* sender) {
     if (method == "POST" || body.size()) {
         request.bodyString(original.getBody());
     }
+
+    request.header(ProxyHandler::getCopyHandshake(), "true");
 
     for (const auto& [name, value] : original.getHeaders().items()) {
         request.header(name, value.get<std::string>());

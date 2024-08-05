@@ -29,11 +29,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
     #ifdef KEYBINDS_ENABLED
         this->addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
             if (event->isDown()) {
-                TextAlertPopup* alert = TextAlertPopup::create("Code Copied", 0.5f, 0.6f, 150, "");
-
-                utils::clipboard::write(this->m_code);
-                alert->setPosition(this->getContentSize() / 2);
-                this->addChild(alert, 100);
+                this->onCopy();
             }
 
             return ListenerResult::Propagate;
@@ -73,6 +69,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
     #endif
 
     const size_t buttonCount = CodeBlock::dataTypes.size();
+    const float buttonOffset = size.width - PADDING * 1.5f;
     std::vector<CCMenuItemSpriteExtra*> buttons;
 
     if (!Border::init({ 0, 0, 0, FULL_OPACITY }, size)) {
@@ -82,7 +79,7 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
     this->setPaddingY(PADDING / 2);
     this->setPaddingRight(PADDING * 1.2f);
     this->setNode(CullingList::create(this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2));
-    this->setCode({ HttpInfo::UNKNOWN_CONTENT, "" });
+    this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
 
     for (size_t i = 0; i < buttonCount; i++) {
         const auto& [key, selector] = CodeBlock::dataTypes.at(i);
@@ -107,10 +104,23 @@ bool CodeBlock::init(const CCSize& size, const CCSize& buttonBarSize) {
 
     scrollbar->setAnchorPoint(BOTTOM_LEFT);
     scrollbar->setPosition({ this->getContentWidth() - PADDING, 1 });
-    buttonBar->setPosition({ size.width - PADDING * 1.5f, size.height - PADDING });
+    buttonBar->setPosition({ buttonOffset, size.height - PADDING });
     buttonBar->setAnchorPoint(TOP_RIGHT);
     this->addChild(buttonBar);
     this->addChild(scrollbar);
+
+    if (!Mod::get()->getSettingValue<bool>("hide-copy-buttons")) {
+        CopyButton* copyButton = CopyButton::create({ 15, 15 }, [this]() { this->onCopy(); });
+        CCMenu* copyMenu = CCMenu::createWithItem(copyButton);
+        const CCSize copyButtonSize = copyButton->getContentSize();
+
+        copyButton->setPosition(copyButtonSize / 2);
+        copyMenu->setAnchorPoint(BOTTOM_RIGHT);
+        copyMenu->setContentSize(copyButtonSize);
+        copyMenu->ignoreAnchorPointForPosition(false);
+        copyMenu->setPosition({ buttonOffset, PADDING });
+        this->addChild(copyMenu);
+    }
 
     return true;
 }
@@ -120,7 +130,7 @@ void CodeBlock::setCode(const HttpInfo::HttpContent& code) {
     CullingList* list = as<CullingList*>(this->getNode());
     const CCSize cellSize = { list->getContentWidth(), this->getCellHeight() };
     const float lineNumberWidth = this->getTrueFontSize().width * std::to_string(
-        std::count(code.contents.begin(), code.contents.end(), '\n')
+        std::count(code.contents.begin(), code.contents.end(), '\n') + 1
     ).size() + PADDING;
     std::stringstream stream(m_code = code.contents);
     std::vector<CullingCell*> cells;
@@ -149,15 +159,15 @@ float CodeBlock::getCellHeight() {
     return this->getTrueFontSize().height + theme.lineHeight;
 }
 
-void CodeBlock::updateInfo(HttpInfo* info) {
+void CodeBlock::updateInfo(const HttpInfo* info) {
     m_info = info;
 
     if (info) {
         switch (currentDataType) {
-            case 'B': CASE_BREAK(this->onBody(nullptr));
-            case 'Q': CASE_BREAK(this->onQuery(nullptr));
-            case 'H': CASE_BREAK(this->onHeaders(nullptr));
-            case 'R': CASE_BREAK(this->onResponse(nullptr));
+            case 'B': this->onBody(nullptr); break;
+            case 'Q': this->onQuery(nullptr); break;
+            case 'H': this->onHeaders(nullptr); break;
+            case 'R': this->onResponse(nullptr); break;
         }
     } else {
         this->updateDataTypeColor('-');
@@ -184,6 +194,14 @@ void CodeBlock::scroll(const float delta) {
     list->m_tableView->m_contentLayer->setPositionY(std::min(max, std::max(min, list->m_tableView->m_contentLayer->getPositionY() + delta)));
 }
 
+void CodeBlock::onCopy() {
+    TextAlertPopup* alert = TextAlertPopup::create("Code Copied", 0.5f, 0.6f, 150, "");
+
+    utils::clipboard::write(this->m_code);
+    alert->setPosition(this->getContentSize() / 2);
+    this->addChild(alert, 100);
+}
+
 void CodeBlock::onBody(CCObject* sender) {
     if (m_info) {
         this->setCode(m_info->getRequest().getBodyContent(Mod::get()->getSettingValue<bool>("raw-data")));
@@ -193,14 +211,14 @@ void CodeBlock::onBody(CCObject* sender) {
 
 void CodeBlock::onQuery(CCObject* sender) {
     if (m_info) {
-        this->setCode({ HttpInfo::JSON, m_info->getRequest().getURL().stringifyQuery() });
+        this->setCode({ ContentType::JSON, m_info->getRequest().getURL().stringifyQuery() });
         this->updateDataTypeColor('Q');
     }
 }
 
 void CodeBlock::onHeaders(CCObject* sender) {
     if (m_info) {
-        this->setCode({ HttpInfo::JSON, m_info->getRequest().stringifyHeaders() });
+        this->setCode({ ContentType::JSON, m_info->getRequest().stringifyHeaders() });
         this->updateDataTypeColor('H');
     }
 }
@@ -210,7 +228,7 @@ void CodeBlock::onResponse(CCObject* sender) {
         if (m_info->responseReceived()) {
             this->setCode(m_info->getResponse().getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
         } else {
-            this->setCode({ HttpInfo::UNKNOWN_CONTENT, m_info->getResponse().stringifyStatusCode() });
+            this->setCode({ ContentType::UNKNOWN_CONTENT, m_info->getResponse().stringifyStatusCode() });
         }
 
         this->updateDataTypeColor('R');
