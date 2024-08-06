@@ -1,6 +1,6 @@
 # GDIntercept Changelog
 
-## v0.5.3-alpha.5 (2024-08-06) - Alpha.5 Hotfix 4
+## v0.5.4-alpha.5 (2024-08-06) - Alpha.5 Hotfix 4
 
 - Moved some logic around to prevent accidentally deleting data before providing it to the events
 
