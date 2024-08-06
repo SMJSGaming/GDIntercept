@@ -36,6 +36,7 @@ Release Todo:
   ☐ Add a response header view
   ☐ Add inputs to the JSON code block
   ☐ Pen test all well known mods & GD
+  ☐ Fix the comment history response parser
 Nice To Haves:
   ☐ Custom theme support
   ☐ Add a way to save requests

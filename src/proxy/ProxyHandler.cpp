@@ -160,9 +160,7 @@ m_originalProxy(nullptr) {
         web::WebResponse* response = nullptr;
 
         while (m_info->isPaused()) {
-            if (cancelled()) {
-                return this->onCancel();
-            }
+            ESCAPE_WHEN(cancelled(), this->onCancel());
 
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
@@ -171,19 +169,15 @@ m_originalProxy(nullptr) {
 
         task.listen([&response](web::WebResponse* taskResponse) {
             response = new web::WebResponse(*taskResponse);
-        }, [progress](web::WebProgress* taskProgress) {
-            progress(*taskProgress);
+        }, [progress, cancelled](web::WebProgress* taskProgress) {
+            if (!cancelled()) progress(*taskProgress);
         });
 
-        while (!response) {
-            BREAK_WHEN(cancelled());
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
-        }
+        while (!response && !cancelled()) std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
         if (cancelled()) {
             task.cancel();
-            
+
             return this->onCancel();
         } else {
             this->onModResponse(response);
