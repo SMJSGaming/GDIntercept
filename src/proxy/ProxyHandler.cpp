@@ -215,17 +215,19 @@ void ProxyHandler::onModResponse(web::WebResponse* response) {
 }
 
 void ProxyHandler::onResponse() {
-    Loader::get()->queueInMainThread([this]{ ResponseEvent(m_info).post(); });
+    Loader::get()->queueInMainThread([this]{
+        if (m_info->m_response.m_statusCode < 0) {
+            m_info->m_state = State::FAULTY;
+        } else {
+            m_info->m_state = State::COMPLETED;
+        }
 
-    if (m_info->m_response.m_statusCode < 0) {
-        m_info->m_state = State::FAULTY;
-    } else {
-        m_info->m_state = State::COMPLETED;
-    }
+        ResponseEvent(m_info).post();
 
-    if (std::find(ProxyHandler::cachedProxies.begin(), ProxyHandler::cachedProxies.end(), this) == ProxyHandler::cachedProxies.end()) {
-        delete this;
-    }
+        if (std::find(ProxyHandler::cachedProxies.begin(), ProxyHandler::cachedProxies.end(), this) == ProxyHandler::cachedProxies.end()) {
+            delete this;
+        }
+    });
 }
 
 web::WebTask::Cancel ProxyHandler::onCancel() {

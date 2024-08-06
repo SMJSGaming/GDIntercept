@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.5.3-alpha.5 (2024-08-06) - Alpha.5 Hotfix 4
+
+- Moved some logic around to prevent accidentally deleting data before providing it to the events
+
 ## v0.5.3-alpha.5 (2024-08-06) - Alpha.5 Hotfix 3
 
 - Added race condition protection due to some edge cases where progress may be sent to a canceled request
