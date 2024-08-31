@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.5.5-alpha.5 (2024-08-31) - Mod Size Reduction
+
+- Removed a build setting that was causing the mod to be larger than it should be
+
 ## v0.5.4-alpha.5 (2024-08-06) - Alpha.5 Hotfix 4
 
 - Moved some logic around to prevent accidentally deleting data before providing it to the events

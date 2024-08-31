@@ -34,8 +34,7 @@ jobs:
       - name: Build
         uses: geode-sdk/build-geode-mod@main
         with:
-          build-config: 'RelWithDebInfo'
-          export-pdb: true
+          build-config: 'Release'
           combine: true
           cli: 'latest'
           target: ${{ matrix.config.target }}

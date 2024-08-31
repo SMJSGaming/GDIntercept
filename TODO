@@ -25,13 +25,14 @@ Alpha 3 Todo:
 Alpha 4 Todo:
   ✔ @critical Add node culling @done(24-07-22 22:19)
   ✔ @critical Add a way to variably limit the amount of requests cached @done(24-07-22 22:19)
-Alpha 5:
+Alpha 5 Todo:
   ✔ @low Add window ratio support @done(24-07-23 16:19)
   ✔ @low Rescale path labels @done(24-07-23 16:20)
   ✔ @low Add badges to the capture cells (e.g. pause, finished, source) @done(24-08-01 18:52)
   ✔ @critical Add a formatted text to original converter in the converters @done(24-08-04 15:11)
   ✔ @high Add a copy button to the code block and info block @done(24-08-05 17:39)
 Release Todo:
+  ☐ Add vertical scrolling
   ☐ Rework the code block button menu to turn it into a side menu
   ☐ Add a response header view
   ☐ Add inputs to the JSON code block
