@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Geode/Geode.hpp>
 #include "../../lib/json.hpp"
 #include "../Enums.hpp"
 
