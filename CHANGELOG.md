@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.5.6-alpha.5 (2024-09-10) - ID System Implementation
+
+- To prevent being incompatible with other geode web API mods, the ID system has been implemented
+
 ## v0.5.5-alpha.5 (2024-08-31) - Mod Size Reduction
 
 - Removed a build setting that was causing the mod to be larger than it should be

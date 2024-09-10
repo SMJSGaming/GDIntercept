@@ -11,16 +11,17 @@ using namespace proxy::prelude;
 namespace proxy {
     class ProxyHandler : public CCObject {
     public:
-        static std::string getCopyHandshake();
-        static std::deque<ProxyHandler*> getProxies();
-        static std::deque<ProxyHandler*> getFilteredProxies();
-        static std::deque<ProxyHandler*> getAliveProxies();
         static ProxyHandler* create(CCHttpRequest* request);
         static ProxyHandler* create(web::WebRequest* request, const std::string& method, const std::string& url);
+        static std::string getCopyHandshake();
+        static std::deque<ProxyHandler*> getFilteredProxies();
+        static bool isProxy(CCHttpRequest* request);
+        static bool isProxy(web::WebRequest* request);
         static void setCacheLimit(const int64_t limit);
         static void resumeAll();
     private:
-        static std::deque<ProxyHandler*> aliveProxies;
+        static std::vector<size_t> handledIDs;
+        static std::vector<ProxyHandler*> aliveProxies;
         static std::deque<ProxyHandler*> cachedProxies;
         static std::vector<ProxyHandler*> pausedProxies;
 

@@ -1,14 +1,12 @@
 #include "ProxyHandler.hpp"
 
-std::deque<ProxyHandler*> proxy::ProxyHandler::aliveProxies;
+std::vector<size_t> proxy::ProxyHandler::handledIDs;
+
+std::vector<ProxyHandler*> proxy::ProxyHandler::aliveProxies;
 
 std::deque<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
 
 std::vector<ProxyHandler*> proxy::ProxyHandler::pausedProxies;
-
-std::string ProxyHandler::getCopyHandshake() {
-    return fmt::format("<{}>", "copied"_spr);
-}
 
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
@@ -29,12 +27,8 @@ ProxyHandler* ProxyHandler::create(web::WebRequest* request, const std::string& 
     return instance;
 }
 
-std::deque<ProxyHandler*> ProxyHandler::getProxies() {
-    return ProxyHandler::cachedProxies;
-}
-
-std::deque<ProxyHandler*> ProxyHandler::getAliveProxies() {
-    return ProxyHandler::aliveProxies;
+std::string ProxyHandler::getCopyHandshake() {
+    return fmt::format("<{}>", "copied"_spr);
 }
 
 std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
@@ -72,6 +66,20 @@ std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
     }
 
     return proxies;
+}
+
+bool ProxyHandler::isProxy(CCHttpRequest* request) {
+    for (const ProxyHandler* proxy : ProxyHandler::aliveProxies) {
+        if (proxy->getCocosRequest() == request) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ProxyHandler::isProxy(web::WebRequest* request) {
+    return std::find(ProxyHandler::handledIDs.begin(), ProxyHandler::handledIDs.end(), request->getID()) != ProxyHandler::handledIDs.end();
 }
 
 void ProxyHandler::setCacheLimit(const int64_t limit) {
@@ -155,6 +163,7 @@ m_originalProxy(nullptr) {
     m_info = new HttpInfo(isRepeat, m_modRequest, method, url);
 
     ProxyHandler::registerProxy(this);
+    ProxyHandler::handledIDs.push_back(request->getID());
 
     m_modTask = web::WebTask::run([this, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse* response = nullptr;
@@ -188,7 +197,11 @@ m_originalProxy(nullptr) {
 }
 
 ProxyHandler::~ProxyHandler() {
-    ProxyHandler::aliveProxies.erase(std::find(ProxyHandler::aliveProxies.begin(), ProxyHandler::aliveProxies.end(), this));
+    const auto it = std::find(ProxyHandler::aliveProxies.begin(), ProxyHandler::aliveProxies.end(), this);
+
+    if (it != ProxyHandler::aliveProxies.end()) {
+        ProxyHandler::aliveProxies.erase(it);
+    }
 
     if (m_cocosRequest) {
         delete m_cocosRequest;
