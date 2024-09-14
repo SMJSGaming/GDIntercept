@@ -148,7 +148,7 @@ std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> Capt
     }
 
     if (m_info->isRepeat()) {
-        badges.push_back(this->makeBadgeInfo("Request Repeat", CCSprite::create("reset-gold.png"_spr)));
+        badges.push_back(this->makeBadgeInfo("Request Repeat", CCSprite::createWithSpriteFrameName("reset-gold.png"_spr)));
     }
 
     return badges;
