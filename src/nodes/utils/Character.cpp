@@ -25,7 +25,6 @@ void Character::update(const float dt) {
         CCNode* characterNode = cocos::getChild(this, 0);
 
         characterNode->setScale(this->getContentHeight() / characterNode->getContentHeight());
-
         characterNode->setPositionY(this->getContentHeight() / 2);
     } else {
         CenterLabel::update(dt);
