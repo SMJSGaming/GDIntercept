@@ -17,7 +17,7 @@ Check the [API documentation](https://github.com/SMJSGaming/GDIntercept/wiki).
 - Sending custom requests.
 - Built in request and response API for other mods.
 - Modifying requests (Disabled in ALPHA).
-- Blocking requests (Disabled in Alpha).
+- Blocking requests.
 
 ## Notes
 
@@ -35,13 +35,17 @@ This version has yet to enable request manipulation due to the official penetrat
 
 Some minor request manipulation features have been re-enabled. This version also adds Geode and API support. This means that in the future GDIntercept will also be useable for other mods. Check [the wiki](https://github.com/SMJSGaming/GDIntercept/wiki) for more details.
 
-## ALPHA.4
+### ALPHA.4
 
 This version significantly improves the performance of the mod and removes as much RAM usage as possible. The exposed API path has also been fixed.
 
-## ALPHA.5
+### ALPHA.5
 
 This version contains a lot of reworks in the background which are needed for the final release. The only thing remaining is the input support for the code block and the final stage of the official penetration test.
+
+### ALPHA.6
+
+This version overhauls the UI and adds a lot of new features. The official Geometry Dash penetration test has also concluded and all issues have been patched. This means that request manipulation will be re-enabled in the next version.
 
 ## Credits
 
