@@ -13,14 +13,10 @@ const std::vector<SideBarView> CodeBlock::views({
 
 const SideBar::Categories CodeBlock::actions({
     { { "Local Files", "localfiles.png"_spr }, {
-        { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenConfigFiles(); } }, [](CodeBlock* block) {
-            return GEODE_ANDROID(!)true;
-        } },
-        { { "Open Config Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } }, [](CodeBlock* block) {
-            return GEODE_ANDROID(!)true;
-        } },
+        { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } } },
+        { { "Open Config Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenConfigFiles(); } } },
         { { "Save", "download.png"_spr, [](CodeBlock* block) { return block->onSave(); } }, [](CodeBlock* block) {
-            return block->m_info && GEODE_ANDROID(!)true;
+            return block->m_info;
         } }
     } },
     { { "Current Request", "link.png"_spr }, {
@@ -55,10 +51,10 @@ const SideBar::Categories CodeBlock::actions({
 });
 
 void CodeBlock::setup() {
-    this->bind("open_save_folder"_spr, [this]() {
+    this->bind("open_save_files"_spr, [this]() {
         this->onOpenSaveFiles();
     });
-    this->bind("open_config_folder"_spr, [this]() {
+    this->bind("open_config_files"_spr, [this]() {
         this->onOpenConfigFiles();
     });
     this->bind("save_packet"_spr, [this]() {
@@ -170,7 +166,9 @@ bool CodeBlock::onCancel() {
 }
 
 bool CodeBlock::onOpenSaveFiles() {
-    utils::file::openFolder(Mod::get()->getSaveDir());
+    Mod* mod = Mod::get();
+
+    utils::file::openFolder(mod->getSavedValue("default-path", mod->getSaveDir()));
 
     return true;
 }

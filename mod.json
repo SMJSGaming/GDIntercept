@@ -41,7 +41,8 @@
       "version": "1.6.4",
       "importance": "required",
       "platforms": [
-        "win"
+        "win",
+        "android64"
       ]
     }
   ],

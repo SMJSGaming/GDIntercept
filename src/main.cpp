@@ -45,8 +45,8 @@
             },
         });
         manager->registerBindable({
-            "open_save_folder"_spr,
-            "Open Save Folder",
+            "open_save_files"_spr,
+            "Open Save Files",
             "Opens the save folder of GDIntercept",
             {
                 Keybind::create(KEY_O, Modifier::Control),
@@ -55,8 +55,8 @@
             "GD Intercept/Side Bar"
         });
         manager->registerBindable({
-            "open_config_folder"_spr,
-            "Open Config Folder",
+            "open_config_files"_spr,
+            "Open Config Files",
             "Opens the config folder of GDIntercept",
             {
                 Keybind::create(KEY_O, Modifier::Alt)
