@@ -8,7 +8,7 @@
 #include "../proxy/Proxy.hpp"
 #include "proxy/ProxyHandler.hpp"
 
-#if defined(GEODE_IS_WINDOWS) || defined(GEODE_ANDROID64)
+#if defined(GEODE_IS_WINDOWS) || defined(GEODE_IS_ANDROID64)
     #define KEYBINDS_ENABLED
     #include <geode.custom-keybinds/include/Keybinds.hpp>
 
