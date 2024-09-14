@@ -199,7 +199,7 @@ void CullingList::update(const float dt) {
 
     for (CullingCell* cell : m_activeCells) {
         if (std::find(newActiveCells.begin(), newActiveCells.end(), cell) == newActiveCells.end()) {
-            cell->removeFromParent();
+            cell->removeFromParentAndCleanup(false);
             cell->discard();
         }
     }
