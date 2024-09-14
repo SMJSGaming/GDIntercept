@@ -1,6 +1,6 @@
-#include <Geode/loader/SettingEvent.hpp>
 #include "include.hpp"
-#include "scenes/InterceptPopup.hpp"
+#include "nodes/InterceptPopup.hpp"
+#include <Geode/loader/SettingEvent.hpp>
 
 #ifdef KEYBINDS_ENABLED
     $execute {
@@ -13,6 +13,7 @@
             { Keybind::create(KEY_I, Modifier::Alt) },
             "GD Intercept"
         });
+
         manager->registerBindable({
             "next_packet"_spr,
             "Next Packet",
@@ -34,49 +35,91 @@
             },
             "GD Intercept"
         });
+
         manager->registerBindable({
-            "toggle_pause"_spr,
-            "Toggle Pause",
-            "Pauses or resumes packets captured by the proxy",
-            { Keybind::create(KEY_Space) },
-            "GD Intercept"
+            "collapse_side_bar"_spr,
+            "Collapse Side Bar",
+            "Toggles the side bar between collapsed and expanded",
+            {
+                Keybind::create(KEY_Enter, Modifier::Control)
+            },
         });
         manager->registerBindable({
-            "resend"_spr,
-            "Resend",
-            "Resends the current packet shown in the capture menu",
+            "open_files"_spr,
+            "Open Files",
+            "Opens the data folder of GDIntercept",
             {
-                Keybind::create(KEY_R, Modifier::Control),
-                Keybind::create(KEY_R, Modifier::Command)
+                Keybind::create(KEY_O, Modifier::Control),
+                Keybind::create(KEY_O, Modifier::Command)
             },
-            "GD Intercept"
+            "GD Intercept/Side Bar"
         });
         manager->registerBindable({
-            "copy_info_block"_spr,
-            "Copy Info",
-            "Copies the contents of the request info",
+            "save_packet"_spr,
+            "Save",
+            "Saves the selected packet to a file",
             {
-                Keybind::create(KEY_C, Modifier::Alt)
+                Keybind::create(KEY_S, Modifier::Control),
+                Keybind::create(KEY_S, Modifier::Command)
             },
-            "GD Intercept"
+            "GD Intercept/Side Bar"
         });
         manager->registerBindable({
             "copy_code_block"_spr,
             "Copy",
-            "Copies the contents of the intercept menu code block to the clipboard",
+            "Copies the contents of the current code in view",
             {
                 Keybind::create(KEY_C, Modifier::Control),
-                // This will only work if this extension finally gets MacOS support
                 Keybind::create(KEY_C, Modifier::Command)
             },
-            "GD Intercept/Code Block"
+            "GD Intercept/Side Bar"
         });
+        manager->registerBindable({
+            "resend_packet"_spr,
+            "Resend",
+            "Resends the selected packet",
+            {
+                Keybind::create(KEY_R, Modifier::Control),
+                Keybind::create(KEY_R, Modifier::Command)
+            },
+            "GD Intercept/Side Bar"
+        });
+        manager->registerBindable({
+            "pause_packet"_spr,
+            "Pause/Resume",
+            "Either pauses or resumes the selected packet",
+            {
+                Keybind::create(KEY_Space, Modifier::Control),
+                Keybind::create(KEY_Space, Modifier::Command)
+            },
+            "GD Intercept/Side Bar"
+        });
+        manager->registerBindable({
+            "raw_code_block"_spr,
+            "Raw/Formatted Code",
+            "Either shows the raw or formatted code",
+            {
+                Keybind::create(KEY_L, Modifier::Control),
+                Keybind::create(KEY_L, Modifier::Command)
+            },
+            "GD Intercept/Side Bar"
+        });
+
         manager->registerBindable({
             "code_line_up"_spr,
             "Line Up",
             "Scrolls one line up in the code block",
             {
                 Keybind::create(KEY_Up)
+            },
+            "GD Intercept/Code Block"
+        });
+        manager->registerBindable({
+            "code_line_down"_spr,
+            "Line Down",
+            "Scrolls one line down in the code block",
+            {
+                Keybind::create(KEY_Down)
             },
             "GD Intercept/Code Block"
         });
@@ -92,15 +135,6 @@
             "GD Intercept/Code Block"
         });
         manager->registerBindable({
-            "code_line_down"_spr,
-            "Line Down",
-            "Scrolls one line down in the code block",
-            {
-                Keybind::create(KEY_Down)
-            },
-            "GD Intercept/Code Block"
-        });
-        manager->registerBindable({
             "code_page_down"_spr,
             "Page Down",
             "Scrolls one page down in the code block",
@@ -111,8 +145,28 @@
             },
             "GD Intercept/Code Block"
         });
+        manager->registerBindable({
+            "code_page_left"_spr,
+            "Page Left",
+            "Scrolls one page left in the code block",
+            {
+                Keybind::create(KEY_Left, Modifier::Control),
+                Keybind::create(KEY_Left, Modifier::Command)
+            },
+            "GD Intercept/Code Block"
+        });
+        manager->registerBindable({
+            "code_page_right"_spr,
+            "Page Right",
+            "Scrolls one page right in the code block",
+            {
+                Keybind::create(KEY_Right, Modifier::Control),
+                Keybind::create(KEY_Right, Modifier::Command)
+            },
+            "GD Intercept/Code Block"
+        });
 
-        new EventListener([=](const InvokeBindEvent* event) {
+        new EventListener([](const InvokeBindEvent* event) {
             if (event->isDown()) {
                 InterceptPopup::scene();
             }
@@ -123,8 +177,8 @@
 #endif
 
 $execute {
-    new EventListener([=](const RequestEvent* event) {
-        OPT(InterceptPopup::get())->softReload();
+    new EventListener([](const RequestEvent* event) {
+        OPT(InterceptPopup::get())->reloadList();
 
         if (Mod::get()->getSettingValue<bool>("log-requests")) {
             const HttpInfo::Request request = event->getRequest();
@@ -144,40 +198,70 @@ $execute {
         return ListenerResult::Propagate;
     }, RequestFilter());
 
-    new EventListener([=](const ResponseEvent* event) {
-        OPT(InterceptPopup::get())->softReload();
+    new EventListener([](const ResponseEvent* event) {
+        InterceptPopup* popup = InterceptPopup::get();
+
+        if (popup != nullptr) {
+            popup->reloadList();
+            popup->reloadSideBar();
+        }
 
         return ListenerResult::Propagate;
     }, ResponseFilter());
 
-    listenForSettingChanges("cache-limit", +[](const int64_t value) {
-        ProxyHandler::setCacheLimit(value);
+    new EventListener([](const CancelEvent* event) {
+        InterceptPopup* popup = InterceptPopup::get();
 
-        OPT(InterceptPopup::get())->reload();
-    });
-
-    listenForSettingChanges("pause-requests", +[](const bool value) {
-        if (!value) {
-            ProxyHandler::resumeAll();
+        if (popup != nullptr) {
+            popup->reloadList();
+            popup->reloadSideBar();
         }
-    });
 
-    listenForAllSettingChanges(+[](SettingValue* event) {
-        const static std::vector<std::string> softList = {
+        return ListenerResult::Propagate;
+    }, CancelFilter());
+
+    listenForAllSettingChanges([](std::shared_ptr<SettingV3> setting) {
+        static const std::vector<std::string> listReloads = {
+            "filter",
+            "cache-limit",
             "hide-badges"
         };
-        const static std::vector<std::string> blacklist = {
-            "cache-limit",
-            "pause-requests",
-            "log-requests"
+        static const std::vector<std::string> codeBlockReloads = {
+            "theme"
         };
+        static const std::vector<std::string> codeReloads = {
+            "filter",
+            "cache-limit",
+            "censor-data",
+            "raw-data"
+        };
+        static const std::vector<std::string> sideMenuReloads = {
+            "minimize-side-menu"
+        };
+        const std::string key = setting->getKey();
 
-        if (std::find(blacklist.begin(), blacklist.end(), event->getKey()) == blacklist.end()) {
-            if (std::find(softList.begin(), softList.end(), event->getKey()) != softList.end()) {
-                OPT(InterceptPopup::get())->softReload();
-            } else {
-                OPT(InterceptPopup::get())->reload();
-            }
+        if (key == "cache-limit") {
+            ProxyHandler::setCacheLimit(Mod::get()->getSettingValue<int64_t>("cache-limit"));
+        } else if (key == "pause-requests" && !Mod::get()->getSettingValue<bool>("pause-requests")) {
+            ProxyHandler::resumeAll();
+        }
+
+        const bool reloadsList = std::find(listReloads.begin(), listReloads.end(), key) != listReloads.end();
+
+        if (reloadsList) {
+            OPT(InterceptPopup::get())->reloadList();
+        }
+
+        if (std::find(codeBlockReloads.begin(), codeBlockReloads.end(), key) != codeBlockReloads.end()) {
+            OPT(InterceptPopup::get())->reloadCodeBlock(!reloadsList);
+        }
+
+        if (std::find(codeReloads.begin(), codeReloads.end(), key) != codeReloads.end()) {
+            OPT(InterceptPopup::get())->reloadCode();
+        }
+
+        if (std::find(sideMenuReloads.begin(), sideMenuReloads.end(), key) != sideMenuReloads.end()) {
+            OPT(InterceptPopup::get())->reloadSideBar();
         }
     });
 }

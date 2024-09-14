@@ -95,8 +95,33 @@ m_state(this->shouldPause() ? State::PAUSED : State::IN_PROGRESS),
 m_repeat(repeat),
 m_request(request, method, url) { }
 
+void proxy::HttpInfo::cancel() {
+    if (m_state == State::IN_PROGRESS || m_state == State::PAUSED) {
+        m_state = State::CANCELLED;
+        m_response.m_statusCode = -3;
+
+        CancelEvent(this).post();
+    }
+}
+
 bool proxy::HttpInfo::isPaused() const {
     return m_state == State::PAUSED;
+}
+
+bool proxy::HttpInfo::isInProgress() const {
+    return m_state == State::IN_PROGRESS;
+}
+
+bool proxy::HttpInfo::isCompleted() const {
+    return m_state == State::COMPLETED;
+}
+
+bool proxy::HttpInfo::isFaulty() const {
+    return m_state == State::FAULTY;
+}
+
+bool proxy::HttpInfo::isCancelled() const {
+    return m_state == State::CANCELLED;
 }
 
 bool proxy::HttpInfo::isRepeat() const {
@@ -181,12 +206,12 @@ std::string proxy::HttpInfo::URL::stringifyProtocol() const {
     }
 }
 
-std::string proxy::HttpInfo::URL::stringifyQuery() const {
-    return converters::safeDump(m_query);
+std::string proxy::HttpInfo::URL::stringifyQuery(const bool raw) const {
+    return converters::safeDump(m_query, raw ? -1 : 2);
 }
 
 std::string proxy::HttpInfo::URL::getPortHost() const {
-    if (m_origin != LOCALHOST && ((m_port == 80 && m_protocol == Protocol::HTTP) || (m_port == 443 && m_protocol == Protocol::HTTPS))) {
+    if (m_origin != Origin::LOCALHOST && ((m_port == 80 && m_protocol == Protocol::HTTP) || (m_port == 443 && m_protocol == Protocol::HTTPS))) {
         return m_host;
     } else {
         return m_host + ":" + std::to_string(m_port);
@@ -258,8 +283,8 @@ m_headers(json::object()) {
     m_contentType = HttpInfo::determineContentType(m_url.getPath(), true, m_body);
 }
 
-std::string proxy::HttpInfo::Request::stringifyHeaders() const {
-    return converters::safeDump(m_headers);
+std::string proxy::HttpInfo::Request::stringifyHeaders(const bool raw) const {
+    return converters::safeDump(m_headers, raw ? -1 : 2);
 }
 
 proxy::HttpInfo::HttpContent proxy::HttpInfo::Request::getBodyContent(const bool raw) const {
@@ -289,8 +314,8 @@ m_contentType(HttpInfo::determineContentType(request->m_url.getPath(), false, m_
     }
 }
 
-std::string proxy::HttpInfo::Response::stringifyHeaders() const {
-    return converters::safeDump(m_headers);
+std::string proxy::HttpInfo::Response::stringifyHeaders(const bool raw) const {
+    return converters::safeDump(m_headers, raw ? -1 : 2);
 }
 
 std::string proxy::HttpInfo::Response::stringifyStatusCode() const {

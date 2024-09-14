@@ -56,7 +56,7 @@ std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
             case Origin::GEODE: if (filter == "Geode Server") {
                 proxies.push_back(proxy);
             } break;
-            case LOCALHOST: if (filter == "Localhost") {
+            case Origin::LOCALHOST: if (filter == "Localhost") {
                 proxies.push_back(proxy);
             } break;
             case Origin::OTHER: if (filter == "Unknown Origin") {
@@ -103,12 +103,14 @@ void ProxyHandler::resumeAll() {
 
     std::thread([paused]{
         for (ProxyHandler* proxy : paused) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            if (!proxy->getInfo()->isCancelled()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-            proxy->getInfo()->resume();
+                proxy->getInfo()->resume();
 
-            if (CCHttpRequest* cocosRequest = proxy->getCocosRequest()) {
-                Loader::get()->queueInMainThread([cocosRequest]{ CCHttpClient::getInstance()->send(cocosRequest); });
+                if (CCHttpRequest* cocosRequest = proxy->getCocosRequest()) {
+                    Loader::get()->queueInMainThread([cocosRequest]{ CCHttpClient::getInstance()->send(cocosRequest); });
+                }
             }
         }
     }).detach();
@@ -174,17 +176,23 @@ m_originalProxy(nullptr) {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
+        ESCAPE_WHEN(m_info->isCancelled(), web::WebTask::Cancel());
+
         web::WebTask task = m_modRequest->send(m_info->getRequest().getURL().getMethod(), url);
 
-        task.listen([&response](web::WebResponse* taskResponse) {
+        task.listen([&response](const web::WebResponse* taskResponse) {
             response = new web::WebResponse(*taskResponse);
-        }, [progress, cancelled](web::WebProgress* taskProgress) {
+        }, [progress, cancelled](const web::WebProgress* taskProgress) {
             if (!cancelled()) progress(*taskProgress);
         });
 
-        while (!response && !cancelled()) std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        while (!response && !cancelled() && !m_info->isCancelled()) std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
-        if (cancelled()) {
+        if (m_info->isCancelled()) {
+            task.cancel();
+
+            return web::WebTask::Cancel();
+        } else if (cancelled()) {
             task.cancel();
 
             return this->onCancel();
@@ -246,6 +254,10 @@ void ProxyHandler::onResponse() {
 web::WebTask::Cancel ProxyHandler::onCancel() {
     m_info->m_response.m_statusCode = -3;
     m_info->m_state = State::CANCELLED;
+
+    Loader::get()->queueInMainThread([this]{
+        CancelEvent(m_info).post();
+    });
 
     return web::WebTask::Cancel();
 }

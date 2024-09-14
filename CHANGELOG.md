@@ -1,5 +1,22 @@
 # GDIntercept Changelog
 
+## v0.6.0-alpha.6 (2024-09-14) - UI v3 Update
+
+- Replaced the small menus with a main code block menu
+- Added horizontal scrolling to the code block menu
+- Added a side bar with quick actions and view switching
+- Added a request info view
+- Added a response headers view
+- Made line numbers stick to the left side of the code block
+- Added a save request button
+- Added more themes
+- Added support for more theme customizability for the future
+- Added snapping aggression to snap the scroll to a specific axis for a few update cycles
+- Implemented the new settings system
+- Major keybind overhaul
+- Added a cancel feature to the proxy
+- Added more stability for proxying geode requests
+
 ## v0.5.6-alpha.5 (2024-09-10) - ID System Implementation
 
 - To prevent being incompatible with other geode web API mods, the ID system has been implemented

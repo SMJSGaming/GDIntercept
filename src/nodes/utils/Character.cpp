@@ -1,9 +1,9 @@
 #include "Character.hpp"
 
-Character* Character::create(const char character, const std::string& font) {
-    Character* instance = new Character();
+Character* Character::create(const char character, const std::string& font, const bool rescale) {
+    Character* instance = new Character(rescale);
 
-    if (instance && instance->initWithString(character, font)) {
+    if (instance && instance->initWithString(std::string(1, character), font)) {
         instance->autorelease();
 
         return instance;
@@ -14,27 +14,20 @@ Character* Character::create(const char character, const std::string& font) {
     }
 }
 
+Character::Character(const bool rescale) : m_rescale(rescale) {}
+
 void Character::setCString(const char* label) {
-    std::string labelStr = label;
-
-    CCLabelBMFont::setCString(labelStr.substr(0, 1).c_str());
+    CenterLabel::setCString(std::string(label).substr(0, 1).c_str());
 }
 
-bool Character::initWithString(const char character, const std::string& font) {
-    if (!CCLabelBMFont::initWithString(std::string(1, character).c_str(), font.c_str())) {
-        return false;
+void Character::update(const float dt) {
+    if (m_rescale) {
+        CCNode* characterNode = cocos::getChild(this, 0);
+
+        characterNode->setScale(this->getContentHeight() / characterNode->getContentHeight());
+
+        characterNode->setPositionY(this->getContentHeight() / 2);
+    } else {
+        CenterLabel::update(dt);
     }
-
-    this->scheduleUpdate();
-
-    return true;
-}
-
-void Character::update(float delta) {
-    CCLabelBMFont::update(delta);
-
-    CCNode* characterNode = cocos::getChild(this, 0);
-
-    characterNode->setScale(this->getContentHeight() / characterNode->getContentHeight());
-    characterNode->setPositionY(this->getContentHeight() / 2);
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 namespace proxy::enums {
-    enum ContentType {
+    enum class ContentType {
         FORM,
         JSON,
         XML,
@@ -10,7 +10,7 @@ namespace proxy::enums {
         UNKNOWN_CONTENT
     };
 
-    enum Origin {
+    enum class Origin {
         GD,
         GD_CDN,
         ROBTOP_GAMES,
@@ -20,13 +20,13 @@ namespace proxy::enums {
         OTHER
     };
 
-    enum Protocol {
+    enum class Protocol {
         HTTP,
         HTTPS,
         UNKNOWN_PROTOCOL
     };
 
-    enum State {
+    enum class State {
         PAUSED,
         IN_PROGRESS,
         COMPLETED,
@@ -34,7 +34,7 @@ namespace proxy::enums {
         CANCELLED
     };
 
-    enum OriginFilter {
+    enum class OriginFilter {
         GD_FILTER,
         GD_CDN_FILTER,
         ROBTOP_GAMES_FILTER,

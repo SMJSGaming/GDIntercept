@@ -1,6 +1,6 @@
 {
-  "geode": "3.5.0",
-  "version": "v0.5.6-alpha.5",
+  "geode": "3.6.1",
+  "version": "v0.6.0-alpha.6",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "api": {
@@ -52,11 +52,24 @@
         "size": 56
       }
     },
+    "spritesheets": {
+      "badges": [
+        "resources/badges/*.png"
+      ],
+      "actions": [
+        "resources/actions/*.png"
+      ]
+    },
     "sprites": [
       "resources/*.png"
     ]
   },
   "settings": {
+    "code-settings": {
+      "type": "title",
+      "name": "Code Settings",
+      "description": "Settings related to the user interface."
+    },
     "theme": {
       "name": "Theme",
       "description": "The theme of the code block.",
@@ -64,8 +77,46 @@
       "default": "Dark",
       "one-of": [
         "Dark",
-        "Light"
+        "Light",
+        "Dracula"
       ]
+    },
+    "snapping-aggression": {
+      "name": "Snapping Aggression",
+      "description": "The amount of update cycles between each scroll axis lock in the code block.",
+      "type": "int",
+      "default": 10,
+      "min": 1,
+      "max": 100
+    },
+    "save-dir": {
+      "type": "folder",
+      "name": "Save Directory",
+      "description": "The folder to save the intercepted requests to.",
+      "default": "{gd_save_dir}/persistent/smjs.gdintercept"
+    },
+    "censor-data": {
+      "name": "Censor Sensitive Data",
+      "description": "Censors all known sensitive keys in GD and some common sensitive keys.",
+      "type": "bool",
+      "default": true
+    },
+    "raw-data": {
+      "name": "Raw Data",
+      "description": "Displays data in its raw state without any manipulation of the text besides capping the amount of rendered characters.",
+      "type": "bool",
+      "default": false
+    },
+    "minimize-side-menu": {
+      "name": "Minimize Side Menu",
+      "description": "Minimizes the side menu to only show icons.",
+      "type": "bool",
+      "default": true
+    },
+    "list-settings": {
+      "type": "title",
+      "name": "List Settings",
+      "description": "Settings related to the request list."
     },
     "filter": {
       "name": "Filter",
@@ -83,6 +134,17 @@
         "Unknown Origin"
       ]
     },
+    "hide-badges": {
+      "name": "Hide Badges",
+      "description": "Hides the badge icons in the request list.",
+      "type": "bool",
+      "default": false
+    },
+    "proxy-settings": {
+      "type": "title",
+      "name": "Proxy Settings",
+      "description": "Settings related to the proxy server."
+    },
     "cache-limit": {
       "name": "Cache Limit",
       "description": "The amount of requests to cache before removing the oldest one.",
@@ -96,30 +158,6 @@
       "description": "Pauses all requests and sets their timeout to infinite.",
       "type": "bool",
       "default": false
-    },
-    "censor-data": {
-      "name": "Censor Sensitive Data",
-      "description": "Censors all known sensitive keys in GD and some common sensitive keys.",
-      "type": "bool",
-      "default": true
-    },
-    "raw-data": {
-      "name": "Raw Data",
-      "description": "Displays data in its raw state without any manipulation of the text besides capping the amount of rendered characters.",
-      "type": "bool",
-      "default": false
-    },
-    "hide-badges": {
-      "name": "Hide Badges",
-      "description": "Hides the badge icons in the request list.",
-      "type": "bool",
-      "default": false
-    },
-    "hide-copy-buttons": {
-      "name": "Hide Copy Buttons",
-      "description": "Hides the copy buttons in the code block and info block.",
-      "type": "bool",
-      "default": true
     },
     "log-requests": {
       "name": "Log Requests",

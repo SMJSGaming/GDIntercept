@@ -1,13 +1,17 @@
 #pragma once
 
 #include "../../include.hpp"
+#include "CenterLabel.hpp"
 
-class Character : public CCLabelBMFont {
+class Character : public CenterLabel {
 public:
-    static Character* create(const char character, const std::string& font);
+    static Character* create(const char character, const std::string& font, const bool rescale = false);
 
     void setCString(const char* label) override;
+protected:
+    void update(const float dt) override;
 private:
-    bool initWithString(const char character, const std::string& font);
-    void update(float delta) override;
+    bool m_rescale;
+
+    Character(const bool rescale);
 };

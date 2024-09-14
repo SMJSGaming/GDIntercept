@@ -31,13 +31,19 @@ Alpha 5 Todo:
   ✔ @low Add badges to the capture cells (e.g. pause, finished, source) @done(24-08-01 18:52)
   ✔ @critical Add a formatted text to original converter in the converters @done(24-08-04 15:11)
   ✔ @high Add a copy button to the code block and info block @done(24-08-05 17:39)
+Alpha 6 Todo:
+  ✔ @high Add horizontal scrolling @done(24-08-09 16:54)
+  ✔ @high Rework the code block button menu to turn it into a side menu @done(24-09-05 11:29)
+  ✔ @high Add actions to the side menu to replace the control menu @done(24-09-09 11:47)
+  ✔ @high Add a response header view @done(24-09-05 11:27)
+  ✔ @low Add bracket color support @done(24-09-11 13:48)
+  ✔ @low Add a horizontal scrollbar @done(24-09-12 22:00)
+  ✔ @low Keep line numbers aligned while horizontally scrolling @done(24-09-11 14:36)
+  ✔ @high Rebind keys @done(24-09-13 19:00)
 Release Todo:
-  ☐ Add vertical scrolling
-  ☐ Rework the code block button menu to turn it into a side menu
-  ☐ Add a response header view
-  ☐ Add inputs to the JSON code block
-  ☐ Pen test all well known mods & GD
-  ☐ Fix the comment history response parser
+  ☐ @critical Add inputs to the JSON code block
+  ☐ @critical Pen test all well known mods & GD
+  ☐ @high Fix the comment history response parser
 Nice To Haves:
   ☐ Custom theme support
   ☐ Add a way to save requests

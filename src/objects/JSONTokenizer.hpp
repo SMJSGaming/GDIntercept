@@ -4,7 +4,7 @@
 
 class JSONTokenizer {
 public:
-    enum Token {
+    enum class Token {
         UNKNOWN,
         CORRUPT,
         KEY,
@@ -12,7 +12,8 @@ public:
         NUMBER,
         CONSTANT,
         TERMINATOR,
-        KEY_TERMINATOR
+        SEPARATOR,
+        BRACKET
     };
 
     struct TokenOffset {

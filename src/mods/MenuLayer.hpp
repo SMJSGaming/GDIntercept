@@ -2,7 +2,7 @@
 
 #include <Geode/modify/MenuLayer.hpp>
 #include "../include.hpp"
-#include "../scenes/InterceptPopup.hpp"
+#include "../nodes/InterceptPopup.hpp"
 
 class $modify(ModMenuLayer, MenuLayer) {
     bool init();

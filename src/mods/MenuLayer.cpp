@@ -1,9 +1,7 @@
 #include "MenuLayer.hpp"
 
 bool ModMenuLayer::init() {
-    if (!MenuLayer::init()) {
-        return false;
-    }
+    ESCAPE_WHEN(!MenuLayer::init(), false);
 
     CCSprite* logo = CCSprite::create("GDI-round.png"_spr);
 

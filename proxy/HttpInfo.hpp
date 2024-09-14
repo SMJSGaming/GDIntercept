@@ -4,7 +4,7 @@
 #include <Geode/utils/web.hpp>
 #include "../lib/json.hpp"
 #include "Enums.hpp"
-#include "LookupTable.hpp"
+#include "../lib/LookupTable.hpp"
 #include "converters/Converter.hpp"
 #include "converters/XmlToXml.hpp"
 #include "converters/FormToJson.hpp"
@@ -29,7 +29,7 @@ namespace proxy {
         class URL {
         public:
             std::string stringifyProtocol() const;
-            std::string stringifyQuery() const;
+            std::string stringifyQuery(const bool raw = false) const;
             std::string getPortHost() const;
         private:
             static std::string stringifyMethod(const cocos2d::extension::CCHttpRequest::HttpRequestType method);
@@ -54,7 +54,7 @@ namespace proxy {
 
         class Request {
         public:
-            std::string stringifyHeaders() const;
+            std::string stringifyHeaders(const bool raw = false) const;
             HttpContent getBodyContent(const bool raw = true) const;
         private:
             PROXY_GETTER(URL, url, URL);
@@ -70,7 +70,7 @@ namespace proxy {
 
         class Response {
         public:
-            std::string stringifyHeaders() const;
+            std::string stringifyHeaders(const bool raw = false) const;
             std::string stringifyStatusCode() const;
             HttpContent getResponseContent(const bool raw = true) const;
             bool received() const;
@@ -90,7 +90,12 @@ namespace proxy {
             friend class HttpInfo;
         };
 
+        void cancel();
         bool isPaused() const;
+        bool isInProgress() const;
+        bool isCompleted() const;
+        bool isFaulty() const;
+        bool isCancelled() const;
         bool isRepeat() const;
         bool responseReceived() const;
     private:
