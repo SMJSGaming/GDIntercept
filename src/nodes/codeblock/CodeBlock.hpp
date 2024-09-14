@@ -43,7 +43,8 @@ private:
     bool onCopy();
     bool onSend();
     bool onCancel();
-    bool onOpenFiles();
+    bool onOpenSaveFiles();
+    bool onOpenConfigFiles();
     bool onSave();
     bool onPause(const SideBarCell::OriginalCallback& original);
     bool onResume(const SideBarCell::OriginalCallback& original);

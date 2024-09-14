@@ -101,13 +101,13 @@ bool ActionCell::init() {
     m_icon = RescalingNode::create(CCNode::create(), referenceSize);
     m_name = CenterLabel::create("", theme.font.fontName);
 
-    m_icon->setAnchorPoint(CENTER_LEFT);
-    m_icon->setPositionY(height / 2);
     m_name->setColor(theme.syntax.text);
     m_name->setOpacity(theme.syntax.text);
     m_name->setScale(theme.font.fontScale);
     m_name->setAnchorPoint(CENTER_LEFT);
     m_name->setPosition({ PADDING, height / 2 });
+    m_icon->setAnchorPoint(CENTER_LEFT);
+    m_icon->setPosition({ PADDING * 2 + m_name->getScaledContentWidth(), height / 2 });
 
     this->setOpacity(0);
     this->setContentHeight(height);
@@ -118,6 +118,8 @@ bool ActionCell::init() {
     const float maxWidthOpposite = this->getMaxCellWidth();
 
     this->setState(oldState);
+
+    m_icon->setPositionX(PADDING * 2 + m_name->getScaledContentWidth());
 
     m_minWidth = referenceSize.width + PADDING * 2;
     m_maxWidth = std::max(this->getMaxCellWidth(), maxWidthOpposite);

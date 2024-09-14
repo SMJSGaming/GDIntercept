@@ -13,7 +13,10 @@ const std::vector<SideBarView> CodeBlock::views({
 
 const SideBar::Categories CodeBlock::actions({
     { { "Local Files", "localfiles.png"_spr }, {
-        { { "Open Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenFiles(); } }, [](CodeBlock* block) {
+        { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenConfigFiles(); } }, [](CodeBlock* block) {
+            return GEODE_ANDROID(!)true;
+        } },
+        { { "Open Config Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } }, [](CodeBlock* block) {
             return GEODE_ANDROID(!)true;
         } },
         { { "Save", "download.png"_spr, [](CodeBlock* block) { return block->onSave(); } }, [](CodeBlock* block) {
@@ -52,8 +55,11 @@ const SideBar::Categories CodeBlock::actions({
 });
 
 void CodeBlock::setup() {
-    this->bind("open_files"_spr, [this]() {
-        this->onOpenFiles();
+    this->bind("open_save_folder"_spr, [this]() {
+        this->onOpenSaveFiles();
+    });
+    this->bind("open_config_folder"_spr, [this]() {
+        this->onOpenConfigFiles();
     });
     this->bind("save_packet"_spr, [this]() {
         this->onSave();
@@ -163,13 +169,20 @@ bool CodeBlock::onCancel() {
     return true;
 }
 
-bool CodeBlock::onOpenFiles() {
-    utils::file::openFolder(Mod::get()->getSettingValue<std::filesystem::path>("save-dir").make_preferred());
+bool CodeBlock::onOpenSaveFiles() {
+    utils::file::openFolder(Mod::get()->getSaveDir());
+
+    return true;
+}
+
+bool CodeBlock::onOpenConfigFiles() {
+    utils::file::openFolder(Mod::get()->getConfigDir());
 
     return true;
 }
 
 bool CodeBlock::onSave() {
+    Mod* mod = Mod::get();
     const HttpInfo::Request request = m_info->getRequest();
     const HttpInfo::URL url = request.getURL();
     const HttpInfo::Response response = m_info->getResponse();
@@ -188,15 +201,26 @@ bool CodeBlock::onSave() {
         response.stringifyHeaders(),
         responseContent.empty() ? "" : fmt::format("\n{}", responseContent)
     );
-    const std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("save-dir");
 
-    (void) utils::file::createDirectoryAll(path);
+    utils::file::pick(file::PickMode::OpenFolder, {
+        .defaultPath = mod->getSavedValue("default-path", mod->getSaveDir())
+    }).listen([this, mod, filename, contents](const Result<std::filesystem::path>* path) {
+        Loader::get()->queueInMainThread([this, mod, path, filename, contents]{
+            if (path->isErr()) {
+                this->showMessage("Error Picking File", { 0xFF, 0x00, 0x00 });
+            } else if (utils::file::writeString(path->unwrap() / filename, contents).isOk()) {
+                mod->setSavedValue("default-path", path->unwrap());
 
-    if (utils::file::writeString(path / filename, contents).isOk()) {
-        this->showMessage("File Saved");
-    } else {
-        this->showMessage("Error Saving File", { 0xFF, 0x00, 0x00 });
-    }
+                this->showMessage("File Saved");
+            } else {
+                this->showMessage("Error Saving File", { 0xFF, 0x00, 0x00 });
+            }
+        });
+    }, [](std::monostate*){}, [this]{
+        Loader::get()->queueInMainThread([this]{
+            this->showMessage("File Save Cancelled", { 0xFF, 0xFF, 0x00 });
+        });
+    });
 
     return true;
 }

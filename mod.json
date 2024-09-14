@@ -89,12 +89,6 @@
       "min": 1,
       "max": 100
     },
-    "save-dir": {
-      "type": "folder",
-      "name": "Save Directory",
-      "description": "The folder to save the intercepted requests to.",
-      "default": "{gd_save_dir}/persistent/smjs.gdintercept"
-    },
     "censor-data": {
       "name": "Censor Sensitive Data",
       "description": "Censors all known sensitive keys in GD and some common sensitive keys.",
