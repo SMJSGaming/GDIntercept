@@ -147,9 +147,9 @@ bool CodeBlock::onSend() {
 
     request.header(ProxyHandler::getCopyHandshake(), "true");
 
-    for (const auto& [name, value] : original.getHeaders().items()) {
-        request.header(name, value.get<std::string>());
-    }
+    // for (const auto& [name, value] : original.getHeaders().items()) {
+    //     request.header(name, value.get<std::string>());
+    // }
 
     (void) request.send(method, url.getOriginal());
 
