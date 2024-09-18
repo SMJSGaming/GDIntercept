@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/resources/themes/theme.schema.json",
+  "title": "GDIntercept Theme",
+  "type": "object",
+  "description": "The schema for the GDIntercept themes.",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "The inclusion of this schema."
+    },
+
+    "version": {
+      "type": "string",
+      "description": "The version of the schema.",
+      "enum": [ "1.0.0" ]
+    },
+
+    "name": {
+      "type": "string",
+      "description": "The name of the theme."
+    },
+
+    "theme": {
+      "type": "object",
+      "description": "The theme properties read by GDIntercept.",
+      "additionalProperties": false,
+      "properties": {
+        "code": { "$ref": "#/definitions/code" },
+        "menu": { "$ref": "#/definitions/menu" }
+      },
+      "required": [ "code", "menu" ]
+    }
+  },
+  "required": [ "$schema", "version", "name", "theme" ],
+  "definitions": {
+    "color-channel": {
+      "type": "integer",
+      "description": "A color channel value.",
+      "minimum": 0,
+      "maximum": 255
+    },
+
+    "color": {
+      "description": "A theme color.",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "A color in hex format.",
+          "pattern": "^#([0-9a-fA-F]{1,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        {
+          "type": "array",
+          "description": "A color channel array.",
+          "minItems": 3,
+          "maxItems": 4,
+          "additionalItems": false,
+          "items": [
+            { "$ref": "#/definitions/color-channel" },
+            { "$ref": "#/definitions/color-channel" },
+            { "$ref": "#/definitions/color-channel" },
+            {
+              "$ref": "#/definitions/color-channel",
+              "default": 255
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "description": "A color object.",
+          "additionalProperties": false,
+          "properties": {
+            "r": { "$ref": "#/definitions/color-channel" },
+            "g": { "$ref": "#/definitions/color-channel" },
+            "b": { "$ref": "#/definitions/color-channel" },
+            "a": {
+              "$ref": "#/definitions/color-channel",
+              "default": 255
+            }
+          },
+          "required": [ "r", "g", "b" ]
+        }
+      ]
+    },
+
+    "font": {
+      "type": "object",
+      "description": "The font properties of the theme.",
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "type": "string",
+          "description": "The font family of the theme including resource path."
+        },
+        "scale": {
+          "type": "number",
+          "description": "The scale of the font."
+        },
+        "line-height": {
+          "type": "number",
+          "description": "The line height used between text lines.",
+          "default": 2,
+          "minimum": 0
+        }
+      },
+      "required": [ "family", "scale" ]
+    },
+
+    "scrollbar": {
+      "type": "object",
+      "description": "The scrollbar colors of the theme.",
+      "additionalProperties": false,
+      "properties": {
+        "size": {
+          "type": "number",
+          "description": "The width or height (depending on if the scrollbar is vertical or horizontal) of the scrollbar.",
+          "default": 4,
+          "minimum": 0
+        },
+        "border": { "$ref": "#/definitions/color" },
+        "thumb": { "$ref": "#/definitions/color" },
+        "active-thumb": { "$ref": "#/definitions/color" }
+      },
+      "required": [ "border", "thumb" ]
+    },
+
+    "syntax": {
+      "type": "object",
+      "description": "The syntax colors of the theme.",
+      "additionalProperties": false,
+      "properties": {
+        "text": { "$ref": "#/definitions/color" },
+        "key": { "$ref": "#/definitions/color" },
+        "string": { "$ref": "#/definitions/color" },
+        "number": { "$ref": "#/definitions/color" },
+        "constant": { "$ref": "#/definitions/color" },
+        "error": { "$ref": "#/definitions/color" },
+        "separator": { "$ref": "#/definitions/color" },
+        "terminator": { "$ref": "#/definitions/color" },
+        "bracket": { "$ref": "#/definitions/color" },
+        "key-quote": { "$ref": "#/definitions/color" },
+        "string-quote": { "$ref": "#/definitions/color" }
+      },
+      "required": [ "text", "key", "string", "number", "constant", "error" ]
+    },
+
+    "code": {
+      "type": "object",
+      "description": "The code colors of the theme.",
+      "additionalProperties": false,
+      "properties": {
+        "padding-left": {
+          "type": "number",
+          "description": "The padding used on the left side of the code block.",
+          "default": 3,
+          "minimum": 0
+        },
+        "padding-right": {
+          "type": "number",
+          "description": "The padding used on the right side of the code block.",
+          "default": 3,
+          "minimum": 0
+        },
+        "padding-center": {
+          "type": "number",
+          "description": "The padding used in between the line number and code line.",
+          "default": 3,
+          "minimum": 0
+        },
+        "background": { "$ref": "#/definitions/color" },
+        "foreground": { "$ref": "#/definitions/color" },
+        "font": { "$ref": "#/definitions/font" },
+        "scrollbar": { "$ref": "#/definitions/scrollbar" },
+        "syntax": { "$ref": "#/definitions/syntax" }
+      },
+      "required": [ "background", "foreground", "font", "scrollbar", "syntax" ]
+    },
+
+    "icons": {
+      "type": "object",
+      "description": "The icon colors of the theme.",
+      "additionalProperties": false,
+      "properties": {
+        "info": { "$ref": "#/definitions/color" },
+        "body": { "$ref": "#/definitions/color" },
+        "query": { "$ref": "#/definitions/color" },
+        "header": { "$ref": "#/definitions/color" },
+        "response": { "$ref": "#/definitions/color" },
+        "action-icon": { "$ref": "#/definitions/color" },
+        "disabled-icon": { "$ref": "#/definitions/color" },
+        "category-icon": { "$ref": "#/definitions/color" }
+      }
+    },
+
+    "menu": {
+      "type": "object",
+      "description": "The side bar menu colors of the theme.",
+      "additionalProperties": false,
+      "properties": {
+        "padding-left": {
+          "type": "number",
+          "description": "The padding used on the left side of the menu.",
+          "default": 3,
+          "minimum": 0
+        },
+        "padding-right": {
+          "type": "number",
+          "description": "The padding used on the right side of the menu.",
+          "default": 3,
+          "minimum": 0
+        },
+        "padding-center": {
+          "type": "number",
+          "description": "The padding used in between the icon and name of the menu items.",
+          "default": 3,
+          "minimum": 0
+        },
+        "background": { "$ref": "#/definitions/color" },
+        "foreground": { "$ref": "#/definitions/color" },
+        "text": { "$ref": "#/definitions/color" },
+        "disabled-text": { "$ref": "#/definitions/color" },
+        "category-text": { "$ref": "#/definitions/color" },
+        "border": { "$ref": "#/definitions/color" },
+        "category-border": { "$ref": "#/definitions/color" },
+        "font": { "$ref": "#/definitions/font" },
+        "icons": { "$ref": "#/definitions/icons" }
+      },
+      "required": [ "background", "foreground", "text", "border", "font" ]
+    }
+  }
+}
