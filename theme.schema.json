@@ -217,13 +217,13 @@
           "minimum": 0
         },
         "background": { "$ref": "#/definitions/color" },
+        "category-background": { "$ref": "#/definitions/color" },
         "foreground": { "$ref": "#/definitions/color" },
         "text": { "$ref": "#/definitions/color" },
         "disabled-text": { "$ref": "#/definitions/color" },
         "category-text": { "$ref": "#/definitions/color" },
         "border": { "$ref": "#/definitions/color" },
         "category-border": { "$ref": "#/definitions/color" },
-        "category-background": { "$ref": "#/definitions/color" },
         "font": { "$ref": "#/definitions/font" },
         "icons": { "$ref": "#/definitions/icons" }
       },
