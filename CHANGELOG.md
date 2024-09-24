@@ -1,6 +1,11 @@
 # GDIntercept Changelog
 
-## v0.6.1-alpha.6 (2024-09-20) - Themes Update
+## v0.6.2-alpha.6 (2024-09-25) - Minor Semantic Fixes
+
+- Fixed the release date of the previous version
+- Fixed the one-dark-pro theme targeting an old schema ID
+
+## v0.6.1-alpha.6 (2024-09-24) - Themes Update
 
 - Added custom theme support
 - Added additional default themes
