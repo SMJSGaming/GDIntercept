@@ -87,27 +87,25 @@ m_block(block),
 m_enabled(true) { }
 
 bool ActionCell::init() {
-    const ThemeStyle& theme = ThemeStyle::getTheme();
+    const Theme::Theme theme = Theme::getTheme();
 
     ESCAPE_WHEN(!HoverNode::init(), false);
-    ESCAPE_WHEN(!CCLayerColor::initWithColor(ThemeStyle::getTheme().ui.menu.foreground), false);
+    ESCAPE_WHEN(!CCLayerColor::initWithColor(theme.menu.foreground), false);
 
-    CCLabelBMFont* referenceSizeNode = CCLabelBMFont::create("0", theme.font.fontName);
-
+    CCLabelBMFont* referenceSizeNode = theme.menu.font.createLabel("0");
     const bool oldState = m_state;
-    const float referenceHeight = cocos::getChild(referenceSizeNode, 0)->getContentHeight() * theme.font.fontScale;
+    const float referenceHeight = cocos::getChild(referenceSizeNode, 0)->getContentHeight() * theme.menu.font.fontScale;
+    const float height = referenceSizeNode->getScaledContentHeight() + theme.menu.font.lineHeight;
     const CCSize referenceSize = { referenceHeight, referenceHeight };
-    const float height = referenceSizeNode->getContentHeight() * theme.font.fontScale + theme.font.lineHeight * 1.2f;
     m_icon = RescalingNode::create(CCNode::create(), referenceSize);
-    m_name = CenterLabel::create("", theme.font.fontName);
+    m_name = CenterLabel::create("", theme.menu.font.fontName);
 
-    m_name->setColor(theme.syntax.text);
-    m_name->setOpacity(theme.syntax.text);
-    m_name->setScale(theme.font.fontScale);
+    theme.menu.text.applyTo(m_name);
+    m_name->setScale(theme.menu.font.fontScale);
     m_name->setAnchorPoint(CENTER_LEFT);
-    m_name->setPosition({ PADDING, height / 2 });
+    m_name->setPosition({ theme.menu.paddingLeft, height / 2 });
     m_icon->setAnchorPoint(CENTER_LEFT);
-    m_icon->setPosition({ PADDING * 2 + m_name->getScaledContentWidth(), height / 2 });
+    m_icon->setPosition({ theme.menu.paddingLeft + theme.menu.paddingCenter + m_name->getScaledContentWidth(), height / 2 });
 
     this->setOpacity(0);
     this->setContentHeight(height);
@@ -119,9 +117,9 @@ bool ActionCell::init() {
 
     this->setState(oldState);
 
-    m_icon->setPositionX(PADDING * 2 + m_name->getScaledContentWidth());
+    m_icon->setPositionX(theme.menu.paddingLeft + theme.menu.paddingCenter + m_name->getScaledContentWidth());
 
-    m_minWidth = referenceSize.width + PADDING * 2;
+    m_minWidth = referenceSize.width + theme.menu.paddingLeft + theme.menu.paddingRight;
     m_maxWidth = std::max(this->getMaxCellWidth(), maxWidthOpposite);
 
     return true;
@@ -129,18 +127,17 @@ bool ActionCell::init() {
 
 void ActionCell::setState(const bool state) {
     m_state = state || m_action.off.isEmpty();
-    const ThemeStyle& theme = ThemeStyle::getTheme();
+    const Theme::Theme theme = Theme::getTheme();
     const SideBarActionButton button = m_state ? m_action.on : m_action.off;
     CCSprite* icon = CCSprite::createWithSpriteFrameName(button.icon.c_str());
 
     m_name->setCString(button.name.c_str());
     m_icon->setNode(icon);
-    icon->setColor(theme.syntax.text);
-    icon->setOpacity(theme.syntax.text);
+    theme.menu.icons.actionIcon.applyTo(icon);
 }
 
 float ActionCell::getMaxCellWidth() const {
-    return m_icon->getPositionX() + m_icon->getScaledContentWidth() + PADDING;
+    return m_icon->getPositionX() + m_icon->getScaledContentWidth() + Theme::getTheme().menu.paddingRight;
 }
 
 void ActionCell::hideOpacity(const float dt) {
@@ -155,17 +152,23 @@ bool ActionCell::isEnabled() const {
 }
 
 void ActionCell::enable() {
+    const Theme::Theme theme = Theme::getTheme();
+    CCSprite* icon = as<CCSprite*>(m_icon->getNode());
+
     m_enabled = true;
 
-    as<CCSprite*>(m_icon->getNode())->setOpacity(255);
-    m_name->setOpacity(255);
+    theme.menu.icons.actionIcon.applyTo(icon);
+    theme.menu.text.applyTo(m_name);
 }
 
 void ActionCell::disable() {
+    const Theme::Theme theme = Theme::getTheme();
+    CCSprite* icon = as<CCSprite*>(m_icon->getNode());
+
     m_enabled = false;
 
-    as<CCSprite*>(m_icon->getNode())->setOpacity(120);
-    m_name->setOpacity(120);
+    theme.menu.icons.disabledIcon.applyTo(icon);
+    theme.menu.disabledText.applyTo(m_name);
 }
 
 void ActionCell::onHover() {
@@ -189,5 +192,5 @@ void ActionCell::onScaleToMin() {
 void ActionCell::onScaleToMax() {
     m_name->setVisible(true);
     m_icon->setAnchorPoint(CENTER_RIGHT);
-    m_icon->setPositionX(m_maxWidth - PADDING);
+    m_icon->setPositionX(m_maxWidth - Theme::getTheme().menu.paddingRight);
 }

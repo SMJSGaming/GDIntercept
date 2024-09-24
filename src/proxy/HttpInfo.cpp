@@ -81,17 +81,15 @@ nlohmann::json proxy::HttpInfo::parseCocosHeaders(const gd::vector<gd::string>& 
     return parsed;
 }
 
-bool proxy::HttpInfo::shouldPause() {
-    return Mod::get()->getSettingValue<bool>("pause-requests");
-}
-
-proxy::HttpInfo::HttpInfo(CCHttpRequest* request) : m_id(globalIndexCounter++),
-m_state(this->shouldPause() ? State::PAUSED : State::IN_PROGRESS),
+proxy::HttpInfo::HttpInfo(const bool paused, CCHttpRequest* request) : m_id(globalIndexCounter++),
+m_client(Client::COCOS),
+m_state(paused ? State::PAUSED : State::IN_PROGRESS),
 m_repeat(false),
 m_request(request) { }
 
-proxy::HttpInfo::HttpInfo(const bool repeat, web::WebRequest* request, const std::string& method, const std::string& url) : m_id(globalIndexCounter++),
-m_state(this->shouldPause() ? State::PAUSED : State::IN_PROGRESS),
+proxy::HttpInfo::HttpInfo(const bool paused, const bool repeat, web::WebRequest* request, const std::string& method, const std::string& url) : m_id(globalIndexCounter++),
+m_client(Client::GEODE),
+m_state(paused ? State::PAUSED : State::IN_PROGRESS),
 m_repeat(repeat),
 m_request(request, method, url) { }
 

@@ -2,9 +2,9 @@
 
 #include "../../../include.hpp"
 #include "../../utils/HoverNode.hpp"
+#include "../../utils/CenterLabel.hpp"
 #include "../utils/SharedWidthNode.hpp"
 #include "../../utils/RescalingNode.hpp"
-#include "../../../objects/ThemeStyle.hpp"
 
 class CategoryCell;
 

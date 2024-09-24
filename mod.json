@@ -1,6 +1,6 @@
 {
-  "geode": "3.6.1",
-  "version": "v0.6.0-alpha.6",
+  "geode": "3.7.1",
+  "version": "v0.6.1-alpha.6",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "api": {
@@ -12,8 +12,7 @@
     "SMJS",
     "RobTop"
   ],
-  "description": "A GD proxy mod which allows you to intercept and modify any communication sent through the Cocos2D-X or Geode web clients.",
-  "repository": "https://github.com/SMJSGaming/GDIntercept",
+  "description": "A tool to intercept and modify GD requests.",
   "links": {
     "community": "https://discord.gg/VqFpjF5mJe",
     "source": "https://github.com/SMJSGaming/GDIntercept"
@@ -63,6 +62,9 @@
     },
     "sprites": [
       "resources/*.png"
+    ],
+    "files": [
+      "resources/themes/*.json"
     ]
   },
   "settings": {
@@ -74,13 +76,9 @@
     "theme": {
       "name": "Theme",
       "description": "The theme of the code block.",
-      "type": "string",
+      "type": "custom:dynamic-enum",
       "default": "Dark",
-      "one-of": [
-        "Dark",
-        "Light",
-        "Dracula"
-      ]
+      "save-value": "themes"
     },
     "snapping-aggression": {
       "name": "Snapping Aggression",
@@ -147,12 +145,6 @@
       "default": 25,
       "min": 1,
       "max": 1000
-    },
-    "pause-requests": {
-      "name": "Pause Requests",
-      "description": "Pauses all requests and sets their timeout to infinite.",
-      "type": "bool",
-      "default": false
     },
     "log-requests": {
       "name": "Log Requests",

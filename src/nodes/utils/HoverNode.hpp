@@ -10,7 +10,9 @@ protected:
     virtual bool init() override {
         ESCAPE_WHEN(!CCNode::init(), false);
 
-        this->scheduleUpdate();
+        #ifndef GEODE_IS_ANDROID
+            this->scheduleUpdate();
+        #endif
 
         return true;
     };
@@ -33,6 +35,9 @@ private:
     }
 
     void update(float delta) override {
+        // Just incase something forcefully schedules an update
+        GEODE_ANDROID(return;)
+
         const CCPoint mousePos = geode::cocos::getMousePos();
         const CCPoint truePos = this->convertToWorldSpace(this->getAnchorPoint());
         const CCPoint oppositeTruePos = truePos + this->getContentSize() * this->getTrueScale();

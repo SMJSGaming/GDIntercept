@@ -5,7 +5,6 @@
 #include "../../utils/HoverNode.hpp"
 #include "../../utils/CenterLabel.hpp"
 #include "../utils/SharedWidthNode.hpp"
-#include "../../../objects/ThemeStyle.hpp"
 
 class CodeBlock;
 class ViewCell;
@@ -13,7 +12,7 @@ class ViewCell;
 namespace SideBarCell {
     struct SideBarView {
         const char icon;
-        const ccColor3B iconColor;
+        const std::function<Theme::Color(const Theme::Menu::Icons& icons)> iconColor;
         const std::string name;
         const std::function<void(CodeBlock* block)> callback;
 

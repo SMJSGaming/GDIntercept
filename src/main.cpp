@@ -1,6 +1,7 @@
+#include <Geode/loader/SettingEvent.hpp>
 #include "include.hpp"
 #include "nodes/InterceptPopup.hpp"
-#include <Geode/loader/SettingEvent.hpp>
+#include "settings/DynamicEnum.hpp"
 
 #ifdef KEYBINDS_ENABLED
     $execute {
@@ -43,6 +44,7 @@
             {
                 Keybind::create(KEY_Enter, Modifier::Control)
             },
+            "GD Intercept/Side Bar"
         });
         manager->registerBindable({
             "open_save_files"_spr,
@@ -55,9 +57,9 @@
             "GD Intercept/Side Bar"
         });
         manager->registerBindable({
-            "open_config_files"_spr,
-            "Open Config Files",
-            "Opens the config folder of GDIntercept",
+            "open_theme_files"_spr,
+            "Open Theme Files",
+            "Opens the theme folder of GDIntercept",
             {
                 Keybind::create(KEY_O, Modifier::Alt)
             },
@@ -250,9 +252,7 @@ $execute {
         const std::string key = setting->getKey();
 
         if (key == "cache-limit") {
-            ProxyHandler::setCacheLimit(Mod::get()->getSettingValue<int64_t>("cache-limit"));
-        } else if (key == "pause-requests" && !Mod::get()->getSettingValue<bool>("pause-requests")) {
-            ProxyHandler::resumeAll();
+            ProxyHandler::setCacheLimit(Mod::get()->getSettingValue<int64_t>(key));
         }
 
         const bool reloadsList = std::find(listReloads.begin(), listReloads.end(), key) != listReloads.end();
@@ -273,4 +273,12 @@ $execute {
             OPT(InterceptPopup::get())->reloadSideBar();
         }
     });
+}
+
+$on_mod(Loaded) {
+    DynamicEnum::registerLoader("theme"_spr, Theme::Theme::load);
+    DynamicEnum::registerLoader("theme"_spr, []{
+        OPT(InterceptPopup::get())->reloadCodeBlock(true);
+    });
+    DynamicEnum::reloadDynamicEnums("theme"_spr);
 }

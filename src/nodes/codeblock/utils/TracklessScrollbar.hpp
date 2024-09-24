@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../../include.hpp"
-#include "../../../objects/ThemeStyle.hpp"
 
 class TracklessScrollbar : public Scrollbar {
 public:

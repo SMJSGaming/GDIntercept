@@ -17,13 +17,16 @@ namespace proxy {
         static std::deque<ProxyHandler*> getFilteredProxies();
         static bool isProxy(CCHttpRequest* request);
         static bool isProxy(web::WebRequest* request);
-        static void setCacheLimit(const int64_t limit);
+        static bool isPaused();
+        static void pauseAll();
         static void resumeAll();
+        static void setCacheLimit(const int64_t limit);
     private:
         static std::vector<size_t> handledIDs;
         static std::vector<ProxyHandler*> aliveProxies;
         static std::deque<ProxyHandler*> cachedProxies;
         static std::vector<ProxyHandler*> pausedProxies;
+        static bool paused;
 
         static void registerProxy(ProxyHandler* proxy);
 
@@ -33,6 +36,7 @@ namespace proxy {
         GETTER(web::WebTask, modTask, ModTask);
         CCObject* m_originalTarget;
         SEL_HttpResponse m_originalProxy;
+        bool m_finished;
 
         ProxyHandler(CCHttpRequest* request);
         ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);
@@ -41,5 +45,6 @@ namespace proxy {
         void onModResponse(web::WebResponse* response);
         void onResponse();
         web::WebTask::Cancel onCancel();
+        void onFinished();
     };
 }

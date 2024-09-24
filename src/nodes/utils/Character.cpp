@@ -20,13 +20,14 @@ void Character::setCString(const char* label) {
     CenterLabel::setCString(std::string(label).substr(0, 1).c_str());
 }
 
-void Character::update(const float dt) {
+void Character::updateLabel() {
     if (m_rescale) {
+        CCLabelBMFont::updateLabel();
         CCNode* characterNode = cocos::getChild(this, 0);
 
         characterNode->setScale(this->getContentHeight() / characterNode->getContentHeight());
         characterNode->setPositionY(this->getContentHeight() / 2);
     } else {
-        CenterLabel::update(dt);
+        CenterLabel::updateLabel();
     }
 }

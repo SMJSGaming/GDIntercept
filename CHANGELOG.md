@@ -1,5 +1,21 @@
 # GDIntercept Changelog
 
+## v0.6.1-alpha.6 (2024-09-20) - Themes Update
+
+- Added custom theme support
+- Added additional default themes
+- Adjusted several nodes to allow for more customization
+- Added a reloadable theme setting
+- Added key and string quote tokens
+- Added a persistent paused request warning
+- Added a client flag to show the client used for the request
+- Patched a race condition which would occur when a request was finished receiving but still being processed while reaching the request cache limit
+- Patched a memory leak when a cocos request is canceled
+- Fixed a bug where the bottom scrollbar would slightly scroll down the content of the code block
+- Fixed a bug where opening and closing settings followed by receiving a request while the menu is still open would cause a crash
+- Removed the pause requests setting in favor of an instance based pause
+- Increased performance by reducing the amount of updates per frame
+
 ## v0.6.0-alpha.6 (2024-09-14) - UI v3 Update
 
 - Replaced the small menus with a main code block menu

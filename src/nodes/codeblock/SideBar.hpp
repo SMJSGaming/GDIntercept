@@ -6,7 +6,6 @@
 #include "cells/CategoryCell.hpp"
 #include "../utils/KeybindNode.hpp"
 #include "utils/SharedWidthNode.hpp"
-#include "../../objects/ThemeStyle.hpp"
 
 class CodeBlock;
 

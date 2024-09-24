@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/theme.schema.json",
+  "version": "1.0.0",
+  "name": "GitHub",
+  "theme": {
+    "code": {
+      "background": "#0D1117",
+      "foreground": "#6E7681",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      },
+      "scrollbar": {
+        "border": "#04080C",
+        "thumb": "#8B949E33"
+      },
+      "syntax": {
+        "text": "#E6EDF3",
+        "key": "#7EE787",
+        "string": "#A5D6FF",
+        "number": "#79C0FF",
+        "constant": "#79C0FF",
+        "error": "#FFA198"
+      }
+    },
+    "menu": {
+      "background": "#010409",
+      "foreground": "#2D3139",
+      "text": "#E6EDF3",
+      "border": "#30363D",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      }
+    }
+  }
+}

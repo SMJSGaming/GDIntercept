@@ -1,6 +1,5 @@
 #pragma once
 
-#include <fmt/chrono.h>
 #include "../../include.hpp"
 #include "SideBar.hpp"
 #include "cells/ViewCell.hpp"
@@ -11,7 +10,7 @@
 #include "cells/CodeLineCell.hpp"
 #include "../utils/KeybindNode.hpp"
 #include "utils/TracklessScrollbar.hpp"
-#include "../../objects/ThemeStyle.hpp"
+#include "../../proxy/ProxyHandler.hpp"
 #include "../../objects/JSONTokenizer.hpp"
 
 class CodeBlock : public KeybindNode<Border>, public FLAlertLayerProtocol {
@@ -26,6 +25,8 @@ public:
 private:
     static const std::vector<SideBarCell::SideBarView> views;
     static const SideBar::Categories actions;
+    static CCScale9Sprite* pauseWarning;
+    static bool acceptedPauses;
 
     HttpInfo* m_info;
     SideBar* m_bar;
@@ -36,25 +37,25 @@ private:
     CodeBlock();
     void setup() override;
     bool init(const CCSize& size);
-    CCSize getTrueFontSize();
-    float getCellHeight();
     void showMessage(const std::string& message, const ccColor3B& color = { 0xFF, 0xFF, 0xFF });
     void scroll(const float x, const float y);
     bool onCopy();
     bool onSend();
     bool onCancel();
     bool onOpenSaveFiles();
-    bool onOpenConfigFiles();
+    bool onOpenThemeFiles();
     bool onSave();
-    bool onPause(const SideBarCell::OriginalCallback& original);
-    bool onResume(const SideBarCell::OriginalCallback& original);
+    bool onPause();
+    bool onResume();
     bool onRaw(const SideBarCell::OriginalCallback& original);
     bool onFormatted(const SideBarCell::OriginalCallback& original);
+    bool onComingSoon();
     void onInfo();
     void onBody();
     void onQuery();
     void onRequestHeaders();
     void onResponse();
     void onResponseHeaders();
+    void onPauseAction();
     void FLAlert_Clicked(FLAlertLayer* alert, const bool state) override;
 };

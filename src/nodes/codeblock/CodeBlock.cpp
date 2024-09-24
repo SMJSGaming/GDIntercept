@@ -17,24 +17,28 @@ CodeBlock* CodeBlock::create(const CCSize& size) {
 CodeBlock::CodeBlock() : m_info(nullptr) { }
 
 bool CodeBlock::init(const CCSize& size) {
+    const Theme::Theme theme = Theme::getTheme();
     ESCAPE_WHEN(!KeybindNode::init(), false);
-    ESCAPE_WHEN(!Border::init(ThemeStyle::getTheme().ui.background, size), false);
+    ESCAPE_WHEN(!Border::init(theme.code.background, size), false);
 
-    this->setPaddingY(PADDING / 2);
-    this->setPaddingRight(PADDING + 1);
-    this->setNode(CullingList::create(this->getContentSize() - ccp(this->getPaddingX(), this->getPaddingY()) * 2));
+    this->setPaddingY(1);
+    this->setPaddingRight(theme.code.scrollbar.size + 1);
 
+    const float fullPaddingY = this->getPaddingY() * 2;
+    const float paddingBottom = this->getPaddingBottom();
+    CullingList* list = CullingList::create(size - ccp(this->getPaddingX() * 2, fullPaddingY));
     TracklessScrollbar* scrollbarY = TracklessScrollbar::create(true, {
-        PADDING,
-        this->getContentHeight() - 2
-    }, as<CullingList*>(this->getNode())->getView());
+        theme.code.scrollbar.size,
+        this->getContentHeight() - fullPaddingY
+    }, list->getView());
     m_scrollbars = { nullptr, scrollbarY };
-    m_bar = SideBar::create(this, size.height - 2, CodeBlock::views, CodeBlock::actions);
+    m_bar = SideBar::create(this, size.height - fullPaddingY, CodeBlock::views, CodeBlock::actions);
 
-    scrollbarY->setAnchorPoint(BOTTOM_RIGHT);
-    scrollbarY->setPosition({ this->getContentWidth(), 1 });
-    m_bar->setPosition({ 0, 1 });
+    scrollbarY->setAnchorPoint(BOTTOM_LEFT);
+    scrollbarY->setPosition({ this->getContentWidth() - this->getPaddingRight(), paddingBottom });
+    m_bar->setPosition({ 1, paddingBottom });
 
+    this->setNode(list);
     this->reloadCode();
     this->reloadSideBar();
     this->addChild(scrollbarY);
@@ -48,21 +52,24 @@ void CodeBlock::reloadCode() {
 }
 
 void CodeBlock::reloadSideBar() {
+    const Theme::Theme theme = Theme::getTheme();
     TracklessScrollbar* scrollbarX = std::get<0>(m_scrollbars);
 
     m_bar->reloadState();
 
     if (Mod::get()->getSettingValue<bool>("minimize-side-menu")) {
         m_bar->scaleToMin();
-        this->setPaddingLeft(m_bar->getMinWidth());
+        this->setPaddingLeft(m_bar->getMinWidth() + 1);
     } else {
         m_bar->scaleToMax();
-        this->setPaddingLeft(m_bar->getMaxWidth());
+        this->setPaddingLeft(m_bar->getMaxWidth() + 1);
     }
 
     if (scrollbarX) {
-        scrollbarX->setPositionX(m_bar->getContentWidth());
-        scrollbarX->setContentWidth(this->getNode()->getContentWidth() + 1);
+        const float paddingLeft = this->getPaddingLeft();
+
+        scrollbarX->setPositionX(paddingLeft);
+        scrollbarX->setContentWidth(this->getContentWidth() - paddingLeft - this->getPaddingRight());
     }
 }
 
@@ -75,12 +82,11 @@ void CodeBlock::updateInfo(HttpInfo* info) {
 }
 
 void CodeBlock::setCode(const HttpInfo::HttpContent& code) {
-    const ThemeStyle& theme = ThemeStyle::getTheme();
-    const float cellHeight = this->getCellHeight();
-    const float fontWidth = this->getTrueFontSize().width;
-    const float lineNumberWidth = fontWidth * std::to_string(
+    const Theme::Theme theme = Theme::getTheme();
+    const CCSize fontSize = theme.code.font.getTrueFontSize();
+    const float lineNumberWidth = fontSize.width * std::to_string(
         std::count(code.contents.begin(), code.contents.end(), '\n') + 1
-    ).size() + PADDING;
+    ).size() + theme.code.paddingLeft;
     TracklessScrollbar* scrollbarX = std::get<0>(m_scrollbars);
     TracklessScrollbar* scrollbarY = std::get<1>(m_scrollbars);
     CullingList* list = as<CullingList*>(this->getNode());
@@ -91,8 +97,10 @@ void CodeBlock::setCode(const HttpInfo::HttpContent& code) {
 
     for (size_t i = 1; std::getline(stream, line) || i == 1; i++) {
         cells.push_back(CodeLineCell::create({
-            code.type == ContentType::BINARY ? list->getContentWidth() : lineNumberWidth + PADDING * 2 + fontWidth * std::min<size_t>(2000, line.size()),
-            cellHeight
+            code.type == ContentType::BINARY ?
+                list->getContentWidth() :
+                lineNumberWidth + theme.code.paddingCenter + fontSize.width * std::min<size_t>(2000, line.size()) + theme.code.paddingRight,
+            fontSize.height + theme.code.font.lineHeight
         }, i, lineNumberWidth, { code.type, line }, tokenizer));
     }
 
@@ -102,48 +110,41 @@ void CodeBlock::setCode(const HttpInfo::HttpContent& code) {
         if (scrollbarX) {
             m_scrollbars = { nullptr, scrollbarY };
 
+            this->setPaddingBottom(1);
             m_corner->removeFromParentAndCleanup(true);
             scrollbarX->removeFromParentAndCleanup(true);
-            scrollbarY->setPositionY(1);
-            scrollbarY->setContentHeight(this->getContentHeight() - 2);
-            this->setPaddingBottom(PADDING / 2);
+            scrollbarY->setPositionY(this->getPaddingBottom());
+            scrollbarY->setContentHeight(this->getContentHeight() - theme.code.scrollbar.size + this->getPaddingY() * 2);
         }
     } else if (!scrollbarX) {
+        const float contentWidth = this->getContentWidth();
+        const float paddingLeft = this->getPaddingLeft();
         scrollbarX = TracklessScrollbar::create(false, {
-            list->getContentWidth() + 1,
-            PADDING
+            contentWidth - paddingLeft - this->getPaddingRight(),
+            theme.code.scrollbar.size
         }, list->getView());
         m_scrollbars = { scrollbarX, scrollbarY };
-        m_corner = CCLayerColor::create(theme.ui.scrollbar.border);
+        m_corner = CCLayerColor::create(theme.code.scrollbar.border);
 
-        m_corner->setContentSize({ PADDING, PADDING });
+        this->setPaddingBottom(theme.code.scrollbar.size + 1);
+        m_corner->setContentSize({ theme.code.scrollbar.size, theme.code.scrollbar.size });
         m_corner->setAnchorPoint(BOTTOM_RIGHT);
         m_corner->ignoreAnchorPointForPosition(false);
-        m_corner->setPosition({ this->getContentWidth(), 0 });
-        scrollbarX->setPositionX(m_bar->getContentWidth());
+        m_corner->setPosition({ contentWidth - 1, 1 });
+        scrollbarX->setPosition({ paddingLeft, 1 });
         scrollbarX->setAnchorPoint(BOTTOM_LEFT);
-        scrollbarY->setPositionY(PADDING);
-        scrollbarY->setContentHeight(this->getContentHeight() - PADDING - 1);
+        scrollbarY->setPositionY(this->getPaddingBottom());
+        scrollbarY->setContentHeight(this->getContentHeight() - this->getPaddingY() * 2);
         this->addChild(scrollbarX);
         this->addChild(m_corner);
-        this->setPaddingBottom(PADDING + 1);
+        list->moveToTop();
     }
 
-    this->setBackgroundColor(theme.ui.background);
+    this->setBackgroundColor(theme.code.background);
 }
 
 HttpInfo* CodeBlock::getActiveInfo() const {
     return m_info;
-}
-
-CCSize CodeBlock::getTrueFontSize() {
-    const ThemeStyle& theme = ThemeStyle::getTheme();
-
-    return CCLabelBMFont::create("0", theme.font.fontName)->getContentSize() * theme.font.fontScale;
-}
-
-float CodeBlock::getCellHeight() {
-    return this->getTrueFontSize().height + ThemeStyle::getTheme().font.lineHeight;
 }
 
 void CodeBlock::showMessage(const std::string& message, const ccColor3B& color) {

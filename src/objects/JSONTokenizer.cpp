@@ -9,11 +9,11 @@ std::vector<JSONTokenizer::TokenOffset> JSONTokenizer::parseLine(const std::stri
     bool previousWasAccepted = true;
     std::vector<TokenOffset> tokens;
 
-    if (m_token == Token::STRING || m_token == Token::NUMBER || m_token == Token::CONSTANT) {
+    if (m_token == Token::STRING || m_token == Token::STRING_QUOTE || m_token == Token::NUMBER || m_token == Token::CONSTANT) {
         m_token = m_futureToken = Token::TERMINATOR;
 
         this->reset();
-    } else if (m_token == Token::KEY && m_openQuote != 0) {
+    } else if ((m_token == Token::KEY || m_token == Token::KEY_QUOTE) && m_openQuote != 0) {
         m_token = m_futureToken = Token::SEPARATOR;
 
         this->reset();
@@ -25,7 +25,7 @@ std::vector<JSONTokenizer::TokenOffset> JSONTokenizer::parseLine(const std::stri
         TokenOffset& back = tokens.back();
 
         if (code[i] != ' ' || (m_token == Token::STRING || m_token == Token::NUMBER)) {
-            if (previousWasAccepted && m_token == Token::STRING && !m_escape) {
+            if (previousWasAccepted && m_token == Token::STRING && !m_escape && back.token == m_token) {
                 back.length = (i = code.find_first_of(std::string() + m_openQuote + '\\', i)) - back.offset;
             }
 
@@ -63,11 +63,12 @@ bool JSONTokenizer::determineCharToken(const char character, const std::string& 
         } else {
             return false;
         }
-    } else if (m_token == Token::KEY) {
+    } else if (m_token == Token::KEY || m_token == Token::KEY_QUOTE) {
         if (m_openQuote != 0) {
             return this->checkString(character, truncatedCode.size());
         } else if (character == '\'' || character == '"') {
             m_openQuote = character;
+            m_futureToken = Token::KEY;
 
             return true;
         } else {
@@ -96,13 +97,14 @@ bool JSONTokenizer::determineCharToken(const char character, const std::string& 
                     m_token = m_futureToken = Token::CONSTANT;
                     m_constantSize = 4 + startsWithFalse;
                 } else if (character == '"' || character == '\'') {
-                    m_token = m_futureToken = Token::STRING;
+                    m_token = Token::STRING_QUOTE;
+                    m_futureToken = Token::STRING;
                     m_openQuote = character;
                 } else if (isdigit(character) || character == '-') {
                     m_token = m_futureToken = Token::NUMBER;
                 } else if (character == '{') {
                     m_token = Token::BRACKET;
-                    m_futureToken = Token::KEY;
+                    m_futureToken = Token::KEY_QUOTE;
                     m_closesExpected += '}';
                 } else if (character == '[') {
                     m_token = Token::BRACKET;
@@ -119,7 +121,7 @@ bool JSONTokenizer::determineCharToken(const char character, const std::string& 
             return accepted;
         } else if (character == ',') {
             m_token = Token::TERMINATOR;
-            m_futureToken = m_closesExpected.ends_with('}') ? Token::KEY : Token::UNKNOWN;
+            m_futureToken = m_closesExpected.ends_with('}') ? Token::KEY_QUOTE : Token::UNKNOWN;
 
             return true;
         } else {
@@ -132,7 +134,13 @@ bool JSONTokenizer::checkString(const char character, const size_t charactersLef
     if (character == '\\') {
         m_escape = !m_escape;
     } else if (character == m_openQuote && !m_escape) {
-        m_futureToken = m_token == Token::KEY ? Token::SEPARATOR : Token::TERMINATOR;
+        if (m_token == Token::KEY) {
+            m_token = Token::KEY_QUOTE;
+            m_futureToken = Token::SEPARATOR;
+        } else {
+            m_token = Token::STRING_QUOTE;
+            m_futureToken = Token::TERMINATOR;
+        }
     } else if (charactersLeft > 1) {
         m_escape = false;
     } else {
@@ -155,7 +163,10 @@ bool JSONTokenizer::checkObjectTerminator(const char character) {
 }
 
 void JSONTokenizer::reset() {
-    m_openQuote = 0;
+    if (m_futureToken != Token::STRING && m_futureToken != Token::KEY) {
+        m_openQuote = 0;
+    }
+
     m_escape = false;
     m_hasDecimal = false;
     m_token = m_futureToken;

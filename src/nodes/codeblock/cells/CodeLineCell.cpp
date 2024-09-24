@@ -13,7 +13,7 @@ CodeLineCell* CodeLineCell::create(const CCSize& size, const size_t lineNumber, 
 }
 
 float CodeLineCell::getCodeLineWidth() const {
-    return m_lineNumberWidth + PADDING;
+    return m_lineNumberWidth + Theme::getTheme().code.paddingCenter;
 }
 
 CodeLineCell::CodeLineCell(
@@ -36,17 +36,14 @@ m_lineNumberWidth(lineNumberWidth) {
 }
 
 void CodeLineCell::initRender() {
-    const ThemeStyle& theme = ThemeStyle::getTheme();
+    const Theme::Theme theme = Theme::getTheme();
     const float codeLineWidth = this->getCodeLineWidth();
-    CCLabelBMFont* lineNumberLabel = CCLabelBMFont::create(std::to_string(m_lineNumber).c_str(), theme.font.fontName);
-    CCLabelBMFont* codeLabel = CCLabelBMFont::create(
-        m_code.contents.substr(0, std::min<size_t>(m_code.contents.size(), 2000)).c_str(),
-        theme.font.fontName
-    );
-    CCLayerColor* numberBackground = CCLayerColor::create(theme.ui.background, codeLineWidth, this->getContentHeight());
+    CCLabelBMFont* lineNumberLabel = theme.code.font.createLabel(std::to_string(m_lineNumber));
+    CCLabelBMFont* codeLabel = theme.code.font.createLabel(m_code.contents.substr(0, std::min<size_t>(m_code.contents.size(), 2000)));
+    CCLayerColor* numberBackground = CCLayerColor::create(theme.code.background, codeLineWidth, this->getContentHeight());
 
     if (m_tokens.empty()) {
-        codeLabel->setColor(theme.syntax.text);
+        codeLabel->setColor(theme.code.syntax.text);
     } else for (const JSONTokenizer::TokenOffset& tokenOffset : m_tokens) {
         const size_t labelLength = m_code.contents.size();
 
@@ -58,27 +55,27 @@ void CodeLineCell::initRender() {
             CONTINUE_WHEN(!character);
 
             switch (tokenOffset.token) {
-                case JSONTokenizer::Token::CORRUPT: character->setColor(theme.syntax.error); break;
-                case JSONTokenizer::Token::KEY: character->setColor(theme.syntax.key); break;
-                case JSONTokenizer::Token::STRING: character->setColor(theme.syntax.string); break;
-                case JSONTokenizer::Token::NUMBER: character->setColor(theme.syntax.number); break;
-                case JSONTokenizer::Token::CONSTANT: character->setColor(theme.syntax.constant); break;
-                case JSONTokenizer::Token::TERMINATOR: character->setColor(theme.syntax.terminator); break;
-                case JSONTokenizer::Token::SEPARATOR: character->setColor(theme.syntax.separator); break;
-                case JSONTokenizer::Token::BRACKET: character->setColor(theme.syntax.bracket); break;
-                default: character->setColor(theme.syntax.text); break;
+                case JSONTokenizer::Token::CORRUPT: theme.code.syntax.error.applyTo(character); break;
+                case JSONTokenizer::Token::KEY: theme.code.syntax.key.applyTo(character); break;
+                case JSONTokenizer::Token::STRING: theme.code.syntax.string.applyTo(character); break;
+                case JSONTokenizer::Token::NUMBER: theme.code.syntax.number.applyTo(character); break;
+                case JSONTokenizer::Token::CONSTANT: theme.code.syntax.constant.applyTo(character); break;
+                case JSONTokenizer::Token::TERMINATOR: theme.code.syntax.terminator.applyTo(character); break;
+                case JSONTokenizer::Token::SEPARATOR: theme.code.syntax.separator.applyTo(character); break;
+                case JSONTokenizer::Token::BRACKET: theme.code.syntax.bracket.applyTo(character); break;
+                case JSONTokenizer::Token::KEY_QUOTE: theme.code.syntax.keyQuote.applyTo(character); break;
+                case JSONTokenizer::Token::STRING_QUOTE: theme.code.syntax.stringQuote.applyTo(character); break;
+                default: theme.code.syntax.text.applyTo(character); break;
             }
         }
     }
 
-    lineNumberLabel->setScale(theme.font.fontScale);
-    lineNumberLabel->setAnchorPoint(BOTTOM_RIGHT);
-    lineNumberLabel->setColor(theme.ui.foreground);
-    lineNumberLabel->setPosition({ m_lineNumberWidth, theme.font.lineHeight / 2 });
+    lineNumberLabel->setAnchorPoint(CENTER_RIGHT);
+    theme.code.foreground.applyTo(lineNumberLabel);
+    lineNumberLabel->setPosition({ m_lineNumberWidth, this->getContentHeight() / 2 });
     codeLabel->setID("code");
-    codeLabel->setScale(theme.font.fontScale);
-    codeLabel->setAnchorPoint(BOTTOM_LEFT);
-    codeLabel->setPosition({ codeLineWidth, theme.font.lineHeight / 2 });
+    codeLabel->setAnchorPoint(CENTER_LEFT);
+    codeLabel->setPosition({ codeLineWidth, this->getContentHeight() / 2 });
     numberBackground->setID("horizontal-align");
     numberBackground->setAnchorPoint(BOTTOM_LEFT);
     numberBackground->setPosition(ZERO_POINT);

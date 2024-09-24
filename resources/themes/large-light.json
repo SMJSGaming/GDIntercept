@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/theme.schema.json",
+  "version":"1.0.0",
+  "name": "Large Light",
+  "theme": {
+    "code": {
+      "padding-left": 5,
+      "padding-right": 5,
+      "padding-center": 5,
+      "background": "#F",
+      "foreground": "#6E7681",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.5,
+        "line-height": 3
+      },
+      "scrollbar": {
+        "border": "#E5",
+        "thumb": "#64646464"
+      },
+      "syntax": {
+        "text": "#3B",
+        "key": "#9CDCFE",
+        "string": "#CE9178",
+        "number": "#B5CEA8",
+        "constant": "#569CD6",
+        "error": "#F44747"
+      }
+    },
+    "menu": {
+      "padding-left": 5,
+      "padding-right": 5,
+      "padding-center": 5,
+      "background": "#F8",
+      "foreground": "#E5EBF1",
+      "text": "#3B",
+      "border": "#E5",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.55,
+        "line-height": 3
+      },
+      "icons": {
+        "info": "#C23B22",
+        "body": "#EFBF04",
+        "query": "#779ECB",
+        "header": "#966FD6",
+        "response": "#56AE57"
+      }
+    }
+  }
+}

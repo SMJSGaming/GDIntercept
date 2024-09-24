@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/resources/themes/theme.schema.json",
+  "version": "1.0.0",
+  "name": "One Dark Pro",
+  "theme": {
+    "code": {
+      "background": "#282C34",
+      "foreground": "#495162",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      },
+      "scrollbar": {
+        "border": "#404349",
+        "thumb": "#4E566664"
+      },
+      "syntax": {
+        "text": "#ABB2BF",
+        "key": "#E06C75",
+        "string": "#98C379",
+        "number": "#D19A66",
+        "constant": "#D19A66",
+        "error": "#FFFFFF"
+      }
+    },
+    "menu": {
+      "background": "#21252B",
+      "category-background": "#282C34",
+      "foreground": "#323842",
+      "text": "#ABB2BF",
+      "category-text": "#ABB2BF",
+      "border": "#21252B",
+      "category-border": "#282C34",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      }
+    }
+  }
+}

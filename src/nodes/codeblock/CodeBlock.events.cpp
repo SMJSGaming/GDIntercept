@@ -3,18 +3,21 @@
 using namespace SideBarCell;
 
 const std::vector<SideBarView> CodeBlock::views({
-    { 'I', { 0xFF, 0x69, 0x61 }, "Info", [](CodeBlock* block) { block->onInfo(); } },
-    { 'B', { 0xFF, 0xEE, 0x8C }, "Body", [](CodeBlock* block) { block->onBody(); } },
-    { 'Q', { 0xA2, 0xBF, 0xFE }, "Query", [](CodeBlock* block) { block->onQuery(); } },
-    { 'H', { 0xB1, 0x9C, 0xD9 }, "Request Headers", [](CodeBlock* block) { block->onRequestHeaders(); } },
-    { 'R', { 0xB2, 0xFB, 0xA5 }, "Response", [](CodeBlock* block) { block->onResponse(); } },
-    { 'H', { 0xB1, 0x9C, 0xD9 }, "Response Headers", [](CodeBlock* block) { block->onResponseHeaders(); } }
+    { 'I', [](const auto& icons) { return icons.info; }, "Info", [](CodeBlock* block) { block->onInfo(); } },
+    { 'B', [](const auto& icons) { return icons.body; }, "Body", [](CodeBlock* block) { block->onBody(); } },
+    { 'Q', [](const auto& icons) { return icons.query; }, "Query", [](CodeBlock* block) { block->onQuery(); } },
+    { 'H', [](const auto& icons) { return icons.header; }, "Request Headers", [](CodeBlock* block) { block->onRequestHeaders(); } },
+    { 'R', [](const auto& icons) { return icons.response; }, "Response", [](CodeBlock* block) { block->onResponse(); } },
+    { 'H', [](const auto& icons) { return icons.header; }, "Response Headers", [](CodeBlock* block) { block->onResponseHeaders(); } }
 });
 
 const SideBar::Categories CodeBlock::actions({
-    { { "Local Files", "localfiles.png"_spr }, {
+    { { "Themes", "themes.png"_spr }, {
+        { { "Open Theme Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenThemeFiles(); } } },
+        { { "Open Theme Docs", "docs.png"_spr, [](CodeBlock* block) { return block->onComingSoon(); } } }
+    } },
+    { { "Save Files", "saves.png"_spr }, {
         { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } } },
-        { { "Open Config Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenConfigFiles(); } } },
         { { "Save", "download.png"_spr, [](CodeBlock* block) { return block->onSave(); } }, [](CodeBlock* block) {
             return block->m_info;
         } }
@@ -31,14 +34,11 @@ const SideBar::Categories CodeBlock::actions({
         } }
     } },
     { {"Settings", "settings.png"_spr }, {
-        { "pause-requests", { "Resume", "Pause" }, { "resume.png"_spr, "pause.png"_spr }, true, {
-            [](CodeBlock* block, const OriginalCallback& original) {
-                return block->onPause(original);
-            },
-            [](CodeBlock* block, const OriginalCallback& original) {
-                return block->onResume(original);
-            }
-        } },
+        {
+            { "Resume All", "resume.png"_spr, [](CodeBlock* block) { return block->onResume(); } },
+            { "Pause All", "pause.png"_spr, [](CodeBlock* block) { return block->onPause(); } },
+            [](CodeBlock* block) { return ProxyHandler::isPaused(); }
+        },
         { "raw-data", { "Raw", "Formatted" }, { "raw.png"_spr, "simplified.png"_spr }, false, {
             [](CodeBlock* block, const OriginalCallback& original) {
                 return block->onRaw(original);
@@ -50,12 +50,16 @@ const SideBar::Categories CodeBlock::actions({
     } }
 });
 
+CCScale9Sprite* CodeBlock::pauseWarning = nullptr;
+
+bool CodeBlock::acceptedPauses = false;
+
 void CodeBlock::setup() {
     this->bind("open_save_files"_spr, [this]() {
         this->onOpenSaveFiles();
     });
-    this->bind("open_config_files"_spr, [this]() {
-        this->onOpenConfigFiles();
+    this->bind("open_theme_files"_spr, [this]() {
+        this->onOpenThemeFiles();
     });
     this->bind("save_packet"_spr, [this]() {
         this->onSave();
@@ -67,20 +71,10 @@ void CodeBlock::setup() {
         this->onSend();
     });
     this->bind("pause_packet"_spr, [this]() {
-        Mod* mod = Mod::get();
-
-        if (mod->getSettingValue<bool>("pause-requests")) {
-            this->onResume([mod]() {
-                mod->setSettingValue("pause-requests", false);
-
-                return true;
-            });
+        if (ProxyHandler::isPaused()) {
+            this->onResume();
         } else {
-            this->onPause([mod]() {
-                mod->setSettingValue("pause-requests", true);
-
-                return true;
-            });
+            this->onPause();
         }
     });
     this->bind("raw_code_block"_spr, [this]() {
@@ -102,10 +96,14 @@ void CodeBlock::setup() {
     });
 
     this->bind("code_line_up"_spr, [this]() {
-        this->scroll(0, -this->getCellHeight());
+        const Theme::Theme theme = Theme::getTheme();
+
+        this->scroll(0, -(theme.code.font.getTrueFontSize().height + theme.code.font.lineHeight));
     });
     this->bind("code_line_down"_spr, [this]() {
-        this->scroll(0, this->getCellHeight());
+        const Theme::Theme theme = Theme::getTheme();
+
+        this->scroll(0, theme.code.font.getTrueFontSize().height + theme.code.font.lineHeight);
     });
     this->bind("code_page_up"_spr, [this]() {
         this->scroll(0, -this->getNode()->getContentHeight());
@@ -173,8 +171,8 @@ bool CodeBlock::onOpenSaveFiles() {
     return true;
 }
 
-bool CodeBlock::onOpenConfigFiles() {
-    utils::file::openFolder(Mod::get()->getConfigDir());
+bool CodeBlock::onOpenThemeFiles() {
+    utils::file::openFolder(Mod::get()->getConfigDir() / "themes");
 
     return true;
 }
@@ -223,26 +221,29 @@ bool CodeBlock::onSave() {
     return true;
 }
 
-bool CodeBlock::onPause(const SideBarCell::OriginalCallback& original) {
-    if (Mod::get()->getSavedValue<bool>("accepted-pauses", false)) {
-        this->showMessage("Requests Paused");
+bool CodeBlock::onPause() {
+    if (CodeBlock::acceptedPauses) {
+        this->onPauseAction();
 
-        return original();
+        return true;
     } else {
         FLAlertLayer::create(this, "Pausing Requests",
-            "Requests will be <cy>paused</c> until you resume them. "
-            "This means that you will no longer be able to send or receive data from the server.\n\n"
-            "Are you sure you want to <cy>pause</c> requests?"
+            "<cr>All requests</c> will be <cy>paused</c> until you resume them. "
+            "This means that you will no longer be able to send or receive online data from any mod or GD.\n\n"
+            "Are you sure you want to <cy>pause</c> <cr>all requests</c>?"
         , "Cancel", "Ok")->show();
 
         return false;
     }
 }
 
-bool CodeBlock::onResume(const SideBarCell::OriginalCallback& original) {
+bool CodeBlock::onResume() {
+    ProxyHandler::resumeAll();
+    SceneManager::get()->forget(CodeBlock::pauseWarning);
+    OPT(CodeBlock::pauseWarning)->removeFromParent();
     this->showMessage("Requests Resumed");
 
-    return original();
+    return true;
 }
 
 bool CodeBlock::onRaw(const SideBarCell::OriginalCallback& original) {
@@ -257,13 +258,20 @@ bool CodeBlock::onFormatted(const SideBarCell::OriginalCallback& original) {
     return original();
 }
 
+bool CodeBlock::onComingSoon() {
+    this->showMessage("Coming Soon...");
+
+    return false;
+}
+
 void CodeBlock::onInfo() {
     if (!m_info) {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     } else {
         const HttpInfo::URL url = m_info->getRequest().getURL();
 
-        this->setCode({ ContentType::UNKNOWN_CONTENT, fmt::format("Status Code: {}\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}",
+        this->setCode({ ContentType::UNKNOWN_CONTENT, fmt::format("Client: {}\nStatus Code: {}\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}",
+            m_info->getClient() == Client::COCOS ? "Cocos2D-X" : "Geode",
             m_info->getResponse().stringifyStatusCode(),
             url.getMethod(),
             url.stringifyProtocol(),
@@ -317,14 +325,30 @@ void CodeBlock::onResponseHeaders() {
     }
 }
 
+void CodeBlock::onPauseAction() {
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+    CCLabelBMFont* label = CCLabelBMFont::create("Requests Paused", "bigFont.fnt");
+    CodeBlock::pauseWarning = CCScale9Sprite::create("square02_001.png");
+
+    label->setScale(2);
+    CodeBlock::pauseWarning->setScale(0.25f);
+    CodeBlock::pauseWarning->setOpacity(0x7F);
+    CodeBlock::pauseWarning->setAnchorPoint(TOP_CENTER);
+    CodeBlock::pauseWarning->setContentSize(label->getScaledContentSize() + ccp(PADDING, PADDING) * 4);
+    CodeBlock::pauseWarning->setPosition({ winSize.width / 2, winSize.height - PADDING });
+    label->setPosition(CodeBlock::pauseWarning->getContentSize() / 2);
+    CodeBlock::pauseWarning->addChild(label);
+
+    ProxyHandler::pauseAll();
+    SceneManager::get()->keepAcrossScenes(CodeBlock::pauseWarning);
+    this->showMessage("Requests Paused");
+}
+
 void CodeBlock::FLAlert_Clicked(FLAlertLayer* alert, const bool state) {
     if (state) {
-        Mod* mod = Mod::get();
+        CodeBlock::acceptedPauses = true;
 
-        mod->setSettingValue("pause-requests", true);
-        mod->setSavedValue("accepted-pauses", true);
+        this->onPauseAction();
         m_bar->reloadState();
-
-        this->showMessage("Requests Paused");
     }
 }

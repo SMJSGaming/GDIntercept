@@ -40,12 +40,15 @@ Alpha 6 Todo:
   ✔ @low Add a horizontal scrollbar @done(24-09-12 22:00)
   ✔ @low Keep line numbers aligned while horizontally scrolling @done(24-09-11 14:36)
   ✔ @high Rebind keys @done(24-09-13 19:00)
+  ✔ @low Add a way to save requests @done(24-09-09 11:47)
 Release Todo:
+  # I'm sorry but I'm bored and wanna do this
+  ✔ @low Custom theme support @done(24-09-18 20:09)
+  ✔ @high Add bigger versions of the standard themes @done(24-09-20 14:20)
+  ✔ @high Persistant pause warning @done(24-09-19 11:49)
   ☐ @critical Add inputs to the JSON code block
   ☐ @critical Pen test all well known mods & GD
   ☐ @high Fix the comment history response parser
 Nice To Haves:
-  ☐ Custom theme support
-  ☐ Add a way to save requests
   ☐ Add a response time field
   ☐ Add a text representation to the binary view

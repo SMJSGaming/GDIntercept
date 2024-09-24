@@ -5,7 +5,6 @@
 #include "../../utils/CenterLabel.hpp"
 #include "../utils/SharedWidthNode.hpp"
 #include "../../utils/RescalingNode.hpp"
-#include "../../../objects/ThemeStyle.hpp"
 
 class CodeBlock;
 class ActionCell;

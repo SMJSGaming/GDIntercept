@@ -8,6 +8,8 @@ std::deque<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
 
 std::vector<ProxyHandler*> proxy::ProxyHandler::pausedProxies;
 
+bool proxy::ProxyHandler::paused = false;
+
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
 
@@ -82,6 +84,37 @@ bool ProxyHandler::isProxy(web::WebRequest* request) {
     return std::find(ProxyHandler::handledIDs.begin(), ProxyHandler::handledIDs.end(), request->getID()) != ProxyHandler::handledIDs.end();
 }
 
+bool ProxyHandler::isPaused() {
+    return ProxyHandler::paused;
+}
+
+void ProxyHandler::pauseAll() {
+    ProxyHandler::paused = true;
+}
+
+void ProxyHandler::resumeAll() {
+    const std::vector<ProxyHandler*> paused = std::vector<ProxyHandler*>(ProxyHandler::pausedProxies);
+    ProxyHandler::paused = false;
+
+    std::thread([paused]{
+        for (ProxyHandler* proxy : paused) {
+            if (proxy->getInfo()->isCancelled()) {
+                proxy->onFinished();
+            } else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+                proxy->getInfo()->resume();
+
+                if (CCHttpRequest* cocosRequest = proxy->getCocosRequest()) {
+                    Loader::get()->queueInMainThread([cocosRequest]{ CCHttpClient::getInstance()->send(cocosRequest); });
+                }
+            }
+        }
+    }).detach();
+
+    ProxyHandler::pausedProxies.clear();
+}
+
 void ProxyHandler::setCacheLimit(const int64_t limit) {
     const size_t size = ProxyHandler::cachedProxies.size();
 
@@ -98,26 +131,6 @@ void ProxyHandler::setCacheLimit(const int64_t limit) {
     }
 }
 
-void ProxyHandler::resumeAll() {
-    const std::vector<ProxyHandler*> paused = std::vector<ProxyHandler*>(ProxyHandler::pausedProxies);
-
-    std::thread([paused]{
-        for (ProxyHandler* proxy : paused) {
-            if (!proxy->getInfo()->isCancelled()) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-                proxy->getInfo()->resume();
-
-                if (CCHttpRequest* cocosRequest = proxy->getCocosRequest()) {
-                    Loader::get()->queueInMainThread([cocosRequest]{ CCHttpClient::getInstance()->send(cocosRequest); });
-                }
-            }
-        }
-    }).detach();
-
-    ProxyHandler::pausedProxies.clear();
-}
-
 void ProxyHandler::registerProxy(ProxyHandler* proxy) {
     ProxyHandler::cachedProxies.push_front(proxy);
     ProxyHandler::aliveProxies.push_back(proxy);
@@ -131,7 +144,7 @@ void ProxyHandler::registerProxy(ProxyHandler* proxy) {
 
         ProxyHandler::cachedProxies.pop_back();
 
-        if (last->getInfo()->responseReceived()) {
+        if (last->m_finished) {
             delete last;
         }
     }
@@ -139,9 +152,10 @@ void ProxyHandler::registerProxy(ProxyHandler* proxy) {
 
 ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_modRequest(nullptr),
 m_cocosRequest(request),
-m_info(new HttpInfo(request)),
+m_info(new HttpInfo(ProxyHandler::paused, request)),
 m_originalTarget(request->getTarget()),
-m_originalProxy(request->getSelector()) {
+m_originalProxy(request->getSelector()),
+m_finished(false) {
     m_cocosRequest->retain();
     m_cocosRequest->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
 
@@ -156,13 +170,14 @@ ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, 
 m_cocosRequest(nullptr),
 m_info(nullptr),
 m_originalTarget(nullptr),
-m_originalProxy(nullptr) {
+m_originalProxy(nullptr),
+m_finished(false) {
     const std::string resendSignature = ProxyHandler::getCopyHandshake();
     const bool isRepeat = m_modRequest->getHeaders().contains(resendSignature);
 
     m_modRequest->removeHeader(resendSignature);
 
-    m_info = new HttpInfo(isRepeat, m_modRequest, method, url);
+    m_info = new HttpInfo(ProxyHandler::paused, isRepeat, m_modRequest, method, url);
 
     ProxyHandler::registerProxy(this);
     ProxyHandler::handledIDs.push_back(request->getID());
@@ -176,7 +191,7 @@ m_originalProxy(nullptr) {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
-        ESCAPE_WHEN(m_info->isCancelled(), web::WebTask::Cancel());
+        ESCAPE_WHEN(m_info->isCancelled(), this->onCancel());
 
         web::WebTask task = m_modRequest->send(m_info->getRequest().getURL().getMethod(), url);
 
@@ -188,11 +203,7 @@ m_originalProxy(nullptr) {
 
         while (!response && !cancelled() && !m_info->isCancelled()) std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
-        if (m_info->isCancelled()) {
-            task.cancel();
-
-            return web::WebTask::Cancel();
-        } else if (cancelled()) {
+        if (m_info->isCancelled() || cancelled()) {
             task.cancel();
 
             return this->onCancel();
@@ -212,6 +223,7 @@ ProxyHandler::~ProxyHandler() {
     }
 
     if (m_cocosRequest) {
+        m_cocosRequest->release();
         delete m_cocosRequest;
     }
 
@@ -244,20 +256,30 @@ void ProxyHandler::onResponse() {
         }
 
         ResponseEvent(m_info).post();
-
-        if (std::find(ProxyHandler::cachedProxies.begin(), ProxyHandler::cachedProxies.end(), this) == ProxyHandler::cachedProxies.end()) {
-            delete this;
-        }
+        this->onFinished();
     });
 }
 
 web::WebTask::Cancel ProxyHandler::onCancel() {
+    const bool shouldPost = m_info->m_state != State::CANCELLED;
     m_info->m_response.m_statusCode = -3;
     m_info->m_state = State::CANCELLED;
 
-    Loader::get()->queueInMainThread([this]{
-        CancelEvent(m_info).post();
+    Loader::get()->queueInMainThread([this, shouldPost]{
+        if (shouldPost) {
+            CancelEvent(m_info).post();
+        }
+
+        this->onFinished();
     });
 
     return web::WebTask::Cancel();
+}
+
+void ProxyHandler::onFinished() {
+    if (std::find(ProxyHandler::cachedProxies.begin(), ProxyHandler::cachedProxies.end(), this) == ProxyHandler::cachedProxies.end()) {
+        delete this;
+    } else {
+        m_finished = true;
+    }
 }

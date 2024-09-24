@@ -9,7 +9,7 @@ public:
 
     void setCString(const char* label) override;
 protected:
-    void update(const float dt) override;
+    void updateLabel() override;
 private:
     bool m_rescale;
 

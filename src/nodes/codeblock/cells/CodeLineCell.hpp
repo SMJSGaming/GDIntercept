@@ -2,7 +2,6 @@
 
 #include "../../../include.hpp"
 #include "CullingCell.hpp"
-#include "../../../objects/ThemeStyle.hpp"
 #include "../../../objects/JSONTokenizer.hpp"
 
 class CodeLineCell : public CullingCell {

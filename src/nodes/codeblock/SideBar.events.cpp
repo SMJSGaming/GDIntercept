@@ -37,10 +37,6 @@ void SideBar::executeAction(CCObject* sender) {
     cell->setOpacity(255);
     m_pScheduler->scheduleSelector(schedule_selector(ActionCell::hideOpacity), cell, 0, 0, 0.2f, false);
 
-    // Small precaution to prevent settings re-opening
-    if (SETTINGS_POPUP) {
-        SETTINGS_POPUP = nullptr;
-    }
     if (oldState) {
         cell->setState(action.on.callback(m_block) ^ oldState);
     } else {

@@ -105,16 +105,16 @@ namespace proxy {
         static enums::ContentType determineContentType(const std::string& path, const bool isBody, const std::string& content);
         static nlohmann::json parseCocosHeaders(const gd::vector<char>* headers);
         static nlohmann::json parseCocosHeaders(const gd::vector<gd::string>& headers);
-        static bool shouldPause();
 
         PROXY_GETTER(size_t, id, ID);
+        PROXY_GETTER(enums::Client, client, Client);
         PROXY_GETTER(enums::State, state, State);
         PROXY_GETTER(Request, request, Request);
         PROXY_GETTER(Response, response, Response);
         bool m_repeat;
 
-        HttpInfo(cocos2d::extension::CCHttpRequest* request);
-        HttpInfo(const bool repeat, geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
+        HttpInfo(const bool paused, cocos2d::extension::CCHttpRequest* request);
+        HttpInfo(const bool paused, const bool repeat, geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
         void resume();
 
         friend class ProxyHandler;

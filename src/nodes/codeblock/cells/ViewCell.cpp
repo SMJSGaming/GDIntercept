@@ -21,35 +21,35 @@ ViewCell* ViewCell::create(const SideBarView& view) {
 }
 
 bool ViewCell::init(const SideBarView& view) {
-    const ThemeStyle& theme = ThemeStyle::getTheme();
+    const Theme::Theme theme = Theme::getTheme();
 
     ESCAPE_WHEN(!HoverNode<CCLayerColor>::init(), false);
-    ESCAPE_WHEN(!CCLayerColor::initWithColor(theme.ui.menu.foreground), false);
+    ESCAPE_WHEN(!CCLayerColor::initWithColor(theme.menu.foreground), false);
 
-    m_icon = Character::create(view.icon, theme.font.fontName);
+    m_icon = Character::create(view.icon, theme.menu.font.fontName);
 
-    m_icon->setScale(theme.font.fontScale);
+    m_icon->setScale(theme.menu.font.fontScale);
 
     const CCSize iconSize = m_icon->getScaledContentSize();
-    const float height = iconSize.height + theme.font.lineHeight * 1.2f;
-    m_name = CenterLabel::create(view.name.c_str(), theme.font.fontName);
+    const float height = iconSize.height + theme.menu.font.lineHeight;
+    const Theme::Color iconColor = view.iconColor(theme.menu.icons);
+    m_name = CenterLabel::create(view.name, theme.menu.font.fontName);
 
-    m_icon->setColor(view.iconColor);
+    iconColor.applyTo(m_icon);
     m_icon->setAnchorPoint(CENTER_LEFT);
     m_icon->setPositionY(height / 2);
-    m_name->setColor(theme.syntax.text);
-    m_name->setOpacity(theme.syntax.text);
-    m_name->setScale(theme.font.fontScale);
+    theme.menu.text.applyTo(m_name);
+    m_name->setScale(theme.menu.font.fontScale);
     m_name->setAnchorPoint(CENTER_LEFT);
-    m_name->setPosition({ PADDING + 2 + iconSize.width, height / 2 });
+    m_name->setPosition({ iconSize.width + theme.menu.paddingLeft + theme.menu.paddingCenter, height / 2 });
 
     this->setOpacity(0);
     this->setContentHeight(height);
     this->addChild(m_icon);
     this->addChild(m_name);
 
-    m_minWidth = iconSize.width + PADDING * 2;
-    m_maxWidth = m_name->getScaledContentWidth() + m_name->getPositionX() + PADDING;
+    m_minWidth = iconSize.width + theme.menu.paddingLeft + theme.menu.paddingRight;
+    m_maxWidth = m_name->getScaledContentWidth() + m_name->getPositionX() + theme.menu.paddingRight;
 
     return true;
 }
@@ -75,5 +75,5 @@ void ViewCell::onScaleToMin() {
 void ViewCell::onScaleToMax() {
     m_name->setVisible(true);
     m_icon->setAnchorPoint(CENTER_LEFT);
-    m_icon->setPositionX(PADDING);
+    m_icon->setPositionX(Theme::getTheme().menu.paddingLeft);
 }

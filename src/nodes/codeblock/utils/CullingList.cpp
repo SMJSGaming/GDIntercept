@@ -33,7 +33,6 @@ bool CullingList::init(const CCSize& size) {
     m_view->m_peekLimitTop = 0;
     m_view->m_peekLimitBottom = 0;
 
-    m_view->setMouseEnabled(true);
     this->reloadData();
     this->moveToTop();
     this->addChild(m_view);
@@ -150,10 +149,11 @@ void CullingList::setContentSize(const CCSize& size) {
 void CullingList::update(const float dt) {
     const size_t size = m_cells.size();
     const CCPoint contentOffset = m_view->m_contentLayer->getPosition();
+    const bool moved = contentOffset != m_lastOffset;
     const bool shouldSkipCulling = m_view->m_disableVertical && m_activeCells.size() == size;
 
     // Alignment snapping
-    if (contentOffset != m_lastOffset) {
+    if (moved) {
         if (m_scrollLockSteps == 0) {
             m_xAxisLocked = std::abs(contentOffset.x - m_lastOffset.x) > std::abs(contentOffset.y - m_lastOffset.y);
             m_scrollLockSteps = Mod::get()->getSettingValue<int64_t>("snapping-aggression");
@@ -180,7 +180,7 @@ void CullingList::update(const float dt) {
         this->horizontalRender(cell);
     }
 
-    ESCAPE_WHEN(shouldSkipCulling,);
+    ESCAPE_WHEN(m_activeCells.size() && (!moved || shouldSkipCulling),);
 
     const size_t offset = size - std::max<int>(0, std::floor(-m_lastOffset.y / m_cellHeight));
     const size_t amount = std::min<size_t>(std::ceil(this->getContentHeight() / m_cellHeight), size) + 1;

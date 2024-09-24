@@ -118,9 +118,19 @@
           "default": 4,
           "minimum": 0
         },
-        "border": { "$ref": "#/definitions/color" },
-        "thumb": { "$ref": "#/definitions/color" },
-        "active-thumb": { "$ref": "#/definitions/color" }
+        "border": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the scrollbar border."
+        },
+        "thumb": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the thumb."
+        },
+        "active-thumb": {
+          "$ref": "#/definitions/color",
+          "description": "The color the thumb when held down.",
+          "custom_default": "#/definitions/scrollbar/thumb[a = min(a * 2, 255)]"
+        }
       },
       "required": [ "border", "thumb" ]
     },
@@ -130,17 +140,55 @@
       "description": "The syntax colors of the theme.",
       "additionalProperties": false,
       "properties": {
-        "text": { "$ref": "#/definitions/color" },
-        "key": { "$ref": "#/definitions/color" },
-        "string": { "$ref": "#/definitions/color" },
-        "number": { "$ref": "#/definitions/color" },
-        "constant": { "$ref": "#/definitions/color" },
-        "error": { "$ref": "#/definitions/color" },
-        "separator": { "$ref": "#/definitions/color" },
-        "terminator": { "$ref": "#/definitions/color" },
-        "bracket": { "$ref": "#/definitions/color" },
-        "key-quote": { "$ref": "#/definitions/color" },
-        "string-quote": { "$ref": "#/definitions/color" }
+        "text": {
+          "$ref": "#/definitions/color",
+          "description": "The color of plain text."
+        },
+        "key": {
+          "$ref": "#/definitions/color",
+          "description": "The color of keys."
+        },
+        "string": {
+          "$ref": "#/definitions/color",
+          "description": "The color of strings."
+        },
+        "number": {
+          "$ref": "#/definitions/color",
+          "description": "The color of numbers."
+        },
+        "constant": {
+          "$ref": "#/definitions/color",
+          "description": "The color of constants."
+        },
+        "error": {
+          "$ref": "#/definitions/color",
+          "description": "The color of errors."
+        },
+        "separator": {
+          "$ref": "#/definitions/color",
+          "description": "The color of separators (:).",
+          "custom_default": "#/definitions/syntax/text"
+        },
+        "terminator": {
+          "$ref": "#/definitions/color",
+          "description": "The color of terminators (,).",
+          "custom_default": "#/definitions/syntax/text"
+        },
+        "bracket": {
+          "$ref": "#/definitions/color",
+          "description": "The color of brackets.",
+          "custom_default": "#/definitions/syntax/text"
+        },
+        "key-quote": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the quotes used in keys.",
+          "custom_default": "#/definitions/syntax/key"
+        },
+        "string-quote": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the quotes used in strings.",
+          "custom_default": "#/definitions/syntax/string"
+        }
       },
       "required": [ "text", "key", "string", "number", "constant", "error" ]
     },
@@ -168,8 +216,14 @@
           "default": 3,
           "minimum": 0
         },
-        "background": { "$ref": "#/definitions/color" },
-        "foreground": { "$ref": "#/definitions/color" },
+        "background": {
+          "$ref": "#/definitions/color",
+          "description": "The background color of the code block."
+        },
+        "foreground": {
+          "$ref": "#/definitions/color",
+          "description": "The foreground color of the code block. Used for line numbers and highlights."
+        },
         "font": { "$ref": "#/definitions/font" },
         "scrollbar": { "$ref": "#/definitions/scrollbar" },
         "syntax": { "$ref": "#/definitions/syntax" }
@@ -182,14 +236,46 @@
       "description": "The icon colors of the theme.",
       "additionalProperties": false,
       "properties": {
-        "info": { "$ref": "#/definitions/color" },
-        "body": { "$ref": "#/definitions/color" },
-        "query": { "$ref": "#/definitions/color" },
-        "header": { "$ref": "#/definitions/color" },
-        "response": { "$ref": "#/definitions/color" },
-        "action-icon": { "$ref": "#/definitions/color" },
-        "disabled-icon": { "$ref": "#/definitions/color" },
-        "category-icon": { "$ref": "#/definitions/color" }
+        "info": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the info icon.",
+          "default": "#FF6961"
+        },
+        "body": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the body icon.",
+          "default": "#FFEE8C"
+        },
+        "query": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the query icon.",
+          "default": "#A2BFFE"
+        },
+        "header": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the header icon.",
+          "default": "#B19CD9"
+        },
+        "response": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the response icon.",
+          "default": "#B2FBA5"
+        },
+        "action-icon": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the icons on the right side of an action.",
+          "custom_default": "#/definitions/menu/text"
+        },
+        "disabled-icon": {
+          "$ref": "#/definitions/color",
+          "description": "The color of icons which are disabled and can't be clicked.",
+          "custom_default": "#/definitions/menu/disabled-text"
+        },
+        "category-icon": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the icons on the right side of a category.",
+          "custom_default": "#/definitions/menu/category-text"
+        }
       }
     },
 
@@ -216,14 +302,42 @@
           "default": 3,
           "minimum": 0
         },
-        "background": { "$ref": "#/definitions/color" },
-        "category-background": { "$ref": "#/definitions/color" },
-        "foreground": { "$ref": "#/definitions/color" },
-        "text": { "$ref": "#/definitions/color" },
-        "disabled-text": { "$ref": "#/definitions/color" },
-        "category-text": { "$ref": "#/definitions/color" },
-        "border": { "$ref": "#/definitions/color" },
-        "category-border": { "$ref": "#/definitions/color" },
+        "background": {
+          "$ref": "#/definitions/color",
+          "description": "The background color of the menu."
+        },
+        "category-background": {
+          "$ref": "#/definitions/color",
+          "description": "The background color of the category menu items.",
+          "custom_default": "#/definitions/menu/background"
+        },
+        "foreground": {
+          "$ref": "#/definitions/color",
+          "description": "The foreground color of the menu. Used for hovering, clicking and viewing."
+        },
+        "text": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the text in the menu."
+        },
+        "disabled-text": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the text in disabled action items.",
+          "custom_default": "#/definitions/menu/text[a = 0x55]"
+        },
+        "category-text": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the text in category items.",
+          "custom_default": "#/definitions/menu/text[a = 0xAA]"
+        },
+        "border": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the border on the right side of the menu."
+        },
+        "category-border": {
+          "$ref": "#/definitions/color",
+          "description": "The color of the top and bottom border of category items.",
+          "custom_default": "#/definitions/menu/border"
+        },
         "font": { "$ref": "#/definitions/font" },
         "icons": { "$ref": "#/definitions/icons" }
       },

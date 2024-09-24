@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/theme.schema.json",
+  "version": "1.0.0",
+  "name": "Tokyo Night",
+  "theme": {
+    "code": {
+      "background": "#1A1B26",
+      "foreground": "#737A97",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      },
+      "scrollbar": {
+        "border": "#10",
+        "thumb": "#868BC414"
+      },
+      "syntax": {
+        "text": "#A9B1D6",
+        "key": "#7AA2F7",
+        "string": "#9ECE6A",
+        "number": "#FF9E64",
+        "constant": "#FF9E64",
+        "error": "#FF5370",
+        "separator": "#89DDFF",
+        "terminator": "#89DDFF",
+        "bracket": "#9ABDF5",
+        "key-quote": "#89DDFF",
+        "string-quote": "#89DDFF"
+      }
+    },
+    "menu": {
+      "background": "#16161E",
+      "foreground": "#1C1D29",
+      "text": "#A9B1D6",
+      "border": "#10",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      }
+    }
+  }
+}

@@ -1,11 +1,13 @@
 #pragma once
 
+#include <fmt/chrono.h>
 #include <Geode/Geode.hpp>
 #include "../lib/json.hpp"
 #include "../lib/LookupTable.hpp"
 #include "concepts.hpp"
 #include "macro_utils.hpp"
 #include "../proxy/Proxy.hpp"
+#include "objects/Theme.hpp"
 #include "proxy/ProxyHandler.hpp"
 
 #if defined(GEODE_IS_WINDOWS) || defined(GEODE_IS_ANDROID64)
@@ -43,6 +45,3 @@ constexpr ccColor3B BROWN_3B({ 0xA0, 0x54, 0x34 });
 constexpr ccColor4B BROWN_4B({ 0xA0, 0x54, 0x34, FULL_OPACITY });
 constexpr ccColor3B DARK_BROWN_3B({ 0x82, 0x40, 0x21 });
 constexpr ccColor4B DARK_BROWN_4B({ 0x82, 0x40, 0x21, FULL_OPACITY });
-
-// HJfod you asked for this, I asked you to return the node to give some basic controls.
-static FLAlertLayer* SETTINGS_POPUP = nullptr;

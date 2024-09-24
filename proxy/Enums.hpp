@@ -1,6 +1,11 @@
 #pragma once
 
 namespace proxy::enums {
+    enum class Client {
+        COCOS,
+        GEODE
+    };
+
     enum class ContentType {
         FORM,
         JSON,

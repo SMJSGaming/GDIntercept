@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/theme.schema.json",
+  "version": "1.0.0",
+  "name": "Dracula",
+  "theme": {
+    "code": {
+      "background": "#282A36",
+      "foreground": "#F8F8F2",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      },
+      "scrollbar": {
+        "border": "#191A21",
+        "thumb": "#79797964"
+      },
+      "syntax": {
+        "text": "#F8F8F2",
+        "key": "#8BE9FD",
+        "string": "#F1FA8C",
+        "number": "#BD93F9",
+        "constant": "#BD93F9",
+        "error": "#F55",
+        "separator": "#FF79C6",
+        "bracket": "#FF79C6"
+      }
+    },
+    "menu": {
+      "background": "#21222C",
+      "category-background": "#282A36",
+      "foreground": "#44475A",
+      "text": "#F8F8F2",
+      "category-text": "#F8F8F2",
+      "border": "#0000",
+      "category-border": "#21222C",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4
+      }
+    }
+  }
+}

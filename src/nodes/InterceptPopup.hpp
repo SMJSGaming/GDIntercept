@@ -2,7 +2,6 @@
 
 #include <Geode/ui/GeodeUI.hpp>
 #include "../include.hpp"
-#include "../objects/ThemeStyle.hpp"
 #include "codeblock/CodeBlock.hpp"
 #include "capturelist/CaptureList.hpp"
 
@@ -25,10 +24,14 @@ private:
 
     float m_captureCellWidth;
     float m_leftColumnXPosition;
+    bool m_settingsShouldReload;
     CodeBlock* m_codeBlock;
     CaptureList* m_list;
+    FLAlertLayer* m_settings;
 
     InterceptPopup(const CCSize& size);
+    void preReload();
+    void postReload();
     void setupList();
     void setupCodeBlock(const bool recycleInfo = false);
     float getPageHeight();

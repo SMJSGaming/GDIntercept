@@ -13,7 +13,9 @@ public:
         CONSTANT,
         TERMINATOR,
         SEPARATOR,
-        BRACKET
+        BRACKET,
+        KEY_QUOTE,
+        STRING_QUOTE
     };
 
     struct TokenOffset {

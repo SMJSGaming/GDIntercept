@@ -6,5 +6,4 @@ void ModCCHttpClient::send(CCHttpRequest* request) {
     } else {
         ProxyHandler::create(request);
     }
-
 }

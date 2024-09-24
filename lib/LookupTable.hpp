@@ -47,13 +47,19 @@ public:
     }
 
     V& at(const K& key) {
-        return this->at(key);
+        for (auto& [first, second] : m_table) {
+            if (first == key) {
+                return second;
+            }
+        }
+
+        throw std::out_of_range("Key not found in LookupTable");
     }
 
     const V& at(const K& key) const {
-        for (const auto& pair : m_table) {
-            if (pair.first == key) {
-                return pair.second;
+        for (const auto& [first, second] : m_table) {
+            if (first == key) {
+                return second;
             }
         }
 
@@ -70,17 +76,21 @@ public:
 
     std::vector<K> keys() const {
         std::vector<K> keys;
-        for (const auto& pair : m_table) {
-            keys.push_back(pair.first);
+
+        for (const auto& [first, _] : m_table) {
+            keys.push_back(first);
         }
+
         return keys;
     }
 
     std::vector<V> values() const {
         std::vector<V> values;
-        for (const auto& pair : m_table) {
-            values.push_back(pair.second);
+
+        for (const auto& [_, second] : m_table) {
+            values.push_back(second);
         }
+
         return values;
     }
 
@@ -89,8 +99,8 @@ public:
     }
 
     bool contains(const K& key) const {
-        for (const auto& pair : m_table) {
-            if (pair.first == key) {
+        for (const auto& [first, _] : m_table) {
+            if (first == key) {
                 return true;
             }
         }
@@ -98,18 +108,19 @@ public:
     }
 
     void insert(const std::pair<K, V>& pair) {
+        this->erase(pair.first);
         m_table.push_back(pair);
     }
 
     void insert(const K& key, const V& value) {
+        this->erase(key);
         m_table.push_back(std::make_pair(key, value));
     }
 
     void erase(const K& key) {
-        for (auto it = m_table.begin(); it != m_table.end(); ++it) {
-            if (it->first == key) {
-                m_table.erase(it);
-
+        for (size_t i = 0; i < m_table.size(); i++) {
+            if (m_table.at(i).first == key) {
+                m_table.erase(m_table.begin() + i);
                 return;
             }
         }

@@ -52,7 +52,7 @@ m_block(block) { }
 
 bool SideBar::init(const float height) {
     ESCAPE_WHEN(!KeybindNode::init(), false);
-    ESCAPE_WHEN(!this->initWithColor(ThemeStyle::getTheme().ui.menu.background), false);
+    ESCAPE_WHEN(!CCLayerColor::initWithColor(Theme::getTheme().menu.background), false);
 
     m_menu = CCMenu::create();
     m_openCell = SideBar::openAction.toActionCell(m_block);
@@ -156,6 +156,6 @@ void SideBar::draw() {
 
     CCLayerColor::draw();
 
-    ccDrawColor4B(ThemeStyle::getTheme().ui.menu.border);
+    ccDrawColor4B(Theme::getTheme().menu.border);
     ccDrawLine({ size.width, 0 }, size);
 }

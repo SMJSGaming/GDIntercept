@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/theme.schema.json",
+  "version": "1.0.0",
+  "name": "Dark",
+  "theme": {
+    "code": {
+      "padding-left": 3,
+      "padding-right": 3,
+      "padding-center": 3,
+      "background": "#1F",
+      "foreground": "#6E7681",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4,
+        "line-height": 2
+      },
+      "scrollbar": {
+        "size": 4,
+        "border": "#0",
+        "thumb": "#79797964",
+        "active-thumb": "#797979C8"
+      },
+      "syntax": {
+        "text": "#C",
+        "key": "#9CDCFE",
+        "string": "#CE9178",
+        "number": "#B5CEA8",
+        "constant": "#569CD6",
+        "error": "#F44747",
+        "separator": "#C",
+        "terminator": "#C",
+        "bracket": "#C",
+        "key-quote": "#9CDCFE",
+        "string-quote": "#CE9178"
+      }
+    },
+    "menu": {
+      "padding-left": 3,
+      "padding-right": 3,
+      "padding-center": 3,
+      "background": "#18",
+      "category-background": "#18",
+      "foreground": "#37373D",
+      "text": "#C",
+      "disabled-text": "#CCC5",
+      "category-text": "#CCCA",
+      "border": "#2B",
+      "category-border": "#2B",
+      "font": {
+        "family": "smjs.gdintercept/consola.fnt",
+        "scale": 0.4,
+        "line-height": 2
+      },
+      "icons": {
+        "info": "#FF6961",
+        "body": "#FFEE8C",
+        "query": "#A2BFFE",
+        "header": "#B19CD9",
+        "response": "#B2FBA5",
+        "action-icon": "#C",
+        "disabled-icon": "#CCC5",
+        "category-icon": "#CCCA"
+      }
+    }
+  }
+}
