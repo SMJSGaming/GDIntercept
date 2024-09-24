@@ -47,7 +47,7 @@
       "oneOf": [
         {
           "type": "string",
-          "description": "A color in hex format.",
+          "description": "A color in hex format. The following formats are supported: #R/G/B, #RR/GG/BB, #RGB, #RGBA, #RRGGBB, and #RRGGBBAA.",
           "pattern": "^#([0-9a-fA-F]{1,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
         },
         {

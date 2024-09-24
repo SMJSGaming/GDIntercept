@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/resources/themes/theme.schema.json",
+  "$schema": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/theme.schema.json",
   "version": "1.0.0",
   "name": "One Dark Pro",
   "theme": {
