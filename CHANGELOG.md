@@ -1,6 +1,6 @@
 # GDIntercept Changelog
 
-## v0.6.6-alpha.6 (2024-09-26) - Theme Docs
+## v0.6.6-alpha.6 (2024-09-27) - Theme Docs
 
 - Added a theme documentation page
 
