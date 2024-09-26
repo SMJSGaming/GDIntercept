@@ -14,7 +14,7 @@ const std::vector<SideBarView> CodeBlock::views({
 const SideBar::Categories CodeBlock::actions({
     { { "Themes", "themes.png"_spr }, {
         { { "Open Theme Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenThemeFiles(); } } },
-        { { "Open Theme Docs", "docs.png"_spr, [](CodeBlock* block) { return block->onComingSoon(); } } }
+        { { "Open Theme Docs", "docs.png"_spr, [](CodeBlock* block) { return block->onDocs(); } } }
     } },
     { { "Save Files", "saves.png"_spr }, {
         { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } } },
@@ -256,8 +256,8 @@ bool CodeBlock::onFormatted(const SideBarCell::OriginalCallback& original) {
     return original();
 }
 
-bool CodeBlock::onComingSoon() {
-    this->showMessage("Coming Soon...");
+bool CodeBlock::onDocs() {
+    utils::web::openLinkInBrowser("https://smjsgaming.github.io/GDIntercept");
 
     return false;
 }

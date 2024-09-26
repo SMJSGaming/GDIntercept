@@ -49,7 +49,7 @@ private:
     bool onResume();
     bool onRaw(const SideBarCell::OriginalCallback& original);
     bool onFormatted(const SideBarCell::OriginalCallback& original);
-    bool onComingSoon();
+    bool onDocs();
     void onInfo();
     void onBody();
     void onQuery();
