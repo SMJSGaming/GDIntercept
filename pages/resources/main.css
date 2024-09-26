@@ -1,0 +1,228 @@
+:root {
+    --background: #0D1117;
+    --tint: #23262C;
+    --border: #30363D;
+    --text: #F2F2F2;
+    --link: #58A6F0;
+    --pattern: #D16969;
+    --type-boolean: #80EF80;
+    --type-integer: #6777B8;
+    --type-number: #6777B8;
+    --type-string: #C23B22;
+    --type-one-of: #FF964F;
+    --type-object: #966FD6;
+    --type-array: #666;
+    --type-ref: #A3386C;
+    --value-boolean: #569CD6;
+    --value-number: #B5CEA8;
+    --value-string: #CE9178;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    font-family: "Work Sans", sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    font-size: 15px;
+    padding: 15px;
+}
+
+h1, h2 {
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+hr {
+    margin-bottom: 10px;
+    height: 1px;
+    background-color: var(--border);
+    border: none;
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+#nav-bar {
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 70px;
+    padding: 8px;
+    border-bottom: var(--border) 3px solid;
+    font-size: 24px;
+}
+
+#nav-bar > * {
+    display: inline-block;
+    vertical-align: top;
+}
+
+#nav-bar > a {
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+#nav-bar > a:hover {
+    background-color: hsl(from var(--text) h s l / 0.2);
+}
+
+#nav-bar > a:active {
+    background-color: hsl(from var(--text) h s l / 0.4);
+}
+
+#nav-bar > a:last-of-type {
+    border-right: none;
+}
+
+#nav-bar > #menu-button {
+    width: 49px;
+    height: 49px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+#nav-bar > #menu-button > img {
+    width: 29px;
+    height: 29px;
+}
+
+#nav-bar > #menu-button:hover {
+    background-color: hsl(from var(--text) h s l / 0.2);
+}
+
+#nav-bar > #menu-button:active {
+    background-color: hsl(from var(--text) h s l / 0.4);
+}
+
+#nav-bar > .separator {
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(0deg, hsl(from var(--border) h s l / 0.2), var(--border), hsl(from var(--border) h s l / 0.2));
+}
+
+#side {
+    top: 70px;
+    left: calc((20vw - 50px) * -1);
+    width: calc(20vw - 50px);
+    height: calc(100vh - 70px);
+    padding-top: 0;
+    padding: 15px;
+    border-right: var(--border) 3px solid;
+    font-size: 1.2em;
+}
+
+#side.open {
+    left: 0;
+}
+
+#md {
+    margin-top: 70px;
+    width: 60vw;
+    margin-left: 20vw;
+}
+
+.menu {
+    position: fixed;
+    background-color: var(--tint);
+    user-select: none;
+}
+
+.list > :not(summary) {
+    margin-top: 10px;
+    margin-left: 15px;
+}
+
+.list, .list > b {
+    margin-bottom: 10px;
+}
+
+.list > b {
+    display: block;
+}
+
+.list > b > a {
+    margin-left: calc(1em + 2px);
+}
+
+.object > :not(summary) {
+    margin-left: 35px;
+}
+
+.property {
+    display: inline-grid;
+    width: calc(100% - 2em - 4px);
+    gap: 7px;
+    padding: 15px;
+    margin: 10px calc(1em + 2px);
+    margin-bottom: 10px;
+    background-color: var(--tint);
+    border-radius: 7px;
+}
+
+.object > summary > .property {
+    margin-left: 0;
+}
+
+.property > .name-info {
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.property > .name-info > .type {
+    display: inline-block;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.property > .name-info > .type > .ref {
+    font-family: monospace;
+}
+
+.property > .properties {
+    grid-row-start: 2;
+    grid-row-end: 3;
+}
+
+.property > .properties > .rule {
+    padding: 10px;
+    margin-right: 10px;
+    background: #444;
+    border-radius: 7px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.property > .properties > .rule:last-of-type {
+    margin-right: 0;
+}
+
+.property > .properties > .rule .pattern {
+    font-family: monospace;
+    color: var(--pattern);
+}
+
+.property > .description {
+    grid-row-start: 3;
+    grid-row-end: 4;
+}
+
+@media only screen and (max-width: 2000px) {
+    #side {
+        width: 60vw;
+        left: -60vw;
+    }
+
+    #md {
+        width: 80vw;
+        margin-left: 10vw;
+    }
+}
