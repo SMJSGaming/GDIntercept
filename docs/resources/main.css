@@ -145,6 +145,7 @@ details[open] > summary::before {
     position: fixed;
     background-color: var(--tint);
     user-select: none;
+    z-index: 100;
 }
 
 .list > :not(summary) {
