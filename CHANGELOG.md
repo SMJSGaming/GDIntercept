@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.6.6-alpha.6 (2024-09-26) - Theme Docs
+
+- Added a theme documentation page
+
 ## v0.6.3-alpha.6 (2024-09-26) - Pause Persisting
 
 - Added a confirmation setting to persist the pause state between sessions
