@@ -2,6 +2,7 @@
 
 #include "../../include.hpp"
 #include "SideBar.hpp"
+#include "../Warning.hpp"
 #include "cells/ViewCell.hpp"
 #include "cells/ActionCell.hpp"
 #include "cells/CategoryCell.hpp"
@@ -25,7 +26,6 @@ public:
 private:
     static const std::vector<SideBarCell::SideBarView> views;
     static const SideBar::Categories actions;
-    static CCScale9Sprite* pauseWarning;
     static bool acceptedPauses;
 
     HttpInfo* m_info;
@@ -56,6 +56,5 @@ private:
     void onRequestHeaders();
     void onResponse();
     void onResponseHeaders();
-    void onPauseAction();
     void FLAlert_Clicked(FLAlertLayer* alert, const bool state) override;
 };

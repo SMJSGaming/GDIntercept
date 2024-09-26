@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.6.3-alpha.6 (2024-09-26) - Pause Persisting
+
+- Added a confirmation setting to persist the pause state between sessions
+
 ## v0.6.2-alpha.6 (2024-09-25) - Minor Semantic Fixes
 
 - Fixed the release date of the previous version

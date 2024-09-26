@@ -1,6 +1,6 @@
 {
   "geode": "3.7.1",
-  "version": "v0.6.2-alpha.6",
+  "version": "v0.6.3-alpha.6",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "api": {
@@ -137,6 +137,12 @@
       "type": "title",
       "name": "Proxy Settings",
       "description": "Settings related to the proxy server."
+    },
+    "confirm-pause-between-plays": {
+      "name": "Confirm Pause Between Plays",
+      "description": "If this is enabled, GDI will remember the pause option between session.",
+      "type": "bool",
+      "default": false
     },
     "cache-limit": {
       "name": "Cache Limit",

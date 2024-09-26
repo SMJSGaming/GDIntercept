@@ -8,7 +8,7 @@ std::deque<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
 
 std::vector<ProxyHandler*> proxy::ProxyHandler::pausedProxies;
 
-bool proxy::ProxyHandler::paused = false;
+bool proxy::ProxyHandler::paused = Mod::get()->getSettingValue<bool>("confirm-pause-between-plays") && Mod::get()->getSavedValue("paused", false);
 
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
@@ -89,12 +89,12 @@ bool ProxyHandler::isPaused() {
 }
 
 void ProxyHandler::pauseAll() {
-    ProxyHandler::paused = true;
+    Mod::get()->setSavedValue("paused", ProxyHandler::paused = true);
 }
 
 void ProxyHandler::resumeAll() {
     const std::vector<ProxyHandler*> paused = std::vector<ProxyHandler*>(ProxyHandler::pausedProxies);
-    ProxyHandler::paused = false;
+    Mod::get()->setSavedValue("paused", ProxyHandler::paused = false);
 
     std::thread([paused]{
         for (ProxyHandler* proxy : paused) {

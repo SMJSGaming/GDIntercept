@@ -50,8 +50,6 @@ const SideBar::Categories CodeBlock::actions({
     } }
 });
 
-CCScale9Sprite* CodeBlock::pauseWarning = nullptr;
-
 bool CodeBlock::acceptedPauses = false;
 
 void CodeBlock::setup() {
@@ -223,7 +221,8 @@ bool CodeBlock::onSave() {
 
 bool CodeBlock::onPause() {
     if (CodeBlock::acceptedPauses) {
-        this->onPauseAction();
+        Warning::show();
+        this->showMessage("Requests Paused");
 
         return true;
     } else {
@@ -239,8 +238,7 @@ bool CodeBlock::onPause() {
 
 bool CodeBlock::onResume() {
     ProxyHandler::resumeAll();
-    SceneManager::get()->forget(CodeBlock::pauseWarning);
-    OPT(CodeBlock::pauseWarning)->removeFromParent();
+    Warning::hide();
     this->showMessage("Requests Resumed");
 
     return true;
@@ -325,30 +323,12 @@ void CodeBlock::onResponseHeaders() {
     }
 }
 
-void CodeBlock::onPauseAction() {
-    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
-    CCLabelBMFont* label = CCLabelBMFont::create("Requests Paused", "bigFont.fnt");
-    CodeBlock::pauseWarning = CCScale9Sprite::create("square02_001.png");
-
-    label->setScale(2);
-    CodeBlock::pauseWarning->setScale(0.25f);
-    CodeBlock::pauseWarning->setOpacity(0x7F);
-    CodeBlock::pauseWarning->setAnchorPoint(TOP_CENTER);
-    CodeBlock::pauseWarning->setContentSize(label->getScaledContentSize() + ccp(PADDING, PADDING) * 4);
-    CodeBlock::pauseWarning->setPosition({ winSize.width / 2, winSize.height - PADDING });
-    label->setPosition(CodeBlock::pauseWarning->getContentSize() / 2);
-    CodeBlock::pauseWarning->addChild(label);
-
-    ProxyHandler::pauseAll();
-    SceneManager::get()->keepAcrossScenes(CodeBlock::pauseWarning);
-    this->showMessage("Requests Paused");
-}
-
 void CodeBlock::FLAlert_Clicked(FLAlertLayer* alert, const bool state) {
     if (state) {
         CodeBlock::acceptedPauses = true;
 
-        this->onPauseAction();
+        Warning::show();
+        this->showMessage("Requests Paused");
         m_bar->reloadState();
     }
 }

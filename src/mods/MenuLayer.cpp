@@ -14,6 +14,10 @@ bool ModMenuLayer::init() {
         closeMenu = this->getChildByID("top-right-menu");
     }
 
+    if (ProxyHandler::isPaused()) {
+        Warning::show();
+    }
+
     menuItem->setID("GDI"_spr);
     closeMenu->addChild(menuItem);
     closeMenu->updateLayout();
