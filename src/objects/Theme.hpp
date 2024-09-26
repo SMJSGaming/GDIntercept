@@ -39,7 +39,7 @@ namespace Theme {
             node->setOpacity(*this);
         }
     private:
-        // Supporting the format #R/G/B, #RR/GG/BB, #RGB, #RGBA, #RRGGBB, and #RRGGBBAA
+        // Supporting the format #R/G/B, #RR/GG/BB, #RGB, #RGBA, #RRGGBB and #RRGGBBAA
         void extractChannels(const std::string& hex);
         GLubyte extractChannel(const std::string& hexString, const size_t index, const bool isShort) const;
 
