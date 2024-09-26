@@ -60,7 +60,7 @@ a {
 
 #nav-bar > * {
     display: inline-block;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 #nav-bar > a {
@@ -77,21 +77,15 @@ a {
     background-color: hsl(from var(--text) h s l / 0.4);
 }
 
-#nav-bar > a:last-of-type {
-    border-right: none;
-}
-
 #nav-bar > #menu-button {
-    width: 49px;
-    height: 49px;
+    height: 100%;
     padding: 10px;
     cursor: pointer;
     border-radius: 10px;
 }
 
 #nav-bar > #menu-button > img {
-    width: 29px;
-    height: 29px;
+    height: 100%;
 }
 
 #nav-bar > #menu-button:hover {
@@ -109,7 +103,7 @@ a {
 }
 
 #side {
-    top: 70px;
+    bottom: 0;
     left: calc((20vw - 50px) * -1);
     width: calc(20vw - 50px);
     height: calc(100vh - 70px);
@@ -121,6 +115,10 @@ a {
 
 #side.open {
     left: 0;
+}
+
+#side > h1 {
+    margin-top: 10px;
 }
 
 #md {
@@ -213,6 +211,50 @@ a {
 .property > .description {
     grid-row-start: 3;
     grid-row-end: 4;
+}
+
+@media only screen and (max-width: 500px) {
+    #nav-bar {
+        height: 46px;
+        font-size: 12px;
+    }
+
+    #nav-bar > a {
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    #nav-bar > #menu-button {
+        padding: 6px;
+        border-radius: 6px;
+    }
+
+    #side {
+        font-size: 0.8em;
+        height: calc(100vh - 46px);
+    }
+}
+
+@media only screen and (max-width: 700px) and (min-width: 500px) {
+    #nav-bar {
+        height: 50px;
+        font-size: 14px;
+    }
+
+    #nav-bar > a {
+        padding: 8px 15px;
+        border-radius: 8px;
+    }
+
+    #nav-bar > #menu-button {
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    #side {
+        font-size: 1em;
+        height: calc(100vh - 50px);
+    }
 }
 
 @media only screen and (max-width: 2000px) {
