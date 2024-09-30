@@ -1,6 +1,10 @@
 # GDIntercept Changelog
 
-## v0.6.6-alpha.6 (2024-09-27) - Theme Docs
+## v0.6.5-alpha.6 (2024-09-27) - Race Condition Patch
+
+- Patched all remaining race conditions (closed source for security reasons)
+
+## v0.6.4-alpha.6 (2024-09-27) - Theme Docs
 
 - Added a theme documentation page
 
