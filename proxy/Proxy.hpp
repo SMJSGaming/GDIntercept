@@ -45,10 +45,7 @@ namespace proxy {
     };
         
 
-    template <typename T>
-    concept proxy_event = std::is_base_of_v<ProxyEvent, T>;
-
-    template<proxy_event T>
+    template<typename T> requires std::is_base_of_v<ProxyEvent, T>
     class ProxyFilter : public geode::EventFilter<T> {
     public:
         geode::ListenerResult handle(geode::utils::MiniFunction<geode::ListenerResult(T*)> callback, T* event) {

@@ -1,6 +1,10 @@
 # GDIntercept Changelog
 
-## v0.6.5-alpha.6 (2024-09-27) - Race Condition Patch
+## v0.6.6-alpha.6 (2024-10-02) - Hook Compatibility Patch
+
+- Added compatibility for hooks that modify the request data
+
+## v0.6.5-alpha.6 (2024-09-30) - Race Condition Patch
 
 - Patched all remaining race conditions (closed source for security reasons)
 

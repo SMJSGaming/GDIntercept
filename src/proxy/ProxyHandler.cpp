@@ -180,7 +180,7 @@ m_finished(false) {
     m_info = new HttpInfo(ProxyHandler::paused, isRepeat, m_modRequest, method, url);
 
     ProxyHandler::registerProxy(this);
-    ProxyHandler::handledIDs.push_back(request->getID());
+    ProxyHandler::handledIDs.push_back(m_modRequest->getID());
 
     m_modTask = web::WebTask::run([this, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse* response = nullptr;
