@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: ['build']
     environment:
-      name: Production
+      name: release
       url: ${{ steps.deploy-release.outputs.binary-url }}
     steps:
       - name: Combine builds
