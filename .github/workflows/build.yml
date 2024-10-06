@@ -44,6 +44,9 @@ jobs:
     name: Package & Deploy builds
     runs-on: ubuntu-latest
     needs: ['build']
+    environment:
+      name: Production
+      url: ${{ steps.deploy-release.outputs.binary-url }}
     steps:
       - name: Combine builds
         uses: geode-sdk/build-geode-mod/combine@main
@@ -56,6 +59,7 @@ jobs:
           path: ${{ steps.build.outputs.build-output }}
 
       - name: Deploy release
+        id: deploy-release
         uses: binary-locker/bin-pipe@main
         with:
           binary-output: ${{ steps.build.outputs.build-output }}
