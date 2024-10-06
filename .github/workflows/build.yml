@@ -49,6 +49,12 @@ jobs:
         uses: geode-sdk/build-geode-mod/combine@main
         id: build
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: GDIntercept Build
+          path: ${{ steps.build.outputs.build-output }}
+
       - name: Deploy release
         uses: binary-locker/bin-pipe@main
         with:
@@ -57,9 +63,3 @@ jobs:
           api-username: ${{ secrets.BINPIPE_API_USERNAME }}
           api-key: ${{ secrets.BINPIPE_API_KEY }}
           pages-directory: 'docs'
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: GDIntercept Build
-          path: ${{ steps.build.outputs.build-output }}
