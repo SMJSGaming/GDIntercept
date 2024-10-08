@@ -41,7 +41,7 @@ jobs:
           target: ${{ matrix.config.target }}
 
   package-deploy:
-    name: Package & Deploy builds
+    name: Package & Deploy Builds
     runs-on: ubuntu-latest
     needs: ['build']
     environment:
