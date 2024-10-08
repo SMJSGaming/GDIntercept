@@ -1,5 +1,10 @@
 # GDIntercept Changelog
 
+## v0.6.7-alpha.6 (2024-10-08) - Release Migration
+
+- Migrated the releases to the Binary Locker service to track downloads and speed up the development cycle
+- Moved pages to the new deployment platform
+
 ## v0.6.6-alpha.6 (2024-10-02) - Hook Compatibility Patch
 
 - Added compatibility for hooks that modify the request data

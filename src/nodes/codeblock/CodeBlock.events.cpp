@@ -257,7 +257,7 @@ bool CodeBlock::onFormatted(const SideBarCell::OriginalCallback& original) {
 }
 
 bool CodeBlock::onDocs() {
-    utils::web::openLinkInBrowser("https://smjsgaming.github.io/GDIntercept");
+    utils::web::openLinkInBrowser("https://bin.smjsproductions.com/smjs.gdintercept/pages");
 
     return false;
 }

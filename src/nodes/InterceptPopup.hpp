@@ -35,6 +35,6 @@ private:
     void setupList();
     void setupCodeBlock(const bool recycleInfo = false);
     float getPageHeight();
-    float getComponentYPosition(float offset, float itemHeight);
+    float getComponentYPosition(const float offset, const float itemHeight);
     void onSettings(CCObject* obj);
 };

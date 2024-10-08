@@ -3,7 +3,7 @@
 CenterLabel* CenterLabel::create(const std::string& string, const std::string& font) {
     CenterLabel* instance = new CenterLabel();
 
-    if (instance && instance->initWithString(string, font)) {
+    if (instance && instance->init(string, font)) {
         instance->autorelease();
 
         return instance;
@@ -14,8 +14,8 @@ CenterLabel* CenterLabel::create(const std::string& string, const std::string& f
     }
 }
 
-bool CenterLabel::initWithString(const std::string& string, const std::string& font) {
-    ESCAPE_WHEN(!CCLabelBMFont::initWithString(string.c_str(), font.c_str()), false);
+bool CenterLabel::init(const std::string& string, const std::string& font) {
+    ESCAPE_WHEN(!this->initWithString(string.c_str(), font.c_str()), false);
 
     return true;
 }

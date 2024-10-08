@@ -134,7 +134,7 @@ float InterceptPopup::getPageHeight() {
     return m_title->getPositionY() - m_title->getContentHeight() / 2 - InterceptPopup::uiPadding;
 }
 
-float InterceptPopup::getComponentYPosition(float offset, float itemHeight) {
+float InterceptPopup::getComponentYPosition(const float offset, const float itemHeight) {
     return InterceptPopup::uiPadding + this->getPageHeight() - itemHeight - offset;
 }
 
