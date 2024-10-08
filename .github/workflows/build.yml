@@ -60,10 +60,25 @@ jobs:
 
       - name: Deploy release
         id: deploy-release
-        uses: binary-locker/bin-pipe@main
+        uses: binary-locker/bin-pipe/binary@main
         with:
           binary-output: ${{ steps.build.outputs.build-output }}
           api-domain: 'https://bin.smjsproductions.com'
           api-username: ${{ secrets.BINPIPE_API_USERNAME }}
           api-key: ${{ secrets.BINPIPE_API_KEY }}
-          pages-directory: 'docs'
+
+  deploy-pages:
+    name: Deploy Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: pages
+      url: ${{ steps.deploy-pages.outputs.pages-url }}
+    steps:
+      - name: Deploy to Binary Locker
+        id: deploy-pages
+        uses: binary-locker/bin-pipe/pages@main
+        with:
+          api-domain: 'https://bin.smjsproductions.com'
+          api-username: ${{ secrets.BINPIPE_API_USERNAME }}
+          api-key: ${{ secrets.BINPIPE_API_KEY }}
+          pages-directory: docs
