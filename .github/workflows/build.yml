@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "main"
+      - "pipeline-tests"
 jobs:
   build:
     strategy:
@@ -39,15 +40,45 @@ jobs:
           cli: 'latest'
           target: ${{ matrix.config.target }}
 
-  package:
-    name: Package builds
+  package-deploy:
+    name: Package & Deploy Builds
     runs-on: ubuntu-latest
     needs: ['build']
+    environment:
+      name: release
+      url: ${{ steps.deploy-release.outputs.binary-url }}
     steps:
-      - uses: geode-sdk/build-geode-mod/combine@main
+      - name: Combine builds
+        uses: geode-sdk/build-geode-mod/combine@main
         id: build
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: GDIntercept Build
           path: ${{ steps.build.outputs.build-output }}
+
+      - name: Deploy release
+        id: deploy-release
+        uses: binary-locker/bin-pipe/binary@main
+        with:
+          binary-output: ${{ steps.build.outputs.build-output }}
+          api-domain: 'https://bin.smjsproductions.com'
+          api-username: ${{ secrets.BINPIPE_API_USERNAME }}
+          api-key: ${{ secrets.BINPIPE_API_KEY }}
+
+  deploy-pages:
+    name: Deploy Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: pages
+      url: ${{ steps.deploy-pages.outputs.pages-url }}
+    steps:
+      - name: Deploy to Binary Locker
+        id: deploy-pages
+        uses: binary-locker/bin-pipe/pages@main
+        with:
+          api-domain: 'https://bin.smjsproductions.com'
+          api-username: ${{ secrets.BINPIPE_API_USERNAME }}
+          api-key: ${{ secrets.BINPIPE_API_KEY }}
+          pages-directory: docs
