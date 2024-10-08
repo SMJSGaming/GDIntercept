@@ -3,7 +3,7 @@
 Character* Character::create(const char character, const std::string& font, const bool rescale) {
     Character* instance = new Character(rescale);
 
-    if (instance && instance->initWithString(std::string(1, character), font)) {
+    if (instance && instance->init(std::string(1, character), font)) {
         instance->autorelease();
 
         return instance;

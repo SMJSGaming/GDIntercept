@@ -38,8 +38,11 @@ m_lineNumberWidth(lineNumberWidth) {
 void CodeLineCell::initRender() {
     const Theme::Theme theme = Theme::getTheme();
     const float codeLineWidth = this->getCodeLineWidth();
-    CCLabelBMFont* lineNumberLabel = theme.code.font.createLabel(std::to_string(m_lineNumber));
-    CCLabelBMFont* codeLabel = theme.code.font.createLabel(m_code.contents.substr(0, std::min<size_t>(m_code.contents.size(), 2000)));
+    MonospaceLabel* lineNumberLabel = MonospaceLabel::create(std::to_string(m_lineNumber), theme.code.font.fontName, theme.code.font.fontScale);
+    MonospaceLabel* codeLabel = MonospaceLabel::create(m_code.contents.substr(
+        0,
+        std::min<size_t>(m_code.contents.size(), 2000)
+    ), theme.code.font.fontName, theme.code.font.fontScale);
     CCLayerColor* numberBackground = CCLayerColor::create(theme.code.background, codeLineWidth, this->getContentHeight());
 
     if (m_tokens.empty()) {
