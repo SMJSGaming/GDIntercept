@@ -21,7 +21,7 @@ public:
     void reloadCode();
     void reloadSideBar();
     void updateInfo(HttpInfo* info);
-    void setCode(const HttpInfo::HttpContent& code);
+    void setCode(const HttpInfo::Content& code);
     HttpInfo* getActiveInfo() const;
 private:
     static const std::vector<SideBarCell::SideBarView> views;
@@ -56,5 +56,6 @@ private:
     void onRequestHeaders();
     void onResponse();
     void onResponseHeaders();
+    void resizeList();
     void FLAlert_Clicked(FLAlertLayer* alert, const bool state) override;
 };

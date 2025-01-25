@@ -11,7 +11,7 @@ const std::vector<SideBarView> CodeBlock::views({
     { 'H', [](const auto& icons) { return icons.header; }, "Response Headers", [](CodeBlock* block) { block->onResponseHeaders(); } }
 });
 
-const SideBar::Categories CodeBlock::actions({
+const SideBar::Categories CodeBlock::actions {
     { { "Themes", "themes.png"_spr }, {
         { { "Open Theme Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenThemeFiles(); } } },
         { { "Open Theme Docs", "docs.png"_spr, [](CodeBlock* block) { return block->onDocs(); } } }
@@ -48,7 +48,7 @@ const SideBar::Categories CodeBlock::actions({
             }
         } }
     } }
-});
+};
 
 bool CodeBlock::acceptedPauses = false;
 
@@ -132,8 +132,7 @@ bool CodeBlock::onCopy() {
 
 bool CodeBlock::onSend() {
     const HttpInfo::Request original = m_info->getRequest();
-    const HttpInfo::URL url = original.getURL();
-    const std::string method = url.getMethod();
+    const std::string method = original.getMethod();
     const std::string body = original.getBody();
     web::WebRequest request;
 
@@ -143,11 +142,13 @@ bool CodeBlock::onSend() {
 
     request.header(ProxyHandler::getCopyHandshake(), "true");
 
-    for (const auto& [name, value] : original.getHeaders().items()) {
-        request.header(name, value.get<std::string>());
+    for (const auto& [name, list] : original.getHeaders()) {
+        for (const std::string& value : list) {
+            request.header(name, value);
+        }
     }
 
-    (void) request.send(method, url.getOriginal());
+    (void) request.send(method, original.getURL().getOriginal());
 
     this->showMessage("Request Resent");
 
@@ -178,21 +179,21 @@ bool CodeBlock::onOpenThemeFiles() {
 bool CodeBlock::onSave() {
     Mod* mod = Mod::get();
     const HttpInfo::Request request = m_info->getRequest();
-    const HttpInfo::URL url = request.getURL();
+    const URL url = request.getURL();
     const HttpInfo::Response response = m_info->getResponse();
     const std::string host = url.getPortHost();
     const std::string bodyContent = request.getBodyContent().contents;
     const std::string responseContent = response.getResponseContent().contents;
     const std::string filename = fmt::format("{:%d-%m-%Y %H.%M.%S} - {}.txt", fmt::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())), host);
     const std::string contents = fmt::format("Method: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nRequest Headers: {}\nBody:{}\nResponse Headers: {}\nResponse:{}",
-        url.getMethod(),
-        url.stringifyProtocol(),
+        request.getMethod(),
+        url.getProtocol(),
         host,
         url.getPath(),
         url.stringifyQuery(),
-        request.stringifyHeaders(),
+        request.getHeaderList(true).contents,
         bodyContent.empty() ? "" : fmt::format("\n{}", bodyContent),
-        response.stringifyHeaders(),
+        response.getHeaderList(true).contents,
         responseContent.empty() ? "" : fmt::format("\n{}", responseContent)
     );
 
@@ -266,40 +267,60 @@ void CodeBlock::onInfo() {
     if (!m_info) {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     } else {
-        const HttpInfo::URL url = m_info->getRequest().getURL();
+        const HttpInfo::Request request = m_info->getRequest();
+        const HttpInfo::Response response = m_info->getResponse();
+        const URL url = request.getURL();
+        LookupTable<std::string, std::string> info {
+            { "Client", m_info->getClient() == Client::COCOS ? "Cocos2D-X" : "Geode" },
+            { "Status Code", response.stringifyStatusCode() },
+            { "Method", request.getMethod() },
+            { "Protocol", url.getProtocol() },
+            { "Host", url.getPortHost() },
+            { "Path", url.getPath() }
+        };
 
-        this->setCode({ ContentType::UNKNOWN_CONTENT, fmt::format("Client: {}\nStatus Code: {}\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}",
-            m_info->getClient() == Client::COCOS ? "Cocos2D-X" : "Geode",
-            m_info->getResponse().stringifyStatusCode(),
-            url.getMethod(),
-            url.stringifyProtocol(),
-            url.getPortHost(),
-            url.getPath()
-        ) });
+        if (m_info->isCompleted()) {
+            info.emplace("Method", "Response Time", fmt::format("{}ms", response.getResponseTime()));
+        }
+
+        if (url.getUsername().size() || url.getPassword().size()) {
+            info.emplace("Host", {
+                { "Username", url.getUsername() },
+                { "Password", url.getPassword() }
+            });
+        }
+
+        if (url.getHash().size()) {
+            info.insert("Hash", url.getHash());
+        }
+
+        this->setCode({ ContentType::UNKNOWN_CONTENT, info.reduce<std::string>([](const std::string& acc, const auto& entry) {
+            return (acc.empty() ? "" : acc + '\n') + entry.first + ": " + entry.second;
+        }, "") });
     }
 }
 
 void CodeBlock::onBody() {
-    if (!m_info) {
-        this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
-    } else {
+    if (m_info) {
         this->setCode(m_info->getRequest().getBodyContent(Mod::get()->getSettingValue<bool>("raw-data")));
+    } else {
+        this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     }
 }
 
 void CodeBlock::onQuery() {
-    if (!m_info) {
-        this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
-    } else {
+    if (m_info) {
         this->setCode({ ContentType::JSON, m_info->getRequest().getURL().stringifyQuery(Mod::get()->getSettingValue<bool>("raw-data")) });
+    } else {
+        this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     }
 }
 
 void CodeBlock::onRequestHeaders() {
-    if (!m_info) {
-        this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
+    if (m_info) {
+        this->setCode(m_info->getRequest().getHeaderList(Mod::get()->getSettingValue<bool>("raw-data")));
     } else {
-        this->setCode({ ContentType::JSON, m_info->getRequest().stringifyHeaders(Mod::get()->getSettingValue<bool>("raw-data")) });
+        this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     }
 }
 
@@ -317,7 +338,7 @@ void CodeBlock::onResponseHeaders() {
     if (!m_info) {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     } else if (m_info->responseReceived()) {
-        this->setCode({ ContentType::JSON, m_info->getResponse().stringifyHeaders(Mod::get()->getSettingValue<bool>("raw-data")) });
+        this->setCode(m_info->getResponse().getHeaderList(Mod::get()->getSettingValue<bool>("raw-data")));
     } else {
         this->setCode({ ContentType::UNKNOWN_CONTENT, m_info->getResponse().stringifyStatusCode() });
     }

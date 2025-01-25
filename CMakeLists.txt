@@ -5,7 +5,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
 
-project(GDIntercept VERSION 0.6.7)
+project(GDIntercept VERSION 0.7.0)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_library(${PROJECT_NAME} SHARED ${SOURCES})

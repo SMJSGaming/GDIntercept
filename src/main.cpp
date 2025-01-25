@@ -1,4 +1,3 @@
-#include <Geode/loader/SettingEvent.hpp>
 #include "include.hpp"
 #include "nodes/InterceptPopup.hpp"
 #include "settings/DynamicEnum.hpp"
@@ -193,15 +192,15 @@ $execute {
 
         if (Mod::get()->getSettingValue<bool>("log-requests")) {
             const HttpInfo::Request request = event->getRequest();
-            const HttpInfo::URL url = request.getURL();
+            const URL url = request.getURL();
 
             log::info("Sending request:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}",
-                url.getMethod(),
-                url.stringifyProtocol(),
+                request.getMethod(),
+                url.getProtocol(),
                 url.getPortHost(),
                 url.getPath(),
                 url.stringifyQuery(),
-                request.stringifyHeaders(),
+                request.getHeaderList(true).contents,
                 request.getBodyContent().contents
             );
         }

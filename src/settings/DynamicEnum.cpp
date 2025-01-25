@@ -17,16 +17,22 @@ matjson::Value matjson::Serialize<DynamicEnumValue>::to_json(const DynamicEnumVa
 }
 
 DynamicEnumValue matjson::Serialize<DynamicEnumValue>::from_json(const matjson::Value& json) {
-    return DynamicEnumValue(json.as_string());
+    Result<std::string> result = json.asString();
+
+    if (result) {
+        return DynamicEnumValue(result.unwrap());
+    } else {
+        return DynamicEnumValue();
+    }
 }
 
 bool matjson::Serialize<DynamicEnumValue>::is_json(const matjson::Value& json) {
-    return json.is_string();
+    return json.isString();
 }
 
 std::unordered_map<std::string, std::vector<std::function<void()>>> DynamicEnum::loaders;
 
-Result<std::shared_ptr<DynamicEnum>> DynamicEnum::parse(const std::string& key, const std::string& modID, const matjson::Value& json) {
+Result<std::shared_ptr<SettingV3>> DynamicEnum::parse(const std::string& key, const std::string& modID, const matjson::Value& json) {
     std::shared_ptr<DynamicEnum> res = std::make_shared<DynamicEnum>();
     JsonExpectedValue root = checkJson(json, "DynamicEnum");
 
@@ -34,7 +40,7 @@ Result<std::shared_ptr<DynamicEnum>> DynamicEnum::parse(const std::string& key, 
     root.needs("save-value").into(res->m_saveValue);
     root.checkUnknownKeys();
 
-    return root.ok(res);
+    return root.ok(std::static_pointer_cast<SettingV3>(res));
 }
 
 void DynamicEnum::reloadDynamicEnums(const std::string& sprSettingKey) {

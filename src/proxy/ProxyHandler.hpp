@@ -36,11 +36,13 @@ namespace proxy {
         GETTER(web::WebTask, modTask, ModTask);
         CCObject* m_originalTarget;
         SEL_HttpResponse m_originalProxy;
+        std::chrono::time_point<std::chrono::steady_clock> m_start;
         bool m_finished;
 
         ProxyHandler(CCHttpRequest* request);
         ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);
         ~ProxyHandler();
+        size_t calculateResponseTime();
         void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);
         void onModResponse(web::WebResponse* response);
         void onResponse();

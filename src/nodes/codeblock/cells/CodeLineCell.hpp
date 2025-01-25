@@ -7,16 +7,16 @@
 
 class CodeLineCell : public CullingCell {
 public:
-    static CodeLineCell* create(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::HttpContent& code, JSONTokenizer& tokenizer);
+    static CodeLineCell* create(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::Content& code, JSONTokenizer& tokenizer);
 
     float getCodeLineWidth() const;
 protected:
     void initRender() override;
 private:
-    HttpInfo::HttpContent m_code;
+    HttpInfo::Content m_code;
     size_t m_lineNumber;
     float m_lineNumberWidth;
     std::vector<JSONTokenizer::TokenOffset> m_tokens;
 
-    CodeLineCell(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::HttpContent& code, JSONTokenizer& tokenizer);
+    CodeLineCell(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::Content& code, JSONTokenizer& tokenizer);
 };

@@ -36,8 +36,9 @@ bool CaptureCell::init(const size_t index, const CCSize& size) {
     const float menuScale = 0.3f;
     const float menuPositionX = size.width - 20;
     const bool hideBadges = Mod::get()->getSettingValue<bool>("hide-badges");
-    const HttpInfo::URL& url = m_info->getRequest().getURL();
-    const std::string method(url.getMethod());
+    const HttpInfo::Request request = m_info->getRequest();
+    const URL url = request.getURL();
+    const std::string method(request.getMethod());
     const std::string path(url.getPath());
     std::string cutoffPath(path == "/" ? "" : path.substr(path.substr(0, path.size() - 1).find_last_of('/')));
 
@@ -156,7 +157,7 @@ std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> Capt
 }
 
 ccColor3B CaptureCell::colorForMethod() {
-    const std::string& method(m_info->getRequest().getURL().getMethod());
+    const std::string& method(m_info->getRequest().getMethod());
 
     if (method == "GET") {
         return { 0xA8, 0x96, 0xFF };

@@ -16,7 +16,8 @@ CullingList* CullingList::create(const CCSize& size, const std::vector<CullingCe
 
 CullingList::CullingList(const std::vector<CullingCell*>& cells) : m_cells(cells),
 m_cellHeight(cells.empty() ? 0 : cells.at(0)->m_height),
-m_view(nullptr) { }
+m_view(nullptr),
+m_disableCulling(false) { }
 
 CullingList::~CullingList() {
     for (CullingCell* cell : m_cells) {
@@ -49,9 +50,7 @@ void CullingList::reloadData() {
 
     m_view->reloadData();
 
-    for (CullingCell* cell : m_cells) {
-        m_maxCellWidth = std::max(m_maxCellWidth, cell->m_width);
-    }
+    Stream(m_cells).forEach([&](CullingCell* cell) { m_maxCellWidth = std::max(m_maxCellWidth, cell->m_width); });
 
     m_view->m_contentLayer->setPositionX(0);
     m_view->m_contentLayer->setContentSize({ m_maxCellWidth, m_cellHeight * m_cells.size() });
@@ -73,6 +72,10 @@ void CullingList::moveToBottom() {
     m_view->m_contentLayer->setPositionY(0);
 }
 
+void CullingList::toggleCulling(const bool enabled) {
+    m_disableCulling = !enabled;
+}
+
 void CullingList::setCells(const std::vector<CullingCell*>& cells) {
     for (CullingCell* cell : m_cells) {
         cell->removeFromParent();
@@ -85,6 +88,37 @@ void CullingList::setCells(const std::vector<CullingCell*>& cells) {
     m_activeCells.clear();
     this->reloadData();
     this->moveToTop();
+
+    if (m_disableCulling) {
+        this->update(0);
+    }
+}
+
+void CullingList::setContentWidth(const float width) {
+    CCLayerColor::setContentWidth(width);
+
+    if (m_view != nullptr) {
+        m_view->setContentHeight(width);
+        this->reloadData();
+    }
+}
+
+void CullingList::setContentHeight(const float height) {
+    CCLayerColor::setContentHeight(height);
+
+    if (m_view != nullptr) {
+        m_view->setContentHeight(height);
+        this->reloadData();
+    }
+}
+
+void CullingList::setContentSize(const CCSize& size) {
+    CCLayerColor::setContentSize(size);
+
+    if (m_view != nullptr) {
+        m_view->setContentSize(size);
+        this->reloadData();
+    }
 }
 
 bool CullingList::isHorizontalLocked() {
@@ -119,38 +153,12 @@ void CullingList::horizontalRender(CullingCell* cell) {
     }
 }
 
-void CullingList::setContentWidth(const float width) {
-    CCLayerColor::setContentWidth(width);
-
-    if (m_view != nullptr) {
-        m_view->setContentHeight(width);
-        this->reloadData();
-    }
-}
-
-void CullingList::setContentHeight(const float height) {
-    CCLayerColor::setContentHeight(height);
-
-    if (m_view != nullptr) {
-        m_view->setContentHeight(height);
-        this->reloadData();
-    }
-}
-
-void CullingList::setContentSize(const CCSize& size) {
-    CCLayerColor::setContentSize(size);
-
-    if (m_view != nullptr) {
-        m_view->setContentSize(size);
-        this->reloadData();
-    }
-}
-
 void CullingList::update(const float dt) {
     const size_t size = m_cells.size();
     const CCPoint contentOffset = m_view->m_contentLayer->getPosition();
     const bool moved = contentOffset != m_lastOffset;
-    const bool shouldSkipCulling = m_view->m_disableVertical && m_activeCells.size() == size;
+    const bool renderAll = m_view->m_disableVertical || m_disableCulling;
+    const bool shouldSkipCulling = renderAll && m_activeCells.size() == size;
 
     // Alignment snapping
     if (moved) {
@@ -181,15 +189,14 @@ void CullingList::update(const float dt) {
     }
 
     ESCAPE_WHEN(m_activeCells.size() && (!moved || shouldSkipCulling),);
-
-    const size_t offset = size - std::max<int>(0, std::floor(-m_lastOffset.y / m_cellHeight));
-    const size_t amount = std::min<size_t>(std::ceil(this->getContentHeight() / m_cellHeight), size) + 1;
+    const size_t offset = size - (renderAll ? 0 : std::max<int>(0, std::floor(-m_lastOffset.y / m_cellHeight))) - 1;
+    const size_t amount = renderAll ? size : std::min<size_t>(std::ceil(this->getContentHeight() / m_cellHeight), size) + 1;
     std::vector<CullingCell*> newActiveCells;
 
     for (size_t i = 0; i < amount; i++) {
-        const size_t index = offset - i - 1;
+        const size_t index = offset - i;
 
-        CONTINUE_WHEN(index < 0 || index >= size);
+        CONTINUE_WHEN(!renderAll && (index < 0 || index >= size));
 
         CullingCell* cell = this->renderCell(index);
 

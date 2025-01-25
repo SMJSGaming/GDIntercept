@@ -106,7 +106,11 @@ void ProxyHandler::resumeAll() {
                 proxy->getInfo()->resume();
 
                 if (CCHttpRequest* cocosRequest = proxy->getCocosRequest()) {
-                    Loader::get()->queueInMainThread([cocosRequest]{ CCHttpClient::getInstance()->send(cocosRequest); });
+                    Loader::get()->queueInMainThread([proxy, cocosRequest]{
+                        proxy->m_start = std::chrono::high_resolution_clock::now();
+
+                        CCHttpClient::getInstance()->send(cocosRequest);
+                    });
                 }
             }
         }
@@ -162,6 +166,8 @@ m_finished(false) {
     ProxyHandler::registerProxy(this);
 
     if (!m_info->isPaused()) {
+        m_start = std::chrono::high_resolution_clock::now();
+
         CCHttpClient::getInstance()->send(m_cocosRequest);
     }
 }
@@ -193,7 +199,8 @@ m_finished(false) {
 
         ESCAPE_WHEN(m_info->isCancelled(), this->onCancel());
 
-        web::WebTask task = m_modRequest->send(m_info->getRequest().getURL().getMethod(), url);
+        m_start = std::chrono::high_resolution_clock::now();
+        web::WebTask task = m_modRequest->send(m_info->getRequest().getMethod(), url);
 
         task.listen([&response](const web::WebResponse* taskResponse) {
             response = new web::WebResponse(*taskResponse);
@@ -234,15 +241,19 @@ ProxyHandler::~ProxyHandler() {
     delete m_info;
 }
 
+size_t ProxyHandler::calculateResponseTime() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_start).count();
+}
+
 void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* response) {
-    m_info->m_response = HttpInfo::Response(&m_info->m_request, response);
+    m_info->m_response = HttpInfo::Response(&m_info->m_request, response, this->calculateResponseTime());
 
     (m_originalTarget->*m_originalProxy)(client, response);
     this->onResponse();
 }
 
 void ProxyHandler::onModResponse(web::WebResponse* response) {
-    m_info->m_response = HttpInfo::Response(&m_info->m_request, response);
+    m_info->m_response = HttpInfo::Response(&m_info->m_request, response, this->calculateResponseTime());
 
     this->onResponse();
 }

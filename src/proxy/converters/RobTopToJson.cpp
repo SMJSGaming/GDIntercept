@@ -4,70 +4,70 @@ using namespace nlohmann;
 
 const std::unordered_map<std::string, proxy::converters::RobTopToJson::Parser> proxy::converters::RobTopToJson::parsers({
     // Accounts
-    { "/database/accounts/syncGJAccountNew.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) },
-    { "/database/accounts/loginGJAccount.php", RobTopToJson::Parser({ "accountID", "userID" }, ",") },
+    { "/accounts/syncGJAccountNew.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) },
+    { "/accounts/loginGJAccount.php", RobTopToJson::Parser({ "accountID", "userID" }, ",") },
     // Users
-    { "/database/getGJScores20.php", RobTopToJson::Parser(":", "|") },
-    { "/database/getGJUserInfo20.php", RobTopToJson::Parser(":") },
-    { "/database/getGJUsers20.php", RobTopToJson::Parser(":", "|", {
+    { "/getGJScores20.php", RobTopToJson::Parser(":", "|") },
+    { "/getGJUserInfo20.php", RobTopToJson::Parser(":") },
+    { "/getGJUsers20.php", RobTopToJson::Parser(":", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
     // Levels
-    { "/database/downloadGJLevel22.php", RobTopToJson::Parser(":", {
+    { "/downloadGJLevel22.php", RobTopToJson::Parser(":", {
         { "hash1", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
         { "hash2", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
         { "unknown", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
         { "songs", RobTopToJson::ObjParser("~|~", "~:~") }
     }) },
-    { "/database/getGJDailyLevel.php", RobTopToJson::Parser({ "tempID", "secondsLeft" }, "|") },
-    { "/database/getGJGauntlets21.php", RobTopToJson::Parser(":", "|", {
+    { "/getGJDailyLevel.php", RobTopToJson::Parser({ "tempID", "secondsLeft" }, "|") },
+    { "/getGJGauntlets21.php", RobTopToJson::Parser(":", "|", {
         { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
-    { "/database/getGJLevels21.php", RobTopToJson::Parser(":", "|", {
+    { "/getGJLevels21.php", RobTopToJson::Parser(":", "|", {
         { "creators", RobTopToJson::ObjParser({ "userID", "username", "accountID" }, ":", "|") },
         { "songs", RobTopToJson::ObjParser("~|~", "~:~") },
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") },
         { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
-    { "/database/getGJLevelLists.php", RobTopToJson::Parser(":", "|", {
+    { "/getGJLevelLists.php", RobTopToJson::Parser(":", "|", {
         { "creators", RobTopToJson::ObjParser({ "userID", "username", "accountID" }, ":", "|") },
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") },
         { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
-    { "/database/getGJLevelScores211.php", RobTopToJson::Parser(":", "|") },
-    { "/database/getGJLevelScoresPlat.php", RobTopToJson::Parser(":", "|") },
-    { "/database/getGJMapPacks21.php", RobTopToJson::Parser(":", "|", {
+    { "/getGJLevelScores211.php", RobTopToJson::Parser(":", "|") },
+    { "/getGJLevelScoresPlat.php", RobTopToJson::Parser(":", "|") },
+    { "/getGJMapPacks21.php", RobTopToJson::Parser(":", "|", {
         { "hash", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) }
     }) },
     // Comments
-    { "/database/getGJAccountComments20.php", RobTopToJson::Parser("~", "|", {
+    { "/getGJAccountComments20.php", RobTopToJson::Parser("~", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
-    { "/database/getGJCommentHistory.php", RobTopToJson::Parser("~", "|", {
+    { "/getGJCommentHistory.php", RobTopToJson::Parser("~", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
-    { "/database/getGJComments21.php", RobTopToJson::Parser("~", "|", {
+    { "/getGJComments21.php", RobTopToJson::Parser("~", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
     // Socials
-    { "/database/downloadGJMessage20.php", RobTopToJson::Parser(":") },
-    { "/database/getGJFriendRequests20.php", RobTopToJson::Parser(":", "|", {
+    { "/downloadGJMessage20.php", RobTopToJson::Parser(":") },
+    { "/getGJFriendRequests20.php", RobTopToJson::Parser(":", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
-    { "/database/getGJMessages20.php", RobTopToJson::Parser(":", "|", {
+    { "/getGJMessages20.php", RobTopToJson::Parser(":", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
-    { "/database/getGJUserList20.php", RobTopToJson::Parser(":", "|") },
+    { "/getGJUserList20.php", RobTopToJson::Parser(":", "|") },
     // Rewards
-    { "/database/getGJChallenges.php", RobTopToJson::Parser({ "encodedResponse", "hash" }, "|") },
-    { "/database/getGJRewards.php", RobTopToJson::Parser({ "encodedResponse", "hash" }, "|") },
+    { "/getGJChallenges.php", RobTopToJson::Parser({ "encodedResponse", "hash" }, "|") },
+    { "/getGJRewards.php", RobTopToJson::Parser({ "encodedResponse", "hash" }, "|") },
     // Songs
-    { "/database/getGJSongInfo.php", RobTopToJson::Parser("~|~") },
-    { "/database/getGJTopArtists.php", RobTopToJson::Parser(":", "|", {
+    { "/getGJSongInfo.php", RobTopToJson::Parser("~|~") },
+    { "/getGJTopArtists.php", RobTopToJson::Parser(":", "|", {
         { "pagination", RobTopToJson::ObjParser({ "total", "offset", "amount" }, ":") }
     }) },
     // Misc
-    { "/database/getSaveData.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) }
+    { "/getSaveData.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) }
 });
 
 proxy::converters::RobTopToJson::ObjParser::ObjParser(const char* delimiter, const char* entryDelimiter) :
@@ -248,13 +248,37 @@ bool proxy::converters::RobTopToJson::needsSanitization() const {
 }
 
 bool proxy::converters::RobTopToJson::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
+    if (isBody) {
+        return false;
+    }
+    
+    for (const auto& [key, parser] : RobTopToJson::parsers) {
+        if (path.ends_with(key)) {
+            return true;
+        }
+    }
+
+    return false; 
+
     return RobTopToJson::parsers.contains(path) && !isBody;
 }
 
 std::string proxy::converters::RobTopToJson::convert(const std::string& path, const std::string& original) const {
-    return converters::safeDump(RobTopToJson::parsers.at(path).parse(original));
+    for (const auto& [key, parser] : RobTopToJson::parsers) {
+        if (path.ends_with(key)) {
+            return converters::safeDump(parser.parse(original));
+        }
+    }
+
+    return "Unknown path";
 }
 
 std::string proxy::converters::RobTopToJson::toRaw(const std::string& path, const std::string& original) const {
-    return RobTopToJson::parsers.at(path).toRaw(json::parse(original));
+    for (const auto& [key, parser] : RobTopToJson::parsers) {
+        if (path.ends_with(key)) {
+            return parser.toRaw(json::parse(original));
+        }
+    }
+
+    return original;
 }

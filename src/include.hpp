@@ -3,6 +3,7 @@
 #include <fmt/chrono.h>
 #include <Geode/Geode.hpp>
 #include "../lib/json.hpp"
+#include "../lib/Stream.hpp"
 #include "../lib/LookupTable.hpp"
 #include "concepts.hpp"
 #include "macro_utils.hpp"

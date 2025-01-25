@@ -1,13 +1,8 @@
 {
-  "geode": "3.8.1",
-  "version": "v0.6.7-alpha.6",
+  "geode": "4.2.0",
+  "version": "v0.7.0",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
-  "api": {
-    "include": [
-      "proxy/*.hpp"
-    ]
-  },
   "developers": [
     "SMJS",
     "RobTop"
@@ -26,25 +21,25 @@
     "interface",
     "utility",
     "content",
-    "cheats",
+    "cheat",
     "developer"
   ],
   "gd": {
-    "win": "2.206",
-    "mac": "2.206",
-    "android": "2.206"
+    "win": "2.2074",
+    "mac": "2.2074",
+    "android": "2.2074"
   },
-  "dependencies": [
-    {
-      "id": "geode.custom-keybinds",
-      "version": "1.6.4",
+  "dependencies": {
+    "geode.custom-keybinds": {
+      "version": "1.10.2",
       "importance": "required",
       "platforms": [
         "win",
-        "android64"
+        "android64",
+        "mac-arm"
       ]
     }
-  ],
+  },
   "resources": {
     "fonts": {
       "consola": {
@@ -64,7 +59,8 @@
       "resources/*.png"
     ],
     "files": [
-      "resources/themes/*.json"
+      "resources/themes/*.json",
+      "resources/suffixes.json"
     ]
   },
   "settings": {

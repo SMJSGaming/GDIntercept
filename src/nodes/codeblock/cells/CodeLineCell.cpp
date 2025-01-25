@@ -1,6 +1,6 @@
 #include "CodeLineCell.hpp"
 
-CodeLineCell* CodeLineCell::create(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::HttpContent& code, JSONTokenizer& tokenizer) {
+CodeLineCell* CodeLineCell::create(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::Content& code, JSONTokenizer& tokenizer) {
     CodeLineCell* instance = new CodeLineCell(size, lineNumber, lineNumberWidth, code, tokenizer);
 
     if (instance && instance->init()) {
@@ -20,7 +20,7 @@ CodeLineCell::CodeLineCell(
     const CCSize& size,
     const size_t lineNumber,
     const float lineNumberWidth,
-    const HttpInfo::HttpContent& code,
+    const HttpInfo::Content& code,
     JSONTokenizer& tokenizer
 ) : CullingCell(size),
 m_code(code),

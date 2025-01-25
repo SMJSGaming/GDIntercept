@@ -6,6 +6,8 @@
 template<typename K, typename V>
 class LookupTable {
 public:
+    using Entry = std::pair<K, V>;
+
     V& operator[](const K& key) {
         return this->at(key);
     }
@@ -14,31 +16,31 @@ public:
         return this->at(key);
     }
 
-    std::pair<K, V>& operator[](const size_t index) {
+    Entry& operator[](const size_t index) {
         return this->at(index);
     }
 
-    const std::pair<K, V>& operator[](const size_t index) const {
+    const Entry& operator[](const size_t index) const {
         return this->at(index);
     }
 
     LookupTable() { }
 
-    LookupTable(const std::vector<std::pair<K, V>>& table) : m_table(table) { }
+    LookupTable(const std::initializer_list<Entry>& table) : m_table(table) { }
 
-    std::vector<std::pair<K, V>>::iterator begin() {
+    std::vector<Entry>::iterator begin() {
         return m_table.begin();
     }
 
-    std::vector<std::pair<K, V>>::const_iterator begin() const {
+    std::vector<Entry>::const_iterator begin() const {
         return m_table.begin();
     }
 
-    std::vector<std::pair<K, V>>::iterator end() {
+    std::vector<Entry>::iterator end() {
         return m_table.end();
     }
 
-    std::vector<std::pair<K, V>>::const_iterator end() const {
+    std::vector<Entry>::const_iterator end() const {
         return m_table.end();
     }
 
@@ -66,11 +68,11 @@ public:
         throw std::out_of_range("Key not found in LookupTable");
     }
 
-    std::pair<K, V>& at(const size_t index) {
+    Entry& at(const size_t index) {
         return m_table.at(index);
     }
 
-    const std::pair<K, V>& at(const size_t index) const {
+    const Entry& at(const size_t index) const {
         return m_table.at(index);
     }
 
@@ -94,7 +96,7 @@ public:
         return values;
     }
 
-    std::vector<std::pair<K, V>> pairs() const {
+    std::vector<Entry> entries() const {
         return m_table;
     }
 
@@ -107,14 +109,46 @@ public:
         return false;
     }
 
-    void insert(const std::pair<K, V>& pair) {
-        this->erase(pair.first);
-        m_table.push_back(pair);
+    void insert(const Entry& entry) {
+        this->erase(entry.first);
+        m_table.push_back(entry);
     }
 
     void insert(const K& key, const V& value) {
-        this->erase(key);
-        m_table.push_back(std::make_pair(key, value));
+        this->insert(std::make_pair(key, value));
+    }
+
+    void insert(const LookupTable<K, V> table) {
+        for (const Entry& entry : table) {
+            this->insert(entry);
+        }
+    }
+
+    void emplace(const K& before, const Entry& entry) {
+        this->erase(entry.first);
+
+        for (size_t i = 0; i < m_table.size(); i++) {
+            if (m_table.at(i).first == before) {
+                m_table.emplace(m_table.begin() + i, entry);
+                return;
+            }
+        }
+
+        m_table.push_back(entry);
+    }
+
+    void emplace(const K& before, const K& key, const V& value) {
+        this->emplace(before, std::make_pair(key, value));
+    }
+
+    void emplace(const K& before, const LookupTable<K, V> table) {
+        K last = before;
+
+        for (const Entry& entry : table) {
+            this->emplace(last, entry);
+
+            last = entry.first;
+        }
     }
 
     void erase(const K& key) {
@@ -129,6 +163,17 @@ public:
     void clear() {
         m_table.clear();
     }
+
+    template<typename T>
+    T reduce(const std::function<T(const T& accumulator, const Entry& entry)> reducer, const T& initialValue) const {
+        T accumulator = initialValue;
+
+        for (const Entry& entry : m_table) {
+            accumulator = reducer(accumulator, entry);
+        }
+
+        return accumulator;
+    }
 private:
-    std::vector<std::pair<K, V>> m_table;       
+    std::vector<Entry> m_table;       
 };

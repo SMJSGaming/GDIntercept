@@ -1,5 +1,13 @@
 # GDIntercept Changelog
 
+## v0.7.0 (2025-01-25) - API Deprecation, Bugfixes, GDPS Support & URL Rework
+
+- Deprecated the public API as it was limiting the workflow
+- Fixed a lot of small bugs
+- Changed the RobTop to JSON converter to be more GDPS friendly
+- Reworked URLs so that they are compatible with every standard
+- Added more info to requests
+
 ## v0.6.7-alpha.6 (2024-10-08) - Release Migration
 
 - Migrated the releases to the Binary Locker service to track downloads and speed up the development cycle

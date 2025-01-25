@@ -48,11 +48,11 @@ namespace proxy {
     template<typename T> requires std::is_base_of_v<ProxyEvent, T>
     class ProxyFilter : public geode::EventFilter<T> {
     public:
-        geode::ListenerResult handle(geode::utils::MiniFunction<geode::ListenerResult(T*)> callback, T* event) {
-            const HttpInfo::URL url = event->getRequest().getURL();
+        geode::ListenerResult handle(std::function<geode::ListenerResult(T*)> callback, T* event) {
+            const URL url = event->getRequest().getURL();
 
             if ((m_urlParts.empty() || std::any_of(m_urlParts.begin(), m_urlParts.end(), [url](std::string part) {
-                return url.getQueryLess().find(part) != std::string::npos;
+                return url.getBasicUrl().find(part) != std::string::npos;
             })) && (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))) {
                 return callback(event);
             } else {

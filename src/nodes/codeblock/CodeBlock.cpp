@@ -71,6 +71,8 @@ void CodeBlock::reloadSideBar() {
         scrollbarX->setPositionX(paddingLeft);
         scrollbarX->setContentWidth(this->getContentWidth() - paddingLeft - this->getPaddingRight());
     }
+
+    this->resizeList();
 }
 
 void CodeBlock::updateInfo(HttpInfo* info) {
@@ -81,30 +83,28 @@ void CodeBlock::updateInfo(HttpInfo* info) {
     }
 }
 
-void CodeBlock::setCode(const HttpInfo::HttpContent& code) {
+void CodeBlock::setCode(const HttpInfo::Content& code) {
     const Theme::Theme theme = Theme::getTheme();
-    const CCSize fontSize = theme.code.font.getTrueFontSize();
+    const CCSize fontSize = MonospaceLabel::getCharacterSize(theme.code.font.fontName) * theme.code.font.fontScale;
     const float lineNumberWidth = fontSize.width * std::to_string(
         std::count(code.contents.begin(), code.contents.end(), '\n') + 1
     ).size() + theme.code.paddingLeft;
+    const float lineHeight = fontSize.height + theme.code.font.lineHeight;
     TracklessScrollbar* scrollbarX = std::get<0>(m_scrollbars);
     TracklessScrollbar* scrollbarY = std::get<1>(m_scrollbars);
-    CullingList* list = as<CullingList*>(this->getNode());
-    std::stringstream stream(m_code = code.contents);
-    std::vector<CullingCell*> cells;
-    std::string line;
+    CullingList* list = reinterpret_cast<CullingList*>(this->getNode());
     JSONTokenizer tokenizer;
 
-    for (size_t i = 1; std::getline(stream, line) || i == 1; i++) {
-        cells.push_back(CodeLineCell::create({
+    Stream<CodeLineCell*> cells = StringStreamer::of(m_code = code.contents).map<CodeLineCell*>([&](const std::string& line, const size_t i) {
+        return CodeLineCell::create({
             code.type == ContentType::BINARY ?
                 list->getContentWidth() :
                 lineNumberWidth + theme.code.paddingCenter + fontSize.width * std::min<size_t>(2000, line.size()) + theme.code.paddingRight,
-            fontSize.height + theme.code.font.lineHeight
-        }, i, lineNumberWidth, { code.type, line }, tokenizer));
-    }
+            lineHeight
+        }, i + 1, lineNumberWidth, { code.type, line }, tokenizer);
+    });
 
-    list->setCells(cells);
+    list->setCells(cells.cast<CullingCell*>());
 
     if (list->isHorizontalLocked()) {
         if (scrollbarX) {
@@ -141,6 +141,7 @@ void CodeBlock::setCode(const HttpInfo::HttpContent& code) {
     }
 
     this->setBackgroundColor(theme.code.background);
+    this->resizeList();
 }
 
 HttpInfo* CodeBlock::getActiveInfo() const {
@@ -157,8 +158,7 @@ void CodeBlock::showMessage(const std::string& message, const ccColor3B& color) 
 }
 
 void CodeBlock::scroll(const float x, const float y) {
-    const CullingList* list = as<CullingList*>(this->getNode());
-    const TableView* tableView = list->getView();
+    const TableView* tableView = reinterpret_cast<CullingList*>(this->getNode())->getView();
     const float max = 0;
     const CCSize min = -(tableView->m_contentLayer->getContentSize() - tableView->getContentSize());
     const CCPoint position = tableView->m_contentLayer->getPosition();
@@ -167,4 +167,8 @@ void CodeBlock::scroll(const float x, const float y) {
         std::min(max, std::max(min.width, position.x + x)),
         std::min(max, std::max(min.height, position.y + y))
     });
+}
+
+void CodeBlock::resizeList() {
+    this->getNode()->setContentSize(this->getNode()->getContentSize());
 }

@@ -4,18 +4,16 @@ using namespace SideBarCell;
 
 SideBar::ActionID::ActionID(const std::string& id) : isOpen(id == "open") {
     ESCAPE_WHEN(isOpen,);
-    std::stringstream stream(id);
-    std::string part;
 
-    for (size_t key = 0; std::getline(stream, part, '-'); key++) {
-        if (key == 0) {
+    StringStreamer::of(id, '-').forEach([this](const std::string& part, const size_t i) {
+        if (i == 0) {
             category = part;
-        } else if (key == 1) {
+        } else if (i == 1) {
             index = std::stoul(part);
         } else {
             cellIndex = std::stoul(part);
         }
-    }
+    });
 }
 
 SideBarCategory SideBar::ActionID::getCategory(const Categories& actions) const {

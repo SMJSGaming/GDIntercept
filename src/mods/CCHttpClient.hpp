@@ -6,7 +6,7 @@
 
 class $modify(ModCCHttpClient, CCHttpClient) {
     static void onModify(auto& self) {
-        (void)self.setHookPriority("cocos2d::extension::CCHttpClient::send", INT_MAX - 1);
+        (void)self.setHookPriority("cocos2d::extension::CCHttpClient::send", 999999999);
     }
 
     void send(CCHttpRequest* request);

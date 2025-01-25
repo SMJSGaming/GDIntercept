@@ -24,7 +24,7 @@ struct matjson::Serialize<DynamicEnumValue> {
 
 class DynamicEnum : public SettingBaseValueV3<DynamicEnumValue> {
 public:
-    static Result<std::shared_ptr<DynamicEnum>> parse(const std::string& key, const std::string& modID, const matjson::Value& json);
+    static Result<std::shared_ptr<SettingV3>> parse(const std::string& key, const std::string& modID, const matjson::Value& json);
     static void reloadDynamicEnums(const std::string& sprSettingKey);
     static void registerLoader(const std::string& sprSettingKey, const std::function<void()>& loader);
 
