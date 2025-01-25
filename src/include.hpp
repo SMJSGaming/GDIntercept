@@ -11,7 +11,7 @@
 #include "objects/Theme.hpp"
 #include "proxy/ProxyHandler.hpp"
 
-#if defined(GEODE_IS_WINDOWS) || defined(GEODE_IS_ANDROID64)
+#if defined(GEODE_IS_WINDOWS) || defined(GEODE_IS_ANDROID64) || defined(GEODE_IS_ARM_MAC)
     #define KEYBINDS_ENABLED
     #include <geode.custom-keybinds/include/Keybinds.hpp>
 
