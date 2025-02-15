@@ -181,7 +181,7 @@ bool CodeBlock::onSave() {
     const HttpInfo::Request request = m_info->getRequest();
     const URL url = request.getURL();
     const HttpInfo::Response response = m_info->getResponse();
-    const std::string host = url.getPortHost();
+    const std::string host = url.getHost();
     const std::string bodyContent = request.getBodyContent().contents;
     const std::string responseContent = response.getResponseContent().contents;
     const std::string filename = fmt::format("{:%d-%m-%Y %H.%M.%S} - {}.txt", fmt::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())), host);
@@ -275,7 +275,7 @@ void CodeBlock::onInfo() {
             { "Status Code", response.stringifyStatusCode() },
             { "Method", request.getMethod() },
             { "Protocol", url.getProtocol() },
-            { "Host", url.getPortHost() },
+            { "Host", url.getHost() },
             { "Path", url.getPath() }
         };
 

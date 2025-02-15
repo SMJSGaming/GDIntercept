@@ -197,7 +197,7 @@ $execute {
             log::info("Sending request:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}",
                 request.getMethod(),
                 url.getProtocol(),
-                url.getPortHost(),
+                url.getHost(),
                 url.getPath(),
                 url.stringifyQuery(),
                 request.getHeaderList(true).contents,

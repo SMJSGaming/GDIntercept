@@ -43,7 +43,7 @@ bool CaptureCell::init(const size_t index, const CCSize& size) {
     std::string cutoffPath(path == "/" ? "" : path.substr(path.substr(0, path.size() - 1).find_last_of('/')));
 
     if (cutoffPath.empty()) {
-        cutoffPath = url.getPortHost();
+        cutoffPath = url.getHost();
     }
 
     CCLabelBMFont* label = CCLabelBMFont::create((method + ' ' + cutoffPath).c_str(), "bigFont.fnt");

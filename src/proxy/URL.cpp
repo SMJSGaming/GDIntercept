@@ -31,19 +31,11 @@ proxy::URL::URL(const std::string& url, web::WebRequest* request) : m_original(u
 }
 
 std::string proxy::URL::getBasicUrl() const {
-    return fmt::format("{}://{}/{}", m_protocol, this->getPortHost(), m_path);
+    return fmt::format("{}://{}/{}", m_protocol, this->getHost(), m_path);
 }
 
 std::string proxy::URL::stringifyQuery(const bool raw) const {
     return converters::safeDump(m_query, raw ? -1 : 2);
-}
-
-std::string proxy::URL::getPortHost() const {
-    if (m_origin != Origin::LOCALHOST && ((m_port == 80 && m_scheme == Protocol::HTTP) || (m_port == 443 && m_scheme == Protocol::HTTPS))) {
-        return m_host;
-    } else {
-        return m_host + ":" + std::to_string(m_port);
-    }
 }
 
 void proxy::URL::parse() {

@@ -9,11 +9,17 @@ web::WebTask WebRequest_send(web::WebRequest* request, std::string_view method, 
     }
 }
 
-$execute {
-    (void) Mod::get()->hook(
+$on_mod(Loaded) {
+    const Result<Hook*> hook = Mod::get()->hook(
         reinterpret_cast<void*>(addresser::getNonVirtual(&web::WebRequest::send)),
         &WebRequest_send,
         "geode::web::WebRequest::send",
         tulip::hook::TulipConvention::Thiscall
     );
+
+    if (hook.isOk()) {
+        hook.unwrap()->setPriority(999999999);
+    } else {
+        log::error("Failed to load the Geode Web hook:\n\tCause:", hook.unwrapErr());
+    }
 }

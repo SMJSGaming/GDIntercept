@@ -11,7 +11,6 @@ namespace proxy {
 
         std::string getBasicUrl() const;
         std::string stringifyQuery(const bool raw = false) const;
-        std::string getPortHost() const;
 
         URL(const std::string& url, geode::utils::web::WebRequest* request = nullptr);
     private:
@@ -26,8 +25,8 @@ namespace proxy {
         PROXY_GETTER(std::string, domainName, DomainName);
         PROXY_GETTER(std::string, domain, Domain);
         PROXY_GETTER(std::vector<std::string>, subDomains, SubDomains);
-        PROXY_GETTER(std::vector<std::string>, sld, m_sld);
-        PROXY_GETTER(std::string, host, host);
+        PROXY_GETTER(std::vector<std::string>, sld, SLD);
+        PROXY_GETTER(std::string, host, Host);
         PROXY_GETTER(std::string, tld, TLD);
         PROXY_GETTER(int, port, Port);
         PROXY_GETTER(std::string, path, Path);

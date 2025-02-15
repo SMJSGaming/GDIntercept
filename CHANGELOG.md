@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.7.1 (2025-02-15) - Fixed Port Handling
+
+- Ensured that ports don't get duplicated in the URL
+
 ## v0.7.0 (2025-01-25) - API Deprecation, Bugfixes, GDPS Support & URL Rework
 
 - Deprecated the public API as it was limiting the workflow
