@@ -1,5 +1,10 @@
 # GDIntercept Changelog
 
+## v0.7.2 (2025-02-15) - Fixed Raw Delimiter Usage
+
+- Fixed an issue where the entry delimiter was used rather than the main delimiter between values
+- Added a HTTP message log option to the settings
+
 ## v0.7.1 (2025-02-15) - Fixed Port Handling
 
 - Ensured that ports don't get duplicated in the URL

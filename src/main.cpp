@@ -216,6 +216,24 @@ $execute {
             popup->reloadSideBar();
         }
 
+        if (Mod::get()->getSettingValue<bool>("log-http-messages")) {
+            const HttpInfo::Request request = event->getRequest();
+            const HttpInfo::Response response = event->getResponse();
+            const URL url = request.getURL();
+
+            log::info("HTTP message:\nMethod: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nHeaders: {}\nBody: {}\nResponse: {}\nResponse Headers: {}",
+                request.getMethod(),
+                url.getProtocol(),
+                url.getHost(),
+                url.getPath(),
+                url.stringifyQuery(),
+                request.getHeaderList(false).contents,
+                request.getBodyContent().contents,
+                response.getResponse(),
+                response.getHeaderList(false).contents
+            );
+        }
+
         return ListenerResult::Propagate;
     }, ResponseFilter());
 

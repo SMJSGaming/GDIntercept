@@ -1,6 +1,6 @@
 {
   "geode": "4.2.0",
-  "version": "v0.7.1",
+  "version": "v0.7.2",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "developers": [
@@ -150,6 +150,12 @@
     "log-requests": {
       "name": "Log Requests",
       "description": "Logs all requests made in the current session to the Geode console.",
+      "type": "bool",
+      "default": false
+    },
+    "log-http-messages": {
+      "name": "Log HTTP Messages",
+      "description": "Logs all requests/responses made in the current session to the Geode console once a response is received.",
       "type": "bool",
       "default": false
     }

@@ -180,7 +180,7 @@ std::string proxy::converters::RobTopToJson::ObjParser::toRawEntry(const json& j
     if (m_tupleKeys.empty()) {
         for (const auto& [key, value] : json.items()) {
             if (stream.tellp() != 0) {
-                stream << m_entryDelimiter;
+                stream << m_delimiter;
             }
 
             stream << key << m_delimiter << converters::safeDump(value, -1, true);
