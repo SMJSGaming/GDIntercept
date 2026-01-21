@@ -264,8 +264,8 @@ public:
 class IntStream {
 public:
     template<typename T = long long> requires(std::is_arithmetic_v<T>)
-    static Stream<T> range(const int exclusiveEnd) {
-        return IntStream::range(0, exclusiveEnd);
+    static Stream<T> range(const T exclusiveEnd) {
+        return IntStream::range<T>(0, exclusiveEnd);
     }
 
     template<typename T = long long> requires(std::is_arithmetic_v<T>)
