@@ -153,7 +153,7 @@ bool ActionCell::isEnabled() const {
 
 void ActionCell::enable() {
     const Theme::Theme theme = Theme::getTheme();
-    CCSprite* icon = as<CCSprite*>(m_icon->getNode());
+    CCSprite* icon = typeinfo_cast<CCSprite*>(m_icon->getNode());
 
     m_enabled = true;
 
@@ -163,7 +163,7 @@ void ActionCell::enable() {
 
 void ActionCell::disable() {
     const Theme::Theme theme = Theme::getTheme();
-    CCSprite* icon = as<CCSprite*>(m_icon->getNode());
+    CCSprite* icon = typeinfo_cast<CCSprite*>(m_icon->getNode());
 
     m_enabled = false;
 

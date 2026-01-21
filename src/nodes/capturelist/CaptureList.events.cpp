@@ -13,7 +13,7 @@ void CaptureList::tabCell(const bool forward) {
     std::deque<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
 
     for (size_t i = 0; i < proxies.size(); i++) {
-        if (proxies[i]->getInfo()->getID() == CaptureList::active) {
+        if (proxies[i]->getInfo()->getID() == CaptureList::ACTIVE) {
             if (!forward && i == 0) {
                 m_cells[m_cells.size() - 1]->activate();
             } else if (forward && i == proxies.size() - 1) {

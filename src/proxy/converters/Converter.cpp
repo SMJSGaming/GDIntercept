@@ -3,6 +3,11 @@
 using namespace nlohmann;
 using namespace geode::prelude;
 
+proxy::converters::Converter::Converter(const enums::ContentType resultContentType) {
+    m_needsSanitization = resultContentType == enums::ContentType::JSON;
+    m_resultContentType = resultContentType;
+}
+
 bool proxy::converters::isInt(const std::string& str) {
     if (str.empty()) {
         return false;
@@ -92,9 +97,17 @@ nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string& key, c
     } else if (converters::isBool(str)) {
         return json(str == "true");
     } else if (converters::isInt(str)) {
-        return json(std::stoll(str));
+        if (Result<long long> result = utils::numFromString<long long>(str); result.isOk()) {
+            return json(result.unwrap());
+        } else {
+            return json(str);
+        }
     } else if (converters::isNumber(str)) {
-        return json(std::stold(str));
+        if (Result<long double> result = utils::numFromString<long double>(str); result.isOk()) {
+            return json(result.unwrap());
+        } else {
+            return json(str);
+        }
     } else if (converters::isString(str)) {
         return json(str.substr(1, str.size() - 2));
     } else {

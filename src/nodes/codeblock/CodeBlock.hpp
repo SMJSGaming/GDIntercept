@@ -24,9 +24,9 @@ public:
     void setCode(const HttpInfo::Content& code);
     HttpInfo* getActiveInfo() const;
 private:
-    static const std::vector<SideBarCell::SideBarView> views;
-    static const SideBar::Categories actions;
-    static bool acceptedPauses;
+    static const std::vector<SideBarCell::SideBarView> VIEWS;
+    static const SideBar::Categories ACTIONS;
+    static bool ACCEPTED_PAUSES;
 
     HttpInfo* m_info;
     SideBar* m_bar;

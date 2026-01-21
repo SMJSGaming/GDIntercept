@@ -6,8 +6,7 @@ namespace proxy::converters {
     // What can I say? I like it raw
     class RawToBinary : public Converter {
     public:
-        enums::ContentType resultContentType() const override;
-        bool needsSanitization() const override;
+        RawToBinary();
         bool canConvert(const std::string& path, const bool isBody, const std::string& original) const override;
         std::string convert(const std::string& path, const std::string& original) const override;
         std::string toRaw(const std::string& path, const std::string& original) const override;

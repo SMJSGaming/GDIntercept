@@ -7,5 +7,5 @@ public:
     static void show();
     static void hide();
 private:
-    static CCScale9Sprite* warning;
+    static CCScale9Sprite* WARNING;
 };

@@ -22,11 +22,11 @@ namespace proxy {
         static void resumeAll();
         static void setCacheLimit(const int64_t limit);
     private:
-        static std::vector<size_t> handledIDs;
-        static std::vector<ProxyHandler*> aliveProxies;
-        static std::deque<ProxyHandler*> cachedProxies;
-        static std::vector<ProxyHandler*> pausedProxies;
-        static bool paused;
+        static std::vector<size_t> HANDLED_IDS;
+        static std::vector<ProxyHandler*> ALIVE_PROXIES;
+        static std::deque<ProxyHandler*> CACHED_PROXIES;
+        static std::vector<ProxyHandler*> PAUSED_PROXIES;
+        static bool PAUSED;
 
         static void registerProxy(ProxyHandler* proxy);
 

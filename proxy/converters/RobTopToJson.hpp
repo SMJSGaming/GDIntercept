@@ -5,8 +5,7 @@
 namespace proxy::converters {
     class RobTopToJson : public Converter {
     public:
-        enums::ContentType resultContentType() const override;
-        bool needsSanitization() const override;
+        RobTopToJson();
         bool canConvert(const std::string& path, const bool isBody, const std::string& original) const override;
         std::string convert(const std::string& path, const std::string& original) const override;
         std::string toRaw(const std::string& path, const std::string& original) const override;
@@ -47,6 +46,6 @@ namespace proxy::converters {
             std::vector<std::tuple<std::string, ObjParser>> m_metadata;
         };
 
-        static const std::unordered_map<std::string, Parser> parsers;
+        static const std::unordered_map<std::string, Parser> PARSERS;
     };
 }

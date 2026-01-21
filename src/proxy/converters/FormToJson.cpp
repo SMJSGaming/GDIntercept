@@ -2,13 +2,7 @@
 
 using namespace nlohmann;
 
-proxy::enums::ContentType proxy::converters::FormToJson::resultContentType() const {
-    return enums::ContentType::JSON;
-}
-
-bool proxy::converters::FormToJson::needsSanitization() const {
-    return true;
-}
+proxy::converters::FormToJson::FormToJson() : Converter(enums::ContentType::JSON) { };
 
 bool proxy::converters::FormToJson::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
     std::stringstream stream(original);

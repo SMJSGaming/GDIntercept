@@ -4,10 +4,10 @@ using namespace nlohmann;
 using namespace proxy::enums;
 using namespace geode::prelude;
 
-std::vector<std::string> proxy::URL::suffixes;
+Stream<std::string> proxy::URL::SUFFIXES;
 
 void proxy::URL::load() {
-    URL::suffixes = json::parse(utils::file::readString(Mod::get()->getResourcesDir() / "suffixes.json").unwrap());
+    URL::SUFFIXES = json::parse(utils::file::readString(Mod::get()->getResourcesDir() / "suffixes.json").unwrap());
 }
 
 proxy::URL::URL(const std::string& url, web::WebRequest* request) : m_original(url), m_query(json::object()) {
@@ -39,7 +39,7 @@ std::string proxy::URL::stringifyQuery(const bool raw) const {
 }
 
 void proxy::URL::parse() {
-    if (URL::suffixes.empty()) {
+    if (URL::SUFFIXES.empty()) {
         URL::load();
     }
 
@@ -118,11 +118,11 @@ void proxy::URL::parseHost(size_t& index) {
     std::string& lastSubDomain = m_subDomains.back();
     const size_t portStart = lastSubDomain.find(':');
 
+    m_port = m_scheme == Protocol::HTTPS ? 443 : 80;
+
     if (portStart != std::string::npos) {
-        m_port = std::stoi(lastSubDomain.substr(portStart + 1));
+        m_port = utils::numFromString<unsigned int>(lastSubDomain.substr(portStart + 1)).unwrapOr(m_port);
         lastSubDomain = lastSubDomain.substr(0, portStart);
-    } else {
-        m_port = m_scheme == Protocol::HTTPS ? 443 : 80;
     }
 
     if (lastSubDomain == "localhost") {
@@ -135,7 +135,7 @@ void proxy::URL::parseHost(size_t& index) {
 
         if (m_tld.empty()) {
             m_tld = subDomain;
-        } else if (std::find(URL::suffixes.begin(), URL::suffixes.end(), m_domain) == URL::suffixes.end()) {
+        } else if (URL::SUFFIXES.includes(m_domain)) {
             m_domainName = subDomain;
 
             m_subDomains.pop_back();

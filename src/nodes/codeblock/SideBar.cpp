@@ -9,9 +9,9 @@ SideBar::ActionID::ActionID(const std::string& id) : isOpen(id == "open") {
         if (i == 0) {
             category = part;
         } else if (i == 1) {
-            index = std::stoul(part);
+            index = utils::numFromString<size_t>(part).unwrapOr(0);
         } else {
-            cellIndex = std::stoul(part);
+            cellIndex = utils::numFromString<size_t>(part).unwrapOr(0);
         }
     });
 }
@@ -26,7 +26,7 @@ SideBarCategory SideBar::ActionID::getCategory(const Categories& actions) const 
     return { "", "" };
 }
 
-const SideBarAction SideBar::openAction = { "minimize-side-menu", { "", "Close" }, { "open.png"_spr, "close.png"_spr }, true };
+const SideBarAction SideBar::OPEN_ACTION = { "minimize-side-menu", { "", "Close" }, { "open.png"_spr, "close.png"_spr }, true };
 
 SideBar* SideBar::create(CodeBlock* block, const float height, const std::vector<SideBarView>& views, const Categories& actions) {
     SideBar* instance = new SideBar(block, views, actions);
@@ -42,7 +42,7 @@ SideBar* SideBar::create(CodeBlock* block, const float height, const std::vector
     }
 }
 
-size_t SideBar::activeView = 0;
+size_t SideBar::ACTIVE_VIEW = 0;
 
 SideBar::SideBar(CodeBlock* block, const std::vector<SideBarView>& views, const Categories& actions) : m_views(views),
 m_actions(actions),
@@ -53,7 +53,7 @@ bool SideBar::init(const float height) {
     ESCAPE_WHEN(!CCLayerColor::initWithColor(Theme::getTheme().menu.background), false);
 
     m_menu = CCMenu::create();
-    m_openCell = SideBar::openAction.toActionCell(m_block);
+    m_openCell = SideBar::OPEN_ACTION.toActionCell(m_block);
     CCMenuItemSpriteExtra* openItem = this->createMenuItem(m_openCell, menu_selector(SideBar::executeAction));
     size_t actionCount = 0;
     size_t cellIndex = 0;
@@ -135,7 +135,7 @@ void SideBar::reloadView() {
 void SideBar::reloadState() {
     for (ActionCell* cell : m_actionCells) {
         const ActionID id = cell->getParent()->getID();
-        const SideBarAction& action = id.isOpen ? SideBar::openAction : m_actions.at(id.getCategory(m_actions)).at(id.index);
+        const SideBarAction& action = id.isOpen ? SideBar::OPEN_ACTION : m_actions.at(id.getCategory(m_actions)).at(id.index);
 
         if (!action.enableState || action.enableState(m_block)) {
             cell->enable();

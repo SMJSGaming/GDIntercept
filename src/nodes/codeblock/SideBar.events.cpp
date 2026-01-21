@@ -12,21 +12,21 @@ void SideBar::setup() {
 
 void SideBar::switchView(CCObject* sender) {
     if (sender != nullptr) {
-        SideBar::activeView = sender->getTag();
-    } else if (SideBar::activeView >= m_views.size()) {
-        SideBar::activeView = 0;
+        SideBar::ACTIVE_VIEW = sender->getTag();
+    } else if (SideBar::ACTIVE_VIEW >= m_views.size()) {
+        SideBar::ACTIVE_VIEW = 0;
     }
 
     for (size_t i = 0; i < m_viewCells.size(); i++) {
-        m_viewCells.at(i)->setOpacity(i == SideBar::activeView ? 255 : 0);
+        m_viewCells.at(i)->setOpacity(i == SideBar::ACTIVE_VIEW ? 255 : 0);
     }
 
-    m_views.at(SideBar::activeView).callback(m_block);
+    m_views.at(SideBar::ACTIVE_VIEW).callback(m_block);
 }
 
 void SideBar::executeAction(CCObject* sender) {
-    const ActionID id = as<CCMenuItemSpriteExtra*>(sender)->getID();
-    const SideBarAction& action = id.isOpen ? SideBar::openAction : m_actions.at(id.getCategory(m_actions)).at(id.index);
+    const ActionID id = typeinfo_cast<CCMenuItemSpriteExtra*>(sender)->getID();
+    const SideBarAction& action = id.isOpen ? SideBar::OPEN_ACTION : m_actions.at(id.getCategory(m_actions)).at(id.index);
     ActionCell* cell = id.isOpen ? m_openCell : m_actionCells.at(id.cellIndex);
 
     ESCAPE_WHEN(!cell->isEnabled(),);

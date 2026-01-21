@@ -45,15 +45,14 @@ namespace proxy {
             std::string stringifyStatusCode() const;
             Content getHeaderList(const bool raw = false) const;
             Content getResponseContent(const bool raw = true) const;
-            bool received() const;
         private:
             PROXY_GETTER(Headers, headers, Headers);
             PROXY_GETTER(int, statusCode, StatusCode);
             PROXY_GETTER(size_t, responseTime, ResponseTime);
             PROXY_GETTER(std::string, response, Response);
             PROXY_GETTER(enums::ContentType, contentType, ContentType);
+            PROXY_BOOL_GETTER(received, Received);
             Request* m_request;
-            bool m_received;
 
             Response();
             Response(Request* request, cocos2d::extension::CCHttpResponse* response, const size_t responseTime);
@@ -69,10 +68,9 @@ namespace proxy {
         bool isCompleted() const;
         bool isFaulty() const;
         bool isCancelled() const;
-        bool isRepeat() const;
         bool responseReceived() const;
     private:
-        static const LookupTable<enums::ContentType, converters::Converter*> converters;
+        static const LookupTable<enums::ContentType, converters::Converter*> CONVERTERS;
 
         static Content getContent(const bool raw, const enums::ContentType originalContentType, const std::string& path, const std::string& original);
         static Content getHeaders(const bool raw, const Headers& headers);
@@ -85,7 +83,7 @@ namespace proxy {
         PROXY_GETTER(enums::State, state, State);
         PROXY_GETTER(Request, request, Request);
         PROXY_GETTER(Response, response, Response);
-        bool m_repeat;
+        PROXY_BOOL_GETTER(repeat, Repeat);
 
         HttpInfo(const bool paused, cocos2d::extension::CCHttpRequest* request);
         HttpInfo(const bool paused, const bool repeat, geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
@@ -95,4 +93,5 @@ namespace proxy {
     };
 
     #undef PROXY_GETTER
+    #undef PROXY_BOOL_GETTER
 }

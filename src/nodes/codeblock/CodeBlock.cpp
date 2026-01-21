@@ -32,7 +32,7 @@ bool CodeBlock::init(const CCSize& size) {
         this->getContentHeight() - fullPaddingY
     }, list->getView());
     m_scrollbars = { nullptr, scrollbarY };
-    m_bar = SideBar::create(this, size.height - fullPaddingY, CodeBlock::views, CodeBlock::actions);
+    m_bar = SideBar::create(this, size.height - fullPaddingY, CodeBlock::VIEWS, CodeBlock::ACTIONS);
 
     scrollbarY->setAnchorPoint(BOTTOM_LEFT);
     scrollbarY->setPosition({ this->getContentWidth() - this->getPaddingRight(), paddingBottom });

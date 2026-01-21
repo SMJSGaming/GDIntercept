@@ -120,7 +120,7 @@ namespace Theme {
         Code code;
         Menu menu;
     private:
-        static LookupTable<std::string, Theme> cachedThemes;
+        static LookupTable<std::string, Theme> CACHED_THEMES;
 
         static void loadDirectory(const std::filesystem::path& path);
         static Theme createTheme(const json& obj);

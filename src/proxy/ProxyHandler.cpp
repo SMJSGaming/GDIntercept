@@ -1,14 +1,14 @@
 #include "ProxyHandler.hpp"
 
-std::vector<size_t> proxy::ProxyHandler::handledIDs;
+std::vector<size_t> proxy::ProxyHandler::HANDLED_IDS;
 
-std::vector<ProxyHandler*> proxy::ProxyHandler::aliveProxies;
+std::vector<ProxyHandler*> proxy::ProxyHandler::ALIVE_PROXIES;
 
-std::deque<ProxyHandler*> proxy::ProxyHandler::cachedProxies;
+std::deque<ProxyHandler*> proxy::ProxyHandler::CACHED_PROXIES;
 
-std::vector<ProxyHandler*> proxy::ProxyHandler::pausedProxies;
+std::vector<ProxyHandler*> proxy::ProxyHandler::PAUSED_PROXIES;
 
-bool proxy::ProxyHandler::paused = Mod::get()->getSettingValue<bool>("confirm-pause-between-plays") && Mod::get()->getSavedValue("paused", false);
+bool proxy::ProxyHandler::PAUSED = Mod::get()->getSettingValue<bool>("confirm-pause-between-plays") && Mod::get()->getSavedValue("paused", false);
 
 ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     ProxyHandler* instance = new ProxyHandler(request);
@@ -37,11 +37,11 @@ std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
     const std::string filter(Mod::get()->getSettingValue<std::string>("filter"));
     std::deque<ProxyHandler*> proxies;
 
-    if (ProxyHandler::cachedProxies.empty() || filter == "None") {
-        return ProxyHandler::cachedProxies;
+    if (ProxyHandler::CACHED_PROXIES.empty() || filter == "None") {
+        return ProxyHandler::CACHED_PROXIES;
     }
 
-    for (ProxyHandler* proxy : ProxyHandler::cachedProxies) {
+    for (ProxyHandler* proxy : ProxyHandler::CACHED_PROXIES) {
         switch (proxy->m_info->getRequest().getURL().getOrigin()) {
             case Origin::GD: if (filter == "Geometry Dash Server") {
                 proxies.push_back(proxy);
@@ -71,7 +71,7 @@ std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
 }
 
 bool ProxyHandler::isProxy(CCHttpRequest* request) {
-    for (const ProxyHandler* proxy : ProxyHandler::aliveProxies) {
+    for (const ProxyHandler* proxy : ProxyHandler::ALIVE_PROXIES) {
         if (proxy->getCocosRequest() == request) {
             return true;
         }
@@ -81,20 +81,20 @@ bool ProxyHandler::isProxy(CCHttpRequest* request) {
 }
 
 bool ProxyHandler::isProxy(web::WebRequest* request) {
-    return std::find(ProxyHandler::handledIDs.begin(), ProxyHandler::handledIDs.end(), request->getID()) != ProxyHandler::handledIDs.end();
+    return std::find(ProxyHandler::HANDLED_IDS.begin(), ProxyHandler::HANDLED_IDS.end(), request->getID()) != ProxyHandler::HANDLED_IDS.end();
 }
 
 bool ProxyHandler::isPaused() {
-    return ProxyHandler::paused;
+    return ProxyHandler::PAUSED;
 }
 
 void ProxyHandler::pauseAll() {
-    Mod::get()->setSavedValue("paused", ProxyHandler::paused = true);
+    Mod::get()->setSavedValue("paused", ProxyHandler::PAUSED = true);
 }
 
 void ProxyHandler::resumeAll() {
-    const std::vector<ProxyHandler*> paused = std::vector<ProxyHandler*>(ProxyHandler::pausedProxies);
-    Mod::get()->setSavedValue("paused", ProxyHandler::paused = false);
+    const std::vector<ProxyHandler*> paused = std::vector<ProxyHandler*>(ProxyHandler::PAUSED_PROXIES);
+    Mod::get()->setSavedValue("paused", ProxyHandler::PAUSED = false);
 
     std::thread([paused]{
         for (ProxyHandler* proxy : paused) {
@@ -116,37 +116,37 @@ void ProxyHandler::resumeAll() {
         }
     }).detach();
 
-    ProxyHandler::pausedProxies.clear();
+    ProxyHandler::PAUSED_PROXIES.clear();
 }
 
 void ProxyHandler::setCacheLimit(const int64_t limit) {
-    const size_t size = ProxyHandler::cachedProxies.size();
+    const size_t size = ProxyHandler::CACHED_PROXIES.size();
 
     if (size > limit) {
         for (size_t i = limit; i < size; i++) {
-            ProxyHandler* proxy = ProxyHandler::cachedProxies.at(i);
+            ProxyHandler* proxy = ProxyHandler::CACHED_PROXIES.at(i);
 
             if (proxy->getInfo()->responseReceived()) {
                 delete proxy;
             }
         }
 
-        ProxyHandler::cachedProxies.resize(limit);
+        ProxyHandler::CACHED_PROXIES.resize(limit);
     }
 }
 
 void ProxyHandler::registerProxy(ProxyHandler* proxy) {
-    ProxyHandler::cachedProxies.push_front(proxy);
-    ProxyHandler::aliveProxies.push_back(proxy);
+    ProxyHandler::CACHED_PROXIES.push_front(proxy);
+    ProxyHandler::ALIVE_PROXIES.push_back(proxy);
 
     if (proxy->getInfo()->isPaused()) {
-        ProxyHandler::pausedProxies.push_back(proxy);
+        ProxyHandler::PAUSED_PROXIES.push_back(proxy);
     }
     
-    if (ProxyHandler::cachedProxies.size() > Mod::get()->getSettingValue<int64_t>("cache-limit")) {
-        ProxyHandler* last = ProxyHandler::cachedProxies.back();
+    if (ProxyHandler::CACHED_PROXIES.size() > Mod::get()->getSettingValue<int64_t>("cache-limit")) {
+        ProxyHandler* last = ProxyHandler::CACHED_PROXIES.back();
 
-        ProxyHandler::cachedProxies.pop_back();
+        ProxyHandler::CACHED_PROXIES.pop_back();
 
         if (last->m_finished) {
             delete last;
@@ -156,7 +156,7 @@ void ProxyHandler::registerProxy(ProxyHandler* proxy) {
 
 ProxyHandler::ProxyHandler(CCHttpRequest* request) : m_modRequest(nullptr),
 m_cocosRequest(request),
-m_info(new HttpInfo(ProxyHandler::paused, request)),
+m_info(new HttpInfo(ProxyHandler::PAUSED, request)),
 m_originalTarget(request->getTarget()),
 m_originalProxy(request->getSelector()),
 m_finished(false) {
@@ -183,10 +183,10 @@ m_finished(false) {
 
     m_modRequest->removeHeader(resendSignature);
 
-    m_info = new HttpInfo(ProxyHandler::paused, isRepeat, m_modRequest, method, url);
+    m_info = new HttpInfo(ProxyHandler::PAUSED, isRepeat, m_modRequest, method, url);
 
     ProxyHandler::registerProxy(this);
-    ProxyHandler::handledIDs.push_back(m_modRequest->getID());
+    ProxyHandler::HANDLED_IDS.push_back(m_modRequest->getID());
 
     m_modTask = web::WebTask::run([this, url](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse* response = nullptr;
@@ -223,10 +223,10 @@ m_finished(false) {
 }
 
 ProxyHandler::~ProxyHandler() {
-    const auto it = std::find(ProxyHandler::aliveProxies.begin(), ProxyHandler::aliveProxies.end(), this);
+    const auto it = std::find(ProxyHandler::ALIVE_PROXIES.begin(), ProxyHandler::ALIVE_PROXIES.end(), this);
 
-    if (it != ProxyHandler::aliveProxies.end()) {
-        ProxyHandler::aliveProxies.erase(it);
+    if (it != ProxyHandler::ALIVE_PROXIES.end()) {
+        ProxyHandler::ALIVE_PROXIES.erase(it);
     }
 
     if (m_cocosRequest) {
@@ -288,7 +288,7 @@ web::WebTask::Cancel ProxyHandler::onCancel() {
 }
 
 void ProxyHandler::onFinished() {
-    if (std::find(ProxyHandler::cachedProxies.begin(), ProxyHandler::cachedProxies.end(), this) == ProxyHandler::cachedProxies.end()) {
+    if (std::find(ProxyHandler::CACHED_PROXIES.begin(), ProxyHandler::CACHED_PROXIES.end(), this) == ProxyHandler::CACHED_PROXIES.end()) {
         delete this;
     } else {
         m_finished = true;

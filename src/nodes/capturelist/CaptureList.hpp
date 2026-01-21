@@ -8,7 +8,7 @@ class CaptureList : public KeybindNode<Border> {
 public:
     static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo);
 private:
-    static size_t active;
+    static size_t ACTIVE;
 
     CCArrayExt<CaptureCell*> m_cells;
 

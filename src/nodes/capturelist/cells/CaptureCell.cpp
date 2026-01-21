@@ -174,11 +174,11 @@ ccColor3B CaptureCell::colorForMethod() {
 
 void CaptureCell::activate() {
     m_switchCell(this);
-    as<ButtonSprite*>(m_mainLayer->getChildByIDRecursive("view"_spr))->updateBGImage("GJ_button_05.png");
+    typeinfo_cast<ButtonSprite*>(m_mainLayer->getChildByIDRecursive("view"_spr))->updateBGImage("GJ_button_05.png");
 }
 
 void CaptureCell::deactivate() {
-    as<ButtonSprite*>(m_mainLayer->getChildByIDRecursive("view"_spr))->updateBGImage("GJ_button_01.png");
+    typeinfo_cast<ButtonSprite*>(m_mainLayer->getChildByIDRecursive("view"_spr))->updateBGImage("GJ_button_01.png");
 }
 
 void CaptureCell::onView(CCObject* obj) {

@@ -7,7 +7,7 @@ using namespace proxy::prelude;
 
 static size_t globalIndexCounter = 1;
 
-const LookupTable<ContentType, proxy::converters::Converter*> proxy::HttpInfo::converters({
+const LookupTable<ContentType, proxy::converters::Converter*> proxy::HttpInfo::CONVERTERS({
     { ContentType::XML, new XmlToXml() },
     { ContentType::JSON, new JsonToJson() },
     { ContentType::ROBTOP, new RobTopToJson() },
@@ -16,12 +16,12 @@ const LookupTable<ContentType, proxy::converters::Converter*> proxy::HttpInfo::c
 });
 
 proxy::HttpInfo::Content proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original) {
-    if (HttpInfo::converters.contains(originalContentType)) {
-        const converters::Converter* converter = HttpInfo::converters.at(originalContentType);
+    if (HttpInfo::CONVERTERS.contains(originalContentType)) {
+        const converters::Converter* converter = HttpInfo::CONVERTERS.at(originalContentType);
 
         if (!raw) {
-            return { converter->resultContentType(), converter->convert(path, original) };
-        } else if (converter->needsSanitization()) {
+            return { converter->getResultContentType(), converter->convert(path, original) };
+        } else if (converter->getNeedsSanitization()) {
             return { originalContentType, converter->toRaw(path, converter->convert(path, original)) };
         }
     }
@@ -56,7 +56,7 @@ ContentType proxy::HttpInfo::determineContentType(const std::string& path, const
         return ContentType::UNKNOWN_CONTENT;
     }
 
-    for (const auto& [type, converter] : HttpInfo::converters) {
+    for (const auto& [type, converter] : HttpInfo::CONVERTERS) {
         if (converter->canConvert(path, isBody, content)) {
             return type;
         }
@@ -66,15 +66,17 @@ ContentType proxy::HttpInfo::determineContentType(const std::string& path, const
 }
 
 proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
-    return HttpInfo::parseCocosHeaders(StringStreamer::of(std::string(headers->begin(), headers->end())).map<gd::string>([](std::string header) {
-        if (header.back() == '\r') {
-            header.pop_back();
-        }
+    return HttpInfo::parseCocosHeaders(StringStreamer::of(std::string(headers->begin(), headers->end()))
+        .map<gd::string>([](std::string header) {
+            if (header.back() == '\r') {
+                header.pop_back();
+            }
 
-        return header;
-    }).filter([](const std::string& header) {
-        return header.size();
-    }));
+            return header;
+        })
+        .filter([](const std::string& header) {
+            return header.size();
+        }));
 }
 
 proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<gd::string>& headers) {
@@ -144,10 +146,6 @@ bool proxy::HttpInfo::isFaulty() const {
 
 bool proxy::HttpInfo::isCancelled() const {
     return m_state == State::CANCELLED;
-}
-
-bool proxy::HttpInfo::isRepeat() const {
-    return m_repeat;
 }
 
 bool proxy::HttpInfo::responseReceived() const {
@@ -232,8 +230,4 @@ proxy::HttpInfo::Content proxy::HttpInfo::Response::getHeaderList(const bool raw
 
 proxy::HttpInfo::Content proxy::HttpInfo::Response::getResponseContent(const bool raw) const {
     return HttpInfo::getContent(raw, m_contentType, m_request->getURL().getPath(), m_response);
-}
-
-bool proxy::HttpInfo::Response::received() const {
-    return m_received;
 }

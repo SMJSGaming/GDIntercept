@@ -135,7 +135,7 @@ void DynamicEnumNode::onArrow(CCObject* sender) {
         index = index > 0 ? index - 1 : options.size() - 1;
     }
 
-    this->setValue(options.at(index), static_cast<CCNode*>(sender));
+    this->setValue(options.at(index), typeinfo_cast<CCNode*>(sender));
 }
 
 void DynamicEnumNode::onRefresh(CCObject* sender) {

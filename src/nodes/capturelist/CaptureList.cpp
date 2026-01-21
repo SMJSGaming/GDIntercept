@@ -1,6 +1,6 @@
 #include "CaptureList.hpp"
 
-size_t CaptureList::active = 0;
+size_t CaptureList::ACTIVE = 0;
 
 CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
     CaptureList* instance = new CaptureList();
@@ -33,7 +33,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
             listSize.width,
             cellHeight
         }, [this, info, switchInfo](CaptureCell* cell) {
-            CaptureList::active = info->getID();
+            CaptureList::ACTIVE = info->getID();
 
             switchInfo(info);
 
@@ -46,7 +46,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
             }
         });
 
-        if (CaptureList::active == info->getID()) {
+        if (CaptureList::ACTIVE == info->getID()) {
             activated = true;
             capture->activate();
         }
@@ -57,7 +57,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     ListView* list = ListView::create(m_cells.inner(), cellHeight, listSize.width, listSize.height);
 
     if (m_cells.size()) {
-        if (!active || !activated) {
+        if (!CaptureList::ACTIVE || !activated) {
             m_cells[0]->activate();
         }
     } else {

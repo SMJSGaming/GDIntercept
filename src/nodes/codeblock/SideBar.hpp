@@ -34,8 +34,8 @@ private:
         SideBarCell::SideBarCategory getCategory(const Categories& actions) const;
     };
 
-    static const SideBarCell::SideBarAction openAction;
-    static size_t activeView;
+    static const SideBarCell::SideBarAction OPEN_ACTION;
+    static size_t ACTIVE_VIEW;
     const std::vector<SideBarCell::SideBarView> m_views;
     const Categories m_actions;
     std::vector<SharedWidthNode<HoverNode<CCLayerColor>>*> m_cells;

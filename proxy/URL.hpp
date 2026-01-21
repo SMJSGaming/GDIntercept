@@ -14,7 +14,7 @@ namespace proxy {
 
         URL(const std::string& url, geode::utils::web::WebRequest* request = nullptr);
     private:
-        static std::vector<std::string> suffixes;
+        static Stream<std::string> SUFFIXES;
 
         PROXY_GETTER(enums::Origin, origin, Origin);
         PROXY_GETTER(std::string, original, Original);

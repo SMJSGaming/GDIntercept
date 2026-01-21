@@ -1,6 +1,6 @@
 #include "Theme.hpp"
 
-LookupTable<std::string, Theme::Theme> Theme::Theme::cachedThemes;
+LookupTable<std::string, Theme::Theme> Theme::Theme::CACHED_THEMES;
 
 Theme::Color::operator float() const {
     return a;
@@ -64,11 +64,7 @@ GLubyte Theme::Color::extractChannel(const std::string& hexString, const size_t 
     const size_t channelSize = 1 + !isShort;
     const std::string channel = hexString.substr(channelSize * index, channelSize);
 
-    if (isShort) {
-        return std::stoi(channel + channel, nullptr, 16);
-    } else {
-        return std::stoi(channel, nullptr, 16);
-    }
+    return utils::numFromString<GLubyte>((isShort ? "" : channel) + channel, 16).unwrapOr(0);
 }
 
 CCLabelBMFont* Theme::Font::createLabel(const std::string& text) const {
@@ -89,10 +85,10 @@ void Theme::Theme::load() {
 
     (void) utils::file::createDirectoryAll(themesDir);
 
-    Theme::cachedThemes.clear();
+    Theme::CACHED_THEMES.clear();
     Theme::loadDirectory(mod->getResourcesDir());
     Theme::loadDirectory(themesDir);
-    mod->setSavedValue("themes", Theme::cachedThemes.keys());
+    mod->setSavedValue("themes", Theme::CACHED_THEMES.keys());
 }
 
 void Theme::Theme::loadDirectory(const std::filesystem::path& path) {
@@ -113,7 +109,7 @@ void Theme::Theme::loadDirectory(const std::filesystem::path& path) {
         const json theme = json::parse(text.unwrap());
 
         if (theme.contains("name") && theme.contains("theme")) try {
-            Theme::cachedThemes.insert(theme.at("name").get<std::string>(), Theme::createTheme(theme.at("theme")));
+            Theme::CACHED_THEMES.insert(theme.at("name").get<std::string>(), Theme::createTheme(theme.at("theme")));
         } catch (const json::exception& e) {
             log::warn("Failed to parse theme file {}: {}", file.string(), e.what());
         } else {
@@ -231,11 +227,11 @@ Theme::Color Theme::Theme::colorOrDefault(const json& obj, const std::string& ke
 const Theme::Theme Theme::getTheme() {
     const std::string theme = Mod::get()->getSettingValue<DynamicEnumValue>("theme");
 
-    if (Theme::cachedThemes.contains(theme)) {
-        return Theme::cachedThemes.at(theme);
+    if (Theme::CACHED_THEMES.contains(theme)) {
+        return Theme::CACHED_THEMES.at(theme);
     } else {
         // Dark is a default theme and will always exist unless someone messes with the default themes, in which case I can't guarantee anything
-        return Theme::cachedThemes.at("Dark");
+        return Theme::CACHED_THEMES.at("Dark");
     }
 }
 

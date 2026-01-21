@@ -1,12 +1,6 @@
 #include "../../../proxy/converters/XmlToXml.hpp"
 
-proxy::enums::ContentType proxy::converters::XmlToXml::resultContentType() const {
-    return enums::ContentType::XML;
-}
-
-bool proxy::converters::XmlToXml::needsSanitization() const {
-    return false;
-}
+proxy::converters::XmlToXml::XmlToXml() : Converter(enums::ContentType::XML) { }
 
 bool proxy::converters::XmlToXml::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
     return original.starts_with("<?xml") ||

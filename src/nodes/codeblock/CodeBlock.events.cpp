@@ -2,7 +2,7 @@
 
 using namespace SideBarCell;
 
-const std::vector<SideBarView> CodeBlock::views({
+const std::vector<SideBarView> CodeBlock::VIEWS({
     { 'I', [](const auto& icons) { return icons.info; }, "Info", [](CodeBlock* block) { block->onInfo(); } },
     { 'B', [](const auto& icons) { return icons.body; }, "Body", [](CodeBlock* block) { block->onBody(); } },
     { 'Q', [](const auto& icons) { return icons.query; }, "Query", [](CodeBlock* block) { block->onQuery(); } },
@@ -11,7 +11,7 @@ const std::vector<SideBarView> CodeBlock::views({
     { 'H', [](const auto& icons) { return icons.header; }, "Response Headers", [](CodeBlock* block) { block->onResponseHeaders(); } }
 });
 
-const SideBar::Categories CodeBlock::actions {
+const SideBar::Categories CodeBlock::ACTIONS {
     { { "Themes", "themes.png"_spr }, {
         { { "Open Theme Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenThemeFiles(); } } },
         { { "Open Theme Docs", "docs.png"_spr, [](CodeBlock* block) { return block->onDocs(); } } }
@@ -50,7 +50,7 @@ const SideBar::Categories CodeBlock::actions {
     } }
 };
 
-bool CodeBlock::acceptedPauses = false;
+bool CodeBlock::ACCEPTED_PAUSES = false;
 
 void CodeBlock::setup() {
     this->bind("open_save_files"_spr, [this]() {
@@ -110,16 +110,16 @@ void CodeBlock::setup() {
         this->scroll(0, this->getNode()->getContentHeight());
     });
     this->bind("code_page_left"_spr, [this]() {
-        const CullingList* list = as<CullingList*>(this->getNode());
+        const CullingList* list = typeinfo_cast<CullingList*>(this->getNode());
         const std::vector<CullingCell*> cells = list->getCells();
 
-        this->scroll(cells.empty() ? 0 : list->getContentWidth() - as<CodeLineCell*>(cells.front())->getCodeLineWidth(), 0);
+        this->scroll(cells.empty() ? 0 : list->getContentWidth() - typeinfo_cast<CodeLineCell*>(cells.front())->getCodeLineWidth(), 0);
     });
     this->bind("code_page_right"_spr, [this]() {
-        const CullingList* list = as<CullingList*>(this->getNode());
+        const CullingList* list = typeinfo_cast<CullingList*>(this->getNode());
         const std::vector<CullingCell*> cells = list->getCells();
 
-        this->scroll(cells.empty() ? 0 : -(list->getContentWidth() - as<CodeLineCell*>(cells.front())->getCodeLineWidth()), 0);
+        this->scroll(cells.empty() ? 0 : -(list->getContentWidth() - typeinfo_cast<CodeLineCell*>(cells.front())->getCodeLineWidth()), 0);
     });
 }
 
@@ -221,7 +221,7 @@ bool CodeBlock::onSave() {
 }
 
 bool CodeBlock::onPause() {
-    if (CodeBlock::acceptedPauses) {
+    if (CodeBlock::ACCEPTED_PAUSES) {
         Warning::show();
         this->showMessage("Requests Paused");
 
@@ -346,7 +346,7 @@ void CodeBlock::onResponseHeaders() {
 
 void CodeBlock::FLAlert_Clicked(FLAlertLayer* alert, const bool state) {
     if (state) {
-        CodeBlock::acceptedPauses = true;
+        CodeBlock::ACCEPTED_PAUSES = true;
 
         Warning::show();
         this->showMessage("Requests Paused");

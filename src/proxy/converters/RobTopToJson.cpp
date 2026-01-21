@@ -2,7 +2,7 @@
 
 using namespace nlohmann;
 
-const std::unordered_map<std::string, proxy::converters::RobTopToJson::Parser> proxy::converters::RobTopToJson::parsers({
+const std::unordered_map<std::string, proxy::converters::RobTopToJson::Parser> proxy::converters::RobTopToJson::PARSERS({
     // Accounts
     { "/accounts/syncGJAccountNew.php", RobTopToJson::Parser(std::vector<std::string>({ "encodedResponse" })) },
     { "/accounts/loginGJAccount.php", RobTopToJson::Parser({ "accountID", "userID" }, ",") },
@@ -16,7 +16,7 @@ const std::unordered_map<std::string, proxy::converters::RobTopToJson::Parser> p
     { "/downloadGJLevel22.php", RobTopToJson::Parser(":", {
         { "hash1", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
         { "hash2", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
-        { "unknown", RobTopToJson::ObjParser(std::vector<std::string>({ "string" })) },
+        { "dailyCreator", RobTopToJson::ObjParser({ "userID", "username", "accountID" }, ":") },
         { "songs", RobTopToJson::ObjParser("~|~", "~:~") }
     }) },
     { "/getGJDailyLevel.php", RobTopToJson::Parser({ "tempID", "secondsLeft" }, "|") },
@@ -239,20 +239,14 @@ std::string proxy::converters::RobTopToJson::Parser::toRaw(const json& json) con
     }
 }
 
-proxy::enums::ContentType proxy::converters::RobTopToJson::resultContentType() const {
-    return enums::ContentType::JSON;
-}
-
-bool proxy::converters::RobTopToJson::needsSanitization() const {
-    return true;
-}
+proxy::converters::RobTopToJson::RobTopToJson() : Converter(enums::ContentType::JSON) { }
 
 bool proxy::converters::RobTopToJson::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
     if (isBody) {
         return false;
     }
     
-    for (const auto& [key, parser] : RobTopToJson::parsers) {
+    for (const auto& [key, parser] : RobTopToJson::PARSERS) {
         if (path.ends_with(key)) {
             return true;
         }
@@ -260,11 +254,11 @@ bool proxy::converters::RobTopToJson::canConvert(const std::string& path, const 
 
     return false; 
 
-    return RobTopToJson::parsers.contains(path) && !isBody;
+    return RobTopToJson::PARSERS.contains(path) && !isBody;
 }
 
 std::string proxy::converters::RobTopToJson::convert(const std::string& path, const std::string& original) const {
-    for (const auto& [key, parser] : RobTopToJson::parsers) {
+    for (const auto& [key, parser] : RobTopToJson::PARSERS) {
         if (path.ends_with(key)) {
             return converters::safeDump(parser.parse(original));
         }
@@ -274,7 +268,7 @@ std::string proxy::converters::RobTopToJson::convert(const std::string& path, co
 }
 
 std::string proxy::converters::RobTopToJson::toRaw(const std::string& path, const std::string& original) const {
-    for (const auto& [key, parser] : RobTopToJson::parsers) {
+    for (const auto& [key, parser] : RobTopToJson::PARSERS) {
         if (path.ends_with(key)) {
             return parser.toRaw(json::parse(original));
         }

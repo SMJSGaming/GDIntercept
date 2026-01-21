@@ -1,19 +1,19 @@
 #include "InterceptPopup.hpp"
 
-CCSize InterceptPopup::popupPadding = { 60, 40 };
+CCSize InterceptPopup::POPUP_PADDING = { 60, 40 };
 
-float InterceptPopup::uiPadding = 2 + PADDING;
+float InterceptPopup::UI_PADDING = 2 + PADDING;
 
-float InterceptPopup::captureCellHeight = 20;
+float InterceptPopup::CAPTURE_CELL_HEIGHT = 20;
 
-float InterceptPopup::captureCellBadgeHeight = 10;
+float InterceptPopup::CAPTURE_CELL_BADGE_HEIGHT = 10;
 
 InterceptPopup* InterceptPopup::get() {
-    return as<InterceptPopup*>(CCDirector::sharedDirector()->getRunningScene()->getChildByID("intercept_popup"_spr));
+    return typeinfo_cast<InterceptPopup*>(CCDirector::sharedDirector()->getRunningScene()->getChildByID("intercept_popup"_spr));
 }
 
 void InterceptPopup::scene() {
-    const CCSize uiSize = CCDirector::sharedDirector()->getWinSize() - InterceptPopup::popupPadding;
+    const CCSize uiSize = CCDirector::sharedDirector()->getWinSize() - InterceptPopup::POPUP_PADDING;
 
     if (!InterceptPopup::get()) {
         InterceptPopup* instance = new InterceptPopup(uiSize);
@@ -30,7 +30,7 @@ void InterceptPopup::scene() {
 }
 
 InterceptPopup::InterceptPopup(const CCSize& size) : m_captureCellWidth(size.width / 3),
-m_leftColumnXPosition(InterceptPopup::uiPadding + PADDING + m_captureCellWidth),
+m_leftColumnXPosition(InterceptPopup::UI_PADDING + PADDING + m_captureCellWidth),
 m_settingsShouldReload(false),
 m_codeBlock(nullptr),
 m_list(nullptr),
@@ -48,7 +48,7 @@ bool InterceptPopup::setup() {
     settingsSprite->setPosition(settingsSprite->getScaledContentSize() / 2);
     item->setContentSize(settingsSprite->getScaledContentSize());
     item->setPosition({
-        m_size.width - InterceptPopup::uiPadding - settingsSprite->getContentWidth() * settingsSprite->getScale() / 2,
+        m_size.width - InterceptPopup::UI_PADDING - settingsSprite->getContentWidth() * settingsSprite->getScale() / 2,
         m_title->getPositionY()
     });
     m_buttonMenu->addChild(item);
@@ -100,7 +100,7 @@ void InterceptPopup::postReload() {
 }
 
 void InterceptPopup::setupList() {
-    const float cellHeight = InterceptPopup::captureCellHeight + InterceptPopup::captureCellBadgeHeight * !Mod::get()->getSettingValue<bool>("hide-badges");
+    const float cellHeight = InterceptPopup::CAPTURE_CELL_HEIGHT + InterceptPopup::CAPTURE_CELL_BADGE_HEIGHT * !Mod::get()->getSettingValue<bool>("hide-badges");
 
     m_list = CaptureList::create({
         m_captureCellWidth,
@@ -110,7 +110,7 @@ void InterceptPopup::setupList() {
     });
 
     m_list->setAnchorPoint(BOTTOM_LEFT);
-    m_list->setPosition({ InterceptPopup::uiPadding, InterceptPopup::uiPadding });
+    m_list->setPosition({ InterceptPopup::UI_PADDING, InterceptPopup::UI_PADDING });
     m_mainLayer->addChild(m_list);
 }
 
@@ -118,7 +118,7 @@ void InterceptPopup::setupCodeBlock(const bool recycleInfo) {
     HttpInfo* info = recycleInfo ? m_codeBlock->getActiveInfo() : nullptr;
 
     m_codeBlock = CodeBlock::create({
-        m_size.width - m_leftColumnXPosition - InterceptPopup::uiPadding,
+        m_size.width - m_leftColumnXPosition - InterceptPopup::UI_PADDING,
         this->getPageHeight()
     });
 
@@ -126,16 +126,16 @@ void InterceptPopup::setupCodeBlock(const bool recycleInfo) {
         m_codeBlock->updateInfo(info);
     }
 
-    m_codeBlock->setPosition({ m_leftColumnXPosition, InterceptPopup::uiPadding });
+    m_codeBlock->setPosition({ m_leftColumnXPosition, InterceptPopup::UI_PADDING });
     m_mainLayer->addChild(m_codeBlock);
 }
 
 float InterceptPopup::getPageHeight() {
-    return m_title->getPositionY() - m_title->getContentHeight() / 2 - InterceptPopup::uiPadding;
+    return m_title->getPositionY() - m_title->getContentHeight() / 2 - InterceptPopup::UI_PADDING;
 }
 
 float InterceptPopup::getComponentYPosition(const float offset, const float itemHeight) {
-    return InterceptPopup::uiPadding + this->getPageHeight() - itemHeight - offset;
+    return InterceptPopup::UI_PADDING + this->getPageHeight() - itemHeight - offset;
 }
 
 void InterceptPopup::onSettings(CCObject* obj) {
@@ -144,5 +144,5 @@ void InterceptPopup::onSettings(CCObject* obj) {
     openSettingsPopup(Mod::get());
 
     // If this breaks, someone should stop messing with addChild, that's a whole lot of not my problem
-    m_settings = as<FLAlertLayer*>(currentScene->getChildren()->objectAtIndex(currentScene->getChildrenCount() - 1));
+    m_settings = typeinfo_cast<FLAlertLayer*>(currentScene->getChildren()->objectAtIndex(currentScene->getChildrenCount() - 1));
 }

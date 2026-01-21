@@ -17,10 +17,10 @@ public:
 protected:
     bool setup() override;
 private:
-    static CCSize popupPadding;
-    static float uiPadding;
-    static float captureCellHeight;
-    static float captureCellBadgeHeight;
+    static CCSize POPUP_PADDING;
+    static float UI_PADDING;
+    static float CAPTURE_CELL_HEIGHT;
+    static float CAPTURE_CELL_BADGE_HEIGHT;
 
     float m_captureCellWidth;
     float m_leftColumnXPosition;

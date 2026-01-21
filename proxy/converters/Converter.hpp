@@ -1,8 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
-#include "../../lib/json.hpp"
-#include "../Enums.hpp"
+#include "../BaseProxy.hpp"
 
 namespace proxy::converters {
     bool isInt(const std::string& str);
@@ -16,10 +15,11 @@ namespace proxy::converters {
 
     class Converter {
     public:
-        virtual enums::ContentType resultContentType() const = 0;
-        virtual bool needsSanitization() const = 0;
+        Converter(const enums::ContentType resultContentType);
         virtual bool canConvert(const std::string& path, const bool isBody, const std::string& original) const = 0;
         virtual std::string convert(const std::string& path, const std::string& original) const = 0;
         virtual std::string toRaw(const std::string& path, const std::string& original) const = 0;
+        PROXY_GETTER(bool, needsSanitization, NeedsSanitization);
+        PROXY_GETTER(enums::ContentType, resultContentType, ResultContentType);
     };
 }
