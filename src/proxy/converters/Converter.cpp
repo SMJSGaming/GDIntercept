@@ -66,7 +66,7 @@ bool proxy::converters::isString(const std::string& str) {
 }
 
 bool proxy::converters::shouldSanitize(const std::string& key) {
-    static const std::vector<std::string> sensitiveKeys = {
+    static const Stream<std::string> sensitiveKeys = {
         "password",
         "pass",
         "passwd",
@@ -78,7 +78,7 @@ bool proxy::converters::shouldSanitize(const std::string& key) {
         "gjp2"
     };
 
-    return Mod::get()->getSettingValue<bool>("censor-data") && std::find(sensitiveKeys.begin(), sensitiveKeys.end(), key) != sensitiveKeys.end();
+    return Mod::get()->getSettingValue<bool>("censor-data") && sensitiveKeys.includes(key);
 }
 
 std::string proxy::converters::safeDump(const nlohmann::json& json, const size_t indent, const bool quoteless) {

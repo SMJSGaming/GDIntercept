@@ -111,9 +111,8 @@ void proxy::URL::parseLogin(size_t& index) {
 void proxy::URL::parseHost(size_t& index) {
     const size_t hostEnd = m_original.find('/', index);
     const size_t size = (hostEnd == std::string::npos ? m_original.size() : hostEnd) - index;
-    std::stringstream subDomainList(m_host = m_original.substr(index, size));
 
-    for (std::string subDomain; std::getline(subDomainList, subDomain, '.'); m_subDomains.push_back(subDomain));
+    m_subDomains = StringStream::of(m_host = m_original.substr(index, size), '.');
 
     std::string& lastSubDomain = m_subDomains.back();
     const size_t portStart = lastSubDomain.find(':');

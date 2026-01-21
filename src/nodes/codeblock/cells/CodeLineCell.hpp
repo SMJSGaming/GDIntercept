@@ -16,7 +16,7 @@ private:
     HttpInfo::Content m_code;
     size_t m_lineNumber;
     float m_lineNumberWidth;
-    std::vector<JSONTokenizer::TokenOffset> m_tokens;
+    Stream<JSONTokenizer::TokenOffset> m_tokens;
 
     CodeLineCell(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::Content& code, JSONTokenizer& tokenizer);
 };

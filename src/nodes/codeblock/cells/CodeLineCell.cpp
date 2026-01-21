@@ -38,6 +38,7 @@ m_lineNumberWidth(lineNumberWidth) {
 void CodeLineCell::initRender() {
     const Theme::Theme theme = Theme::getTheme();
     const float codeLineWidth = this->getCodeLineWidth();
+    const size_t labelLength = m_code.contents.size();
     MonospaceLabel* lineNumberLabel = MonospaceLabel::create(std::to_string(m_lineNumber), theme.code.font.fontName, theme.code.font.fontScale);
     MonospaceLabel* codeLabel = MonospaceLabel::create(m_code.contents.substr(
         0,
@@ -45,33 +46,28 @@ void CodeLineCell::initRender() {
     ), theme.code.font.fontName, theme.code.font.fontScale);
     CCLayerColor* numberBackground = CCLayerColor::create(theme.code.background, codeLineWidth, this->getContentHeight());
 
-    if (m_tokens.empty()) {
-        codeLabel->setColor(theme.code.syntax.text);
-    } else for (const JSONTokenizer::TokenOffset& tokenOffset : m_tokens) {
-        const size_t labelLength = m_code.contents.size();
-
-        BREAK_WHEN(tokenOffset.offset >= labelLength);
-
-        for (size_t i = tokenOffset.offset; i < labelLength && i < tokenOffset.offset + tokenOffset.length; i++) {
-            CCSprite* character = cocos::getChild<CCSprite>(codeLabel, i);
-
-            CONTINUE_WHEN(!character);
-
-            switch (tokenOffset.token) {
-                case JSONTokenizer::Token::CORRUPT: theme.code.syntax.error.applyTo(character); break;
-                case JSONTokenizer::Token::KEY: theme.code.syntax.key.applyTo(character); break;
-                case JSONTokenizer::Token::STRING: theme.code.syntax.string.applyTo(character); break;
-                case JSONTokenizer::Token::NUMBER: theme.code.syntax.number.applyTo(character); break;
-                case JSONTokenizer::Token::CONSTANT: theme.code.syntax.constant.applyTo(character); break;
-                case JSONTokenizer::Token::TERMINATOR: theme.code.syntax.terminator.applyTo(character); break;
-                case JSONTokenizer::Token::SEPARATOR: theme.code.syntax.separator.applyTo(character); break;
-                case JSONTokenizer::Token::BRACKET: theme.code.syntax.bracket.applyTo(character); break;
-                case JSONTokenizer::Token::KEY_QUOTE: theme.code.syntax.keyQuote.applyTo(character); break;
-                case JSONTokenizer::Token::STRING_QUOTE: theme.code.syntax.stringQuote.applyTo(character); break;
-                default: theme.code.syntax.text.applyTo(character); break;
-            }
-        }
-    }
+    m_tokens.filter([&](const JSONTokenizer::TokenOffset& tokenOffset) { return tokenOffset.offset >= labelLength; })
+        .forEach([&](const JSONTokenizer::TokenOffset& tokenOffset) {
+            IntStream::range(tokenOffset.offset, std::min(labelLength, tokenOffset.offset + tokenOffset.length))
+                .map<CCSprite*>([&](const int i) { return cocos::getChild<CCSprite>(codeLabel, i); })
+                .filter([](CCSprite* character) { return character != nullptr; })
+                .forEach([&](CCSprite* character) {
+                    switch (tokenOffset.token) {
+                        case JSONTokenizer::Token::CORRUPT: theme.code.syntax.error.applyTo(character); break;
+                        case JSONTokenizer::Token::KEY: theme.code.syntax.key.applyTo(character); break;
+                        case JSONTokenizer::Token::STRING: theme.code.syntax.string.applyTo(character); break;
+                        case JSONTokenizer::Token::NUMBER: theme.code.syntax.number.applyTo(character); break;
+                        case JSONTokenizer::Token::CONSTANT: theme.code.syntax.constant.applyTo(character); break;
+                        case JSONTokenizer::Token::TERMINATOR: theme.code.syntax.terminator.applyTo(character); break;
+                        case JSONTokenizer::Token::SEPARATOR: theme.code.syntax.separator.applyTo(character); break;
+                        case JSONTokenizer::Token::BRACKET: theme.code.syntax.bracket.applyTo(character); break;
+                        case JSONTokenizer::Token::KEY_QUOTE: theme.code.syntax.keyQuote.applyTo(character); break;
+                        case JSONTokenizer::Token::STRING_QUOTE: theme.code.syntax.stringQuote.applyTo(character); break;
+                        default: theme.code.syntax.text.applyTo(character); break;
+                    }
+                });
+        })
+        .orExecute([&]() { codeLabel->setColor(theme.code.syntax.text); });
 
     lineNumberLabel->setAnchorPoint(CENTER_RIGHT);
     theme.code.foreground.applyTo(lineNumberLabel);

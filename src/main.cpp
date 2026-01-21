@@ -249,21 +249,21 @@ $execute {
     }, CancelFilter());
 
     listenForAllSettingChanges([](std::shared_ptr<SettingV3> setting) {
-        static const std::vector<std::string> listReloads = {
+        static const Stream<std::string> listReloads = {
             "filter",
             "cache-limit",
             "hide-badges"
         };
-        static const std::vector<std::string> codeBlockReloads = {
+        static const Stream<std::string> codeBlockReloads = {
             "theme"
         };
-        static const std::vector<std::string> codeReloads = {
+        static const Stream<std::string> codeReloads = {
             "filter",
             "cache-limit",
             "censor-data",
             "raw-data"
         };
-        static const std::vector<std::string> sideMenuReloads = {
+        static const Stream<std::string> sideMenuReloads = {
             "minimize-side-menu"
         };
         const std::string key = setting->getKey();
@@ -272,21 +272,21 @@ $execute {
             ProxyHandler::setCacheLimit(Mod::get()->getSettingValue<int64_t>(key));
         }
 
-        const bool reloadsList = std::find(listReloads.begin(), listReloads.end(), key) != listReloads.end();
+        const bool reloadsList = listReloads.includes(key);
 
         if (reloadsList) {
             OPT(InterceptPopup::get())->reloadList();
         }
 
-        if (std::find(codeBlockReloads.begin(), codeBlockReloads.end(), key) != codeBlockReloads.end()) {
+        if (codeBlockReloads.includes(key)) {
             OPT(InterceptPopup::get())->reloadCodeBlock(!reloadsList);
         }
 
-        if (std::find(codeReloads.begin(), codeReloads.end(), key) != codeReloads.end()) {
+        if (codeReloads.includes(key)) {
             OPT(InterceptPopup::get())->reloadCode();
         }
 
-        if (std::find(sideMenuReloads.begin(), sideMenuReloads.end(), key) != sideMenuReloads.end()) {
+        if (sideMenuReloads.includes(key)) {
             OPT(InterceptPopup::get())->reloadSideBar();
         }
     });

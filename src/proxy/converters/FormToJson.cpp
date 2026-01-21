@@ -6,9 +6,8 @@ proxy::converters::FormToJson::FormToJson() : Converter(enums::ContentType::JSON
 
 bool proxy::converters::FormToJson::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
     std::stringstream stream(original);
-    std::string section;
 
-    while (std::getline(stream, section, '&')) {
+    for (std::string section; std::getline(stream, section, '&');) {
         // The official form spec has no null value support and an empty string still requires an empty assignment, thus this is invalid
         if (section.find('=') == std::string::npos) {
             return false;
@@ -20,10 +19,8 @@ bool proxy::converters::FormToJson::canConvert(const std::string& path, const bo
 
 std::string proxy::converters::FormToJson::convert(const std::string& path, const std::string& original) const {
     json object(json::object());
-    std::stringstream stream(original);
-    std::string section;
 
-    while (std::getline(stream, section, '&')) {
+    StringStream::of(original).forEach([&](const std::string& section) {
         const size_t equalPos = section.find('=');
         const std::string key = section.substr(0, equalPos);
 
@@ -32,7 +29,7 @@ std::string proxy::converters::FormToJson::convert(const std::string& path, cons
         } else {
             object[key] = getPrimitiveJsonType(key, section.substr(equalPos + 1));
         }
-    }
+    });
 
     return converters::safeDump(object);
 }

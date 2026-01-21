@@ -30,7 +30,7 @@ bool matjson::Serialize<DynamicEnumValue>::is_json(const matjson::Value& json) {
     return json.isString();
 }
 
-std::unordered_map<std::string, std::vector<std::function<void()>>> DynamicEnum::loaders;
+std::unordered_map<std::string, Stream<std::function<void()>>> DynamicEnum::LOADERS;
 
 Result<std::shared_ptr<SettingV3>> DynamicEnum::parse(const std::string& key, const std::string& modID, const matjson::Value& json) {
     std::shared_ptr<DynamicEnum> res = std::make_shared<DynamicEnum>();
@@ -44,17 +44,15 @@ Result<std::shared_ptr<SettingV3>> DynamicEnum::parse(const std::string& key, co
 }
 
 void DynamicEnum::reloadDynamicEnums(const std::string& sprSettingKey) {
-    for (const auto& loader : DynamicEnum::loaders.at(sprSettingKey)) {
-        loader();
-    }
+    DynamicEnum::LOADERS.at(sprSettingKey).forEach([](const auto& loader) { loader(); });
 }
 
 void DynamicEnum::registerLoader(const std::string& sprSettingKey, const std::function<void()>& loader) {
-    if (!DynamicEnum::loaders.contains(sprSettingKey)) {
-        DynamicEnum::loaders[sprSettingKey] = {};
+    if (!DynamicEnum::LOADERS.contains(sprSettingKey)) {
+        DynamicEnum::LOADERS[sprSettingKey] = {};
     }
 
-    DynamicEnum::loaders.at(sprSettingKey).push_back(loader);
+    DynamicEnum::LOADERS.at(sprSettingKey).push_back(loader);
 }
 
 SettingNodeV3* DynamicEnum::createNode(const float width) {

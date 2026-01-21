@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Geode/Geode.hpp>
+#include "../include.hpp"
 
 using namespace geode::prelude;
 
@@ -31,7 +31,7 @@ public:
     SettingNodeV3* createNode(const float width) override;
     std::string getSaveValue() const;
 private:
-    static std::unordered_map<std::string, std::vector<std::function<void()>>> loaders;
+    static std::unordered_map<std::string, Stream<std::function<void()>>> LOADERS;
 
     std::string m_saveValue;
 };

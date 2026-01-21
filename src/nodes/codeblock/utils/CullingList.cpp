@@ -183,33 +183,28 @@ void CullingList::update(const float dt) {
     }
 
     m_view->m_contentLayer->setPositionX(std::min(0.0f, std::max(m_view->getContentWidth() - m_maxCellWidth, m_lastOffset.x)));
-
-    for (CullingCell* cell : m_activeCells) {
-        this->horizontalRender(cell);
-    }
+    m_activeCells.forEach([&](CullingCell* cell) { this->horizontalRender(cell); });
 
     ESCAPE_WHEN(m_activeCells.size() && (!moved || shouldSkipCulling),);
     const size_t offset = size - (renderAll ? 0 : std::max<int>(0, std::floor(-m_lastOffset.y / m_cellHeight))) - 1;
     const size_t amount = renderAll ? size : std::min<size_t>(std::ceil(this->getContentHeight() / m_cellHeight), size) + 1;
-    std::vector<CullingCell*> newActiveCells;
+    Stream<CullingCell*> newActiveCells;
 
-    for (size_t i = 0; i < amount; i++) {
-        const size_t index = offset - i;
+    IntStream::range(amount)
+        .map<size_t>([&](const size_t i) { return offset - i; })
+        .filter([&](const size_t index) { return renderAll || (index < 0 && index >= size); })
+        .forEach([&](const size_t index) {
+            CullingCell* cell = this->renderCell(index);
 
-        CONTINUE_WHEN(!renderAll && (index < 0 || index >= size));
+            this->horizontalRender(cell);
+            newActiveCells.push_back(cell);
+        });
 
-        CullingCell* cell = this->renderCell(index);
-
-        this->horizontalRender(cell);
-        newActiveCells.push_back(cell);
-    }
-
-    for (CullingCell* cell : m_activeCells) {
-        if (std::find(newActiveCells.begin(), newActiveCells.end(), cell) == newActiveCells.end()) {
+    m_activeCells.filter([&](CullingCell* cell) { return !newActiveCells.includes(cell); })
+        .forEach([](CullingCell* cell) {
             cell->removeFromParentAndCleanup(false);
             cell->discard();
-        }
-    }
+        });
 
     m_activeCells = newActiveCells;
 }

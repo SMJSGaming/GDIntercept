@@ -19,7 +19,7 @@ public:
     bool isHorizontalLocked();
 protected:
     GETTER(std::vector<CullingCell*>, cells, Cells);
-    PROTECTED_GETTER(std::vector<CullingCell*>, activeCells, ActiveCells);
+    PROTECTED_GETTER(Stream<CullingCell*>, activeCells, ActiveCells);
     PROTECTED_GETTER(float, cellHeight, CellHeight);
     PROTECTED_GETTER(float, maxCellWidth, MaxCellWidth);
     PROTECTED_GETTER(TableView*, view, View);

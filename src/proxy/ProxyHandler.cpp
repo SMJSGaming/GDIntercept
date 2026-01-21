@@ -1,8 +1,8 @@
 #include "ProxyHandler.hpp"
 
-std::vector<size_t> proxy::ProxyHandler::HANDLED_IDS;
+Stream<size_t> proxy::ProxyHandler::HANDLED_IDS;
 
-std::vector<ProxyHandler*> proxy::ProxyHandler::ALIVE_PROXIES;
+Stream<ProxyHandler*> proxy::ProxyHandler::ALIVE_PROXIES;
 
 std::deque<ProxyHandler*> proxy::ProxyHandler::CACHED_PROXIES;
 
@@ -71,17 +71,11 @@ std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
 }
 
 bool ProxyHandler::isProxy(CCHttpRequest* request) {
-    for (const ProxyHandler* proxy : ProxyHandler::ALIVE_PROXIES) {
-        if (proxy->getCocosRequest() == request) {
-            return true;
-        }
-    }
-
-    return false;
+    return ProxyHandler::ALIVE_PROXIES.some([&](ProxyHandler* proxy) { return proxy->getCocosRequest() == request; });
 }
 
 bool ProxyHandler::isProxy(web::WebRequest* request) {
-    return std::find(ProxyHandler::HANDLED_IDS.begin(), ProxyHandler::HANDLED_IDS.end(), request->getID()) != ProxyHandler::HANDLED_IDS.end();
+    return ProxyHandler::HANDLED_IDS.includes(request->getID());
 }
 
 bool ProxyHandler::isPaused() {
@@ -119,17 +113,17 @@ void ProxyHandler::resumeAll() {
     ProxyHandler::PAUSED_PROXIES.clear();
 }
 
-void ProxyHandler::setCacheLimit(const int64_t limit) {
+void ProxyHandler::setCacheLimit(const size_t limit) {
     const size_t size = ProxyHandler::CACHED_PROXIES.size();
 
     if (size > limit) {
-        for (size_t i = limit; i < size; i++) {
+        IntStream::range(limit, size).forEach([&](const int i) {
             ProxyHandler* proxy = ProxyHandler::CACHED_PROXIES.at(i);
 
             if (proxy->getInfo()->responseReceived()) {
                 delete proxy;
             }
-        }
+        });
 
         ProxyHandler::CACHED_PROXIES.resize(limit);
     }

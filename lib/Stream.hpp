@@ -16,6 +16,8 @@ public:
     Stream(const std::initializer_list<T>& list) : std::vector<T>(list) { }
     template <typename I>
     Stream(const I& begin, const I& end) : std::vector<T>(begin, end) { }
+    template <typename ...Args> requires(std::convertible_to<Args, T> && ...)
+    Stream(Args&& ...args) : std::vector<T>{ std::forward<Args>(args)... } { }
 
     template<std::invocable<const T&> F>
     Stream<T> filter(F&& predicate) const {
@@ -87,7 +89,7 @@ public:
         return false;
     }
 
-    template<typename R = T>
+    template<typename R>
     Stream<R> map(auto&& mapper) const requires(std::invocable<decltype(mapper), const T&>) {
         Stream<R> stream;
 
@@ -98,7 +100,7 @@ public:
         return stream;
     }
 
-    template<typename R = T>
+    template<typename R>
     Stream<R> map(auto&& mapper) const requires(std::invocable<decltype(mapper), const T&, const size_t>) { 
         Stream<R> stream;
 
@@ -109,7 +111,7 @@ public:
         return stream;
     }
 
-    template<typename R = T>
+    template<typename R>
     R reduce(auto&& reducer, const R& initial) const requires(std::invocable<decltype(reducer), const R&, const T&>) {
         R accumulator = initial;
 
@@ -120,7 +122,7 @@ public:
         return accumulator;
     }
 
-    template<typename R = T>
+    template<typename R>
     R reduce(auto&& reducer, const R& initial) const requires(std::invocable<decltype(reducer), const R&, const T&, const size_t>) {
         R accumulator = initial;
 
@@ -136,6 +138,54 @@ public:
         Stream<T> stream = *this;
 
         std::sort(stream.begin(), stream.end(), comparator);
+
+        return stream;
+    }
+
+    template<std::invocable<const T&> F>
+    Stream<T> forEach(F&& consumer) const {
+        for (const T& element : *this) {
+            consumer(element);
+        }
+
+        return *this;
+    }
+
+    template<std::invocable<const T&, const size_t> F>
+    Stream<T> forEach(F&& consumer) const {
+        for (size_t i = 0; i < this->size(); i++) {
+            consumer(this->at(i), i);
+        }
+
+        return *this;
+    }
+
+    Stream<T> unique() const {
+        Stream<T> stream;
+
+        for (const T& element : *this) {
+            if (std::find(stream.begin(), stream.end(), element) == stream.end()) {
+                stream.push_back(element);
+            }
+        }
+
+        return stream;
+    }
+
+    auto flat() const requires(is_stream<T>::value) {
+        Stream<typename T::value_type> stream;
+
+        for (const T& element : *this) {
+            stream.concat(element);
+        }
+
+        return stream;
+    }
+
+    Stream<T> reverse() const {
+        Stream<T> stream = *this;
+
+        std::reverse(stream.begin(), stream.end());
 
         return stream;
     }
@@ -186,59 +236,51 @@ public:
 
     template<typename R>
     Stream<R> cast() const {
-        return this->map<R>([](const T& element) { return reinterpret_cast<R>(element); });
+        return this->map<R>([](const T& element) { return static_cast<R>(element); });
     }
 
-    Stream<T> unique() const {
-        Stream<T> stream;
-
-        for (const T& element : *this) {
-            if (std::find(stream.begin(), stream.end(), element) == stream.end()) {
-                stream.push_back(element);
-            }
+    template<std::invocable F>
+    Stream<T> orExecute(F&& execution) const {
+        if (this->empty()) {
+            execution();
         }
 
-        return stream;
+        return *this;
     }
 
-    auto flat() const requires(is_stream<T>::value) {
-        Stream<typename T::value_type> stream;
-
-        for (const T& element : *this) {
-            stream.concat(element);
-        }
-
-        return stream;
-    }
-
-    Stream<T> reverse() const {
-        Stream<T> stream = *this;
-
-        std::reverse(stream.begin(), stream.end());
-
-        return stream;
-    }
-
-    boolean includes(const T& value) {
+    bool includes(const T& value) const {
         return std::find(this->begin(), this->end(), value) != this->end();
     }
 
-    template<std::invocable<const T&> F>
-    void forEach(F&& consumer) const {
-        for (const T& element : *this) {
-            consumer(element);
-        }
+    bool includes(const std::vector<T>::iterator& iterator) const {
+        return iterator != this->end();
     }
 
-    template<std::invocable<const T&, const size_t> F>
-    void forEach(F&& consumer) const {
-        for (size_t i = 0; i < this->size(); i++) {
-            consumer(this->at(i), i);
-        }
+    auto getIterator(const T& value) const {
+        return std::find(this->begin(), this->end(), value);
     }
 };
 
-class StringStreamer {
+class IntStream {
+public:
+    template<typename T = long long> requires(std::is_arithmetic_v<T>)
+    static Stream<T> range(const int exclusiveEnd) {
+        return IntStream::range(0, exclusiveEnd);
+    }
+
+    template<typename T = long long> requires(std::is_arithmetic_v<T>)
+    static Stream<T> range(const T includeStart, const T exclusiveEnd) {
+        Stream<T> stream;
+
+        for (T i = includeStart; i < exclusiveEnd; i++) {
+            stream.push_back(i);
+        }
+
+        return stream;
+    }
+};
+
+class StringStream {
 public:
     static Stream<std::string> of(const std::string& input, const char delimiter = '\n') {
         std::stringstream stream(input);

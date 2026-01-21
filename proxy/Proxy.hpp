@@ -51,9 +51,10 @@ namespace proxy {
         geode::ListenerResult handle(std::function<geode::ListenerResult(T*)> callback, T* event) {
             const URL url = event->getRequest().getURL();
 
-            if ((m_urlParts.empty() || std::any_of(m_urlParts.begin(), m_urlParts.end(), [url](std::string part) {
-                return url.getBasicUrl().find(part) != std::string::npos;
-            })) && (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))) {
+            if (
+                (m_urlParts.empty() || m_urlParts.some([&](const std::string& part) { return url.getBasicUrl().find(part) != std::string::npos; })) &&
+                (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))
+            ) {
                 return callback(event);
             } else {
                 return geode::ListenerResult::Stop;
@@ -61,7 +62,7 @@ namespace proxy {
         }
     protected:
         enums::OriginFilter m_origin;
-        std::vector<std::string> m_urlParts;
+        Stream<std::string> m_urlParts;
 
         ProxyFilter(const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER) : m_origin(origin) { };
         ProxyFilter(const std::vector<std::string>& urlParts) : m_origin(enums::OriginFilter::ALL_FILTER), m_urlParts(urlParts) { };

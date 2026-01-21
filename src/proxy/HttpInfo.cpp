@@ -66,7 +66,7 @@ ContentType proxy::HttpInfo::determineContentType(const std::string& path, const
 }
 
 proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
-    return HttpInfo::parseCocosHeaders(StringStreamer::of(std::string(headers->begin(), headers->end()))
+    return HttpInfo::parseCocosHeaders(StringStream::of(std::string(headers->begin(), headers->end()))
         .map<gd::string>([](std::string header) {
             if (header.back() == '\r') {
                 header.pop_back();
@@ -74,9 +74,7 @@ proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<cha
 
             return header;
         })
-        .filter([](const std::string& header) {
-            return header.size();
-        }));
+        .filter([](const std::string& header) { return header.size(); }));
 }
 
 proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<gd::string>& headers) {

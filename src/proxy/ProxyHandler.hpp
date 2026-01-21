@@ -20,10 +20,10 @@ namespace proxy {
         static bool isPaused();
         static void pauseAll();
         static void resumeAll();
-        static void setCacheLimit(const int64_t limit);
+        static void setCacheLimit(const size_t limit);
     private:
-        static std::vector<size_t> HANDLED_IDS;
-        static std::vector<ProxyHandler*> ALIVE_PROXIES;
+        static Stream<size_t> HANDLED_IDS;
+        static Stream<ProxyHandler*> ALIVE_PROXIES;
         static std::deque<ProxyHandler*> CACHED_PROXIES;
         static std::vector<ProxyHandler*> PAUSED_PROXIES;
         static bool PAUSED;

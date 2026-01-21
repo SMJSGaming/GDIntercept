@@ -5,7 +5,7 @@ using namespace SideBarCell;
 SideBar::ActionID::ActionID(const std::string& id) : isOpen(id == "open") {
     ESCAPE_WHEN(isOpen,);
 
-    StringStreamer::of(id, '-').forEach([this](const std::string& part, const size_t i) {
+    StringStream::of(id, '-').forEach([this](const std::string& part, const size_t i) {
         if (i == 0) {
             category = part;
         } else if (i == 1) {
