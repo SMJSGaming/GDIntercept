@@ -47,8 +47,8 @@ Release Todo:
   ✔ @high Add bigger versions of the standard themes @done(24-09-20 14:20)
   ✔ @high Persistant pause warning @done(24-09-19 11:49)
   ☐ @critical Add inputs to the JSON code block
-  ☐ @critical Pen test all well known mods & GD
-  ☐ @high Fix the comment (comments and comment history) response parsers
+  ✔ @critical Pen test all well known mods & GD @ongoing
+  ☐ @critical Make the RobTop to JSON parser object based rather than URL based
   ☐ @high Add spoofing (response mocking) support
   ☐ @critical Fix number parsing to support scientific notation and too big numbers
 Nice To Haves:

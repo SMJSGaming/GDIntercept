@@ -1,5 +1,5 @@
 {
-  "geode": "4.2.0",
+  "geode": "4.10.0",
   "version": "v0.7.2",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
@@ -29,6 +29,7 @@
     "mac": "2.2074",
     "android": "2.2074"
   },
+  "early-load": true,
   "dependencies": {
     "geode.custom-keybinds": {
       "version": "1.10.2",
@@ -99,7 +100,7 @@
       "name": "Minimize Side Menu",
       "description": "Minimizes the side menu to only show icons.",
       "type": "bool",
-      "default": true
+      "default": false
     },
     "list-settings": {
       "type": "title",
