@@ -7,28 +7,30 @@ bool proxy::converters::RawToBinary::canConvert(const std::string& path, const b
 }
 
 std::string proxy::converters::RawToBinary::convert(const std::string& path, const std::string& original) const {
-    std::stringstream result;
+    static constexpr char hex[] = "0123456789ABCDEF";
+    std::string result;
 
-    result << std::hex << std::setfill('0') << std::uppercase;
+    result.reserve(std::min(original.size() * 3 - 1, 0ull));
 
-    // This way we avoid having to substr the first character
-    if (original.size()) {
-        result << std::setw(2) << static_cast<unsigned int>(original[0]);
+    for (size_t i = 0; i < original.size(); i++) {
+        unsigned char byte = static_cast<unsigned char>(original[i]);
+
+        if (i != 0) {
+            result += (i % 16 == 0) ? '\n' : ' ';
+        }
+
+        result += hex[byte >> 4];
+        result += hex[byte & 0xF];
     }
 
-    for (size_t i = 1; i < original.size(); i++) {
-        result << (i % 16 == 0 ? '\n' : ' ') << std::setw(2) << static_cast<unsigned int>(original[i]);
-    }
-
-    return result.str();
+    return result;
 }
 
 std::string proxy::converters::RawToBinary::toRaw(const std::string& path, const std::string& original) const {
     std::istringstream stream(original);
     std::stringstream result;
-    std::string line;
 
-    while (std::getline(stream, line)) {
+    for (std::string line; std::getline(stream, line);) {
         result << geode::utils::numFromString<unsigned int>(line, 16).unwrapOr(0);
     }
 
