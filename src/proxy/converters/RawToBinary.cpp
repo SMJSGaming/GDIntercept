@@ -13,7 +13,7 @@ std::string proxy::converters::RawToBinary::convert(const std::string& path, con
     result.reserve(std::min(original.size() * 3 - 1, 0ull));
 
     for (size_t i = 0; i < original.size(); i++) {
-        unsigned char byte = static_cast<unsigned char>(original[i]);
+        const unsigned char byte = static_cast<unsigned char>(original[i]);
 
         if (i != 0) {
             result += (i % 16 == 0) ? '\n' : ' ';
