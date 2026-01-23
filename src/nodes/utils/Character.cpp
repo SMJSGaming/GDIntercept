@@ -1,6 +1,6 @@
 #include "Character.hpp"
 
-Character* Character::create(const char character, const std::string& font, const bool rescale) {
+Character* Character::create(const char character, const std::string_view font, const bool rescale) {
     Character* instance = new Character(rescale);
 
     if (instance && instance->init(std::string(1, character), font)) {
@@ -17,7 +17,9 @@ Character* Character::create(const char character, const std::string& font, cons
 Character::Character(const bool rescale) : m_rescale(rescale) {}
 
 void Character::setCString(const char* label) {
-    CenterLabel::setCString(std::string(label).substr(0, 1).c_str());
+    const char buffer[2] = { label[0], 0 };
+
+    CenterLabel::setCString(buffer);
 }
 
 void Character::updateLabel() {

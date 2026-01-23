@@ -192,7 +192,7 @@ void CullingList::update(const float dt) {
 
     IntStream::range(amount)
         .map<size_t>([&](const size_t i) { return offset - i; })
-        .filter([&](const size_t index) { return renderAll || (index < 0 && index >= size); })
+        .filter([&](const size_t index) { return renderAll || (index >= 0 && index < size); })
         .forEach([&](const size_t index) {
             CullingCell* cell = this->renderCell(index);
 
@@ -206,7 +206,7 @@ void CullingList::update(const float dt) {
             cell->discard();
         });
 
-    m_activeCells = newActiveCells;
+    m_activeCells = std::move(newActiveCells);
 }
 
 int CullingList::numberOfRowsInSection(unsigned int section, TableView* view) {

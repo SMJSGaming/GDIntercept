@@ -27,7 +27,7 @@ namespace Theme {
         GLubyte a;
 
         Color(const GLubyte a = 0);
-        Color(const std::string hex);
+        Color(const std::string_view hex);
         Color(const GLubyte r, const GLubyte g, const GLubyte b, const GLubyte a = 255);
 
         bool isInvisible() const;
@@ -40,8 +40,8 @@ namespace Theme {
         }
     private:
         // Supporting the format #R/G/B, #RR/GG/BB, #RGB, #RGBA, #RRGGBB and #RRGGBBAA
-        void extractChannels(const std::string& hex);
-        GLubyte extractChannel(const std::string& hexString, const size_t index, const bool isShort) const;
+        void extractChannels(const std::string_view hex);
+        GLubyte extractChannel(const std::string_view hexString, const size_t index, const bool isShort) const;
 
         friend void from_json(const json& json, Color& color);
     };
@@ -51,7 +51,7 @@ namespace Theme {
         float fontScale;
         float lineHeight;
 
-        CCLabelBMFont* createLabel(const std::string& text) const;
+        CCLabelBMFont* createLabel(const std::string_view text) const;
         CCSize getTrueFontSize() const;
     };
 
@@ -124,10 +124,10 @@ namespace Theme {
 
         static void loadDirectory(const std::filesystem::path& path);
         static Theme createTheme(const json& obj);
-        static Color colorOrDefault(const json& obj, const std::string& key, const Color& override, const std::optional<GLubyte>& alpha = std::nullopt);
+        static Color colorOrDefault(const json& obj, const std::string_view key, const Color& override, const std::optional<GLubyte>& alpha = std::nullopt);
 
         template <typename T>
-        static T objectOrDefault(const json& obj, const std::string& key, const std::function<T(const json& obj)>& constructor, const T& defaultObj) {
+        static T objectOrDefault(const json& obj, const std::string_view key, const std::function<T(const json& obj)>& constructor, const T& defaultObj) {
             return obj.contains(key) ? constructor(obj.at(key)) : defaultObj;
         }
 

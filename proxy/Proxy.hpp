@@ -51,10 +51,9 @@ namespace proxy {
         geode::ListenerResult handle(std::function<geode::ListenerResult(T*)> callback, T* event) {
             const URL url = event->getRequest().getURL();
 
-            if (
-                (m_urlParts.empty() || m_urlParts.some([&](const std::string& part) { return url.getBasicUrl().find(part) != std::string::npos; })) &&
-                (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))
-            ) {
+            if ((m_urlParts.empty() || m_urlParts.some([&](const std::string_view part) {
+                    return url.getBasicUrl().find(part) != std::string_view::npos;
+            })) && (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))) {
                 return callback(event);
             } else {
                 return geode::ListenerResult::Stop;

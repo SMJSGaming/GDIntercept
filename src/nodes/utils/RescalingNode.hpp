@@ -13,7 +13,7 @@ public:
     void setRescaleHeight(const bool value);
     void setContentSize(const CCSize& size) override;
 private:
-    GETTER(CCNode*, node, Node);
-    GETTER(bool, rescaleWidth, RescaleWidth);
-    GETTER(bool, rescaleHeight, RescaleHeight);
+    PRIMITIVE_GETTER(CCNode*, node, Node);
+    PRIMITIVE_GETTER(bool, rescaleWidth, RescaleWidth);
+    PRIMITIVE_GETTER(bool, rescaleHeight, RescaleHeight);
 };

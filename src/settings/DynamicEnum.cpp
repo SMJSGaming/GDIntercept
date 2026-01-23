@@ -8,7 +8,7 @@ DynamicEnumValue::operator std::string() const {
     return value;
 }
 
-DynamicEnumValue::DynamicEnumValue(const std::string& value) : value(value) { }
+DynamicEnumValue::DynamicEnumValue(std::string value) : value(std::move(value)) { }
 
 DynamicEnumValue::DynamicEnumValue(const DynamicEnumValue& other) : value(other.value) { }
 
@@ -32,27 +32,27 @@ bool matjson::Serialize<DynamicEnumValue>::is_json(const matjson::Value& json) {
 
 std::unordered_map<std::string, Stream<std::function<void()>>> DynamicEnum::LOADERS;
 
-Result<std::shared_ptr<SettingV3>> DynamicEnum::parse(const std::string& key, const std::string& modID, const matjson::Value& json) {
+Result<std::shared_ptr<SettingV3>> DynamicEnum::parse(std::string key, std::string modID, const matjson::Value& json) {
     std::shared_ptr<DynamicEnum> res = std::make_shared<DynamicEnum>();
     JsonExpectedValue root = checkJson(json, "DynamicEnum");
 
-    res->parseBaseProperties(key, modID, root);
+    res->parseBaseProperties(std::move(key), std::move(modID), root);
     root.needs("save-value").into(res->m_saveValue);
     root.checkUnknownKeys();
 
     return root.ok(std::static_pointer_cast<SettingV3>(res));
 }
 
-void DynamicEnum::reloadDynamicEnums(const std::string& sprSettingKey) {
-    DynamicEnum::LOADERS.at(sprSettingKey).forEach([](const auto& loader) { loader(); });
+void DynamicEnum::reloadDynamicEnums(std::string sprSettingKey) {
+    DynamicEnum::LOADERS.at(std::move(sprSettingKey)).forEach([](const auto& loader) { loader(); });
 }
 
-void DynamicEnum::registerLoader(const std::string& sprSettingKey, const std::function<void()>& loader) {
+void DynamicEnum::registerLoader(std::string sprSettingKey, const std::function<void()>& loader) {
     if (!DynamicEnum::LOADERS.contains(sprSettingKey)) {
         DynamicEnum::LOADERS[sprSettingKey] = {};
     }
 
-    DynamicEnum::LOADERS.at(sprSettingKey).push_back(loader);
+    DynamicEnum::LOADERS.at(std::move(sprSettingKey)).push_back(loader);
 }
 
 SettingNodeV3* DynamicEnum::createNode(const float width) {

@@ -2,7 +2,7 @@
 
 using namespace SideBarCell;
 
-bool SideBarCategory::operator ==(const SideBarCategory& other) const {
+bool SideBarCategory::operator==(const SideBarCategory& other) const {
     return icon == other.icon && name == other.name;
 }
 
@@ -74,7 +74,7 @@ void CategoryCell::onScaleToMax() {
 
 void CategoryCell::draw() {
     const Theme::Theme theme = Theme::getTheme();
-    const CCSize size = this->getContentSize();
+    const CCSize& size = this->getContentSize();
 
     SharedWidthNode::draw();
 

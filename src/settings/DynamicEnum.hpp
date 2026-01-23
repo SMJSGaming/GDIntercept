@@ -11,7 +11,7 @@ struct DynamicEnumValue {
     std::string value;
 
     DynamicEnumValue() = default;
-    DynamicEnumValue(const std::string& value);
+    DynamicEnumValue(std::string value);
     DynamicEnumValue(const DynamicEnumValue& other);
 };
 
@@ -24,9 +24,9 @@ struct matjson::Serialize<DynamicEnumValue> {
 
 class DynamicEnum : public SettingBaseValueV3<DynamicEnumValue> {
 public:
-    static Result<std::shared_ptr<SettingV3>> parse(const std::string& key, const std::string& modID, const matjson::Value& json);
-    static void reloadDynamicEnums(const std::string& sprSettingKey);
-    static void registerLoader(const std::string& sprSettingKey, const std::function<void()>& loader);
+    static Result<std::shared_ptr<SettingV3>> parse(std::string key, std::string modID, const matjson::Value& json);
+    static void reloadDynamicEnums(std::string sprSettingKey);
+    static void registerLoader(std::string sprSettingKey, const std::function<void()>& loader);
 
     SettingNodeV3* createNode(const float width) override;
     std::string getSaveValue() const;

@@ -99,11 +99,11 @@ proxy::converters::RobTopToJson::Parser::Parser(const std::vector<std::string>& 
 ObjParser(tupleKeys, delimiter, entryDelimiter),
 m_metadata(metadataKeys) {}
 
-std::vector<std::string> proxy::converters::RobTopToJson::ObjParser::split(const std::string& str, const std::string& delimiter) {
+std::vector<std::string> proxy::converters::RobTopToJson::ObjParser::split(std::string str, const std::string_view delimiter) {
     std::vector<std::string> parts;
 
     if (delimiter.empty()) {
-        parts.push_back(str);
+        parts.push_back(std::move(str));
     } else {
         size_t end, start = 0;
 
@@ -119,16 +119,16 @@ std::vector<std::string> proxy::converters::RobTopToJson::ObjParser::split(const
     return parts;
 }
 
-json proxy::converters::RobTopToJson::ObjParser::parse(const std::string& str) const {
+json proxy::converters::RobTopToJson::ObjParser::parse(std::string str) const {
     if (m_entryDelimiter.empty()) {
         return parseEntry(str);
     } else {
         json array(json::array());
 
-        for (const std::string& entry : this->split(str, m_entryDelimiter)) {
+        for (std::string entry : this->split(str, m_entryDelimiter)) {
             // For some reason some responses have a trailing delimiter
             if (!entry.empty()) {
-                array.push_back(parseEntry(entry));
+                array.push_back(parseEntry(std::move(entry)));
             }
         }
 
@@ -136,8 +136,8 @@ json proxy::converters::RobTopToJson::ObjParser::parse(const std::string& str) c
     }
 }
 
-json proxy::converters::RobTopToJson::ObjParser::parseEntry(const std::string& str) const {
-    const std::vector<std::string> parts(this->split(str, m_delimiter));
+json proxy::converters::RobTopToJson::ObjParser::parseEntry(std::string str) const {
+    const std::vector<std::string> parts(this->split(std::move(str), m_delimiter));
     json object(json::object());
     std::string lastKey;
 
@@ -200,9 +200,9 @@ std::string proxy::converters::RobTopToJson::ObjParser::toRawEntry(const json& j
     return stream.str();
 }
 
-json proxy::converters::RobTopToJson::Parser::parse(const std::string& str) const {
+json proxy::converters::RobTopToJson::Parser::parse(std::string str) const {
     if (m_metadata.empty()) {
-        return ObjParser::parse(str);
+        return ObjParser::parse(std::move(str));
     } else {
         std::stringstream stream(str);
         json object(json::object());
@@ -241,7 +241,7 @@ std::string proxy::converters::RobTopToJson::Parser::toRaw(const json& json) con
 
 proxy::converters::RobTopToJson::RobTopToJson() : Converter(enums::ContentType::JSON) { }
 
-bool proxy::converters::RobTopToJson::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
+bool proxy::converters::RobTopToJson::canConvert(const std::string_view path, const bool isBody, const std::string_view original) const {
     if (isBody) {
         return false;
     }
@@ -254,25 +254,25 @@ bool proxy::converters::RobTopToJson::canConvert(const std::string& path, const 
 
     return false; 
 
-    return RobTopToJson::PARSERS.contains(path) && !isBody;
+    return RobTopToJson::PARSERS.contains(std::string(path)) && !isBody;
 }
 
-std::string proxy::converters::RobTopToJson::convert(const std::string& path, const std::string& original) const {
+std::string proxy::converters::RobTopToJson::convert(const std::string_view path, const std::string_view original) const {
     for (const auto& [key, parser] : RobTopToJson::PARSERS) {
         if (path.ends_with(key)) {
-            return converters::safeDump(parser.parse(original));
+            return converters::safeDump(parser.parse(std::string(original)));
         }
     }
 
     return "Unknown path";
 }
 
-std::string proxy::converters::RobTopToJson::toRaw(const std::string& path, const std::string& original) const {
+std::string proxy::converters::RobTopToJson::toRaw(const std::string_view path, const std::string_view original) const {
     for (const auto& [key, parser] : RobTopToJson::PARSERS) {
         if (path.ends_with(key)) {
             return parser.toRaw(json::parse(original));
         }
     }
 
-    return original;
+    return std::string(original);
 }

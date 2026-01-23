@@ -1,6 +1,6 @@
 #include "CenterLabel.hpp"
 
-CenterLabel* CenterLabel::create(const std::string& string, const std::string& font) {
+CenterLabel* CenterLabel::create(const std::string_view string, const std::string_view font) {
     CenterLabel* instance = new CenterLabel();
 
     if (instance && instance->init(string, font)) {
@@ -14,8 +14,8 @@ CenterLabel* CenterLabel::create(const std::string& string, const std::string& f
     }
 }
 
-bool CenterLabel::init(const std::string& string, const std::string& font) {
-    ESCAPE_WHEN(!this->initWithString(string.c_str(), font.c_str()), false);
+bool CenterLabel::init(const std::string_view string, const std::string_view font) {
+    ESCAPE_WHEN(!this->initWithString(string.data(), font.data()), false);
 
     return true;
 }

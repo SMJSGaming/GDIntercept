@@ -4,25 +4,30 @@ using namespace nlohmann;
 
 proxy::converters::FormToJson::FormToJson() : Converter(enums::ContentType::JSON) { };
 
-bool proxy::converters::FormToJson::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
-    std::stringstream stream(original);
+bool proxy::converters::FormToJson::canConvert(const std::string_view path, const bool isBody, const std::string_view original) const {
+    bool hasAssignment = false;
 
-    for (std::string section; std::getline(stream, section, '&');) {
-        // The official form spec has no null value support and an empty string still requires an empty assignment, thus this is invalid
-        if (section.find('=') == std::string::npos) {
-            return false;
+    for (const char character : original) {
+        if (character == '=') {
+            hasAssignment = true;
+        } else if (character == '&') {
+            if (!hasAssignment) {
+                return false;
+            }
+
+            hasAssignment = false;
         }
     }
 
-    return true;
+    return hasAssignment;
 }
 
-std::string proxy::converters::FormToJson::convert(const std::string& path, const std::string& original) const {
+std::string proxy::converters::FormToJson::convert(const std::string_view path, const std::string_view original) const {
     json object(json::object());
 
-    StringStream::of(original).forEach([&](const std::string& section) {
+    StringStream::of(original, '&').forEach([&](const std::string_view section) {
         const size_t equalPos = section.find('=');
-        const std::string key = section.substr(0, equalPos);
+        const std::string_view key = section.substr(0, equalPos);
 
         if (equalPos == std::string::npos) {
             object[key] = json("");
@@ -34,17 +39,19 @@ std::string proxy::converters::FormToJson::convert(const std::string& path, cons
     return converters::safeDump(object);
 }
 
-std::string proxy::converters::FormToJson::toRaw(const std::string& path, const std::string& original) const {
+std::string proxy::converters::FormToJson::toRaw(const std::string_view path, const std::string_view original) const {
     const json object = json::parse(original);
-    std::stringstream result;
+    std::string result;
 
     for (const auto& [key, value] : object.items()) {
-        if (result.tellp() > 0) {
-            result << '&';
+        if (result.size()) {
+            result.push_back('&');
         }
 
-        result << key << '=' << converters::safeDump(value, 0, true);
+        result.append(key);
+        result.push_back('=');
+        result.append(converters::safeDump(value, 0, true));
     }
 
-    return result.str();
+    return result;
 }

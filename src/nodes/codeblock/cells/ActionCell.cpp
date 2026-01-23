@@ -5,8 +5,8 @@ using namespace SideBarCell;
 SideBarActionButton::SideBarActionButton() : name(""),
 icon("") { }
 
-SideBarActionButton::SideBarActionButton(const std::string& name, const std::string& icon, const StandardCallback& callback) : name(name),
-icon(icon),
+SideBarActionButton::SideBarActionButton(std::string name, std::string icon, const StandardCallback& callback) : name(std::move(name)),
+icon(std::move(icon)),
 callback(callback) { }
 
 bool SideBarActionButton::isEmpty() const {

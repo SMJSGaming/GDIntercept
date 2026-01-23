@@ -31,9 +31,9 @@ bool TracklessScrollbar::init(const CCSize& size, CCScrollLayerExt* scrollLayer)
 }
 
 void TracklessScrollbar::ccTouchMoved(CCTouch* touch, CCEvent* event) {
-    const CCSize size = this->getContentSize();
-    const CCSize targetSize = m_target->getContentSize();
-    const CCSize targetContentSize = m_target->m_contentLayer->getContentSize();
+    const CCSize& size = this->getContentSize();
+    const CCSize& targetSize = m_target->getContentSize();
+    const CCSize& targetContentSize = m_target->m_contentLayer->getContentSize();
     const CCPoint touchLocation = this->convertTouchToNodeSpace(touch);
     const CCSize thumbSize = m_thumb->getScaledContentSize();
 

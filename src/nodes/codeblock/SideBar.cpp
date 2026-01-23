@@ -2,10 +2,10 @@
 
 using namespace SideBarCell;
 
-SideBar::ActionID::ActionID(const std::string& id) : isOpen(id == "open") {
+SideBar::ActionID::ActionID(const std::string_view id) : isOpen(id == "open") {
     ESCAPE_WHEN(isOpen,);
 
-    StringStream::of(id, '-').forEach([this](const std::string& part, const size_t i) {
+    StringStream::of(id, '-').forEach([this](const std::string_view part, const size_t i) {
         if (i == 0) {
             category = part;
         } else if (i == 1) {
@@ -134,7 +134,7 @@ void SideBar::reloadView() {
 
 void SideBar::reloadState() {
     for (ActionCell* cell : m_actionCells) {
-        const ActionID id = cell->getParent()->getID();
+        const ActionID id = ActionID(cell->getParent()->getID());
         const SideBarAction& action = id.isOpen ? SideBar::OPEN_ACTION : m_actions.at(id.getCategory(m_actions)).at(id.index);
 
         if (!action.enableState || action.enableState(m_block)) {
@@ -150,7 +150,7 @@ void SideBar::reloadState() {
 }
 
 void SideBar::draw() {
-    const CCSize size = this->getContentSize();
+    const CCSize& size = this->getContentSize();
 
     CCLayerColor::draw();
 

@@ -15,7 +15,7 @@ const LookupTable<ContentType, proxy::converters::Converter*> proxy::HttpInfo::C
     { ContentType::BINARY, new RawToBinary() }
 });
 
-proxy::HttpInfo::Content proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string& path, const std::string& original) {
+proxy::HttpInfo::Content proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string_view path, const std::string_view original) {
     if (HttpInfo::CONVERTERS.contains(originalContentType)) {
         const converters::Converter* converter = HttpInfo::CONVERTERS.at(originalContentType);
 
@@ -26,20 +26,23 @@ proxy::HttpInfo::Content proxy::HttpInfo::getContent(const bool raw, const Conte
         }
     }
 
-    return { originalContentType, original };
+    return { originalContentType, std::string(original) };
 }
 
 proxy::HttpInfo::Content proxy::HttpInfo::getHeaders(const bool raw, const Headers& headers) {
     if (raw) {
-        std::stringstream stream;
+        std::string rawHeaders;
 
         for (const auto& [headerKey, list] : headers) {
-            for (const std::string& headerValue : list) {
-                stream << headerKey << ':' << headerValue << std::endl;
+            for (const std::string_view headerValue : list) {
+                rawHeaders.append(headerKey)
+                    .append(": ")
+                    .append(headerValue)
+                    .push_back('\n');
             }
         }
 
-        return { ContentType::UNKNOWN_CONTENT, stream.str() };
+        return { ContentType::UNKNOWN_CONTENT, std::move(rawHeaders) };
     } else {
         json content = json::object();
 
@@ -51,7 +54,7 @@ proxy::HttpInfo::Content proxy::HttpInfo::getHeaders(const bool raw, const Heade
     }
 }
 
-ContentType proxy::HttpInfo::determineContentType(const std::string& path, const bool isBody, const std::string& content) {
+ContentType proxy::HttpInfo::determineContentType(const std::string_view path, const bool isBody, const std::string_view content) {
     if (content.empty()) {
         return ContentType::UNKNOWN_CONTENT;
     }
@@ -66,39 +69,32 @@ ContentType proxy::HttpInfo::determineContentType(const std::string& path, const
 }
 
 proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
-    return HttpInfo::parseCocosHeaders(StringStream::of(std::string(headers->begin(), headers->end()))
-        .map<gd::string>([](std::string header) {
+    return HttpInfo::parseCocosHeaders(StringStream::of(std::string_view(headers->begin(), headers->end()))
+        .map<gd::string>([](std::string&& header) {
             if (header.back() == '\r') {
                 header.pop_back();
             }
 
             return header;
         })
-        .filter([](const std::string& header) { return header.size(); }));
+        .filter([](const std::string_view header) { return header.size(); }));
 }
 
 proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<gd::string>& headers) {
     Headers parsed;
 
-    // CCHttp headers technically allow for weird header formats, but I'm assuming they're all key-value pairs separated by a colon since this is the standard
-    // If you don't follow the standard, I'm not going to care that you get shitty results
-    for (const gd::string& header : headers) {
-        const std::string headerString(header.c_str());
-        const size_t colonPos = headerString.find(":");
-        std::string headerKey = headerString;
-        std::string headerValue;
+    for (const std::string_view header : headers) {
+        const size_t colonPos = header.find(':');
 
-        if (colonPos != std::string::npos) {
-            std::string value(headerString.substr(colonPos + 1));
+        if (colonPos != std::string_view::npos) {
+            const size_t valueOffset = colonPos + 1;
+            const size_t valueStartOffset = header.find_first_not_of(' ', valueOffset);
 
-            headerKey = headerString.substr(0, colonPos);
-            headerValue = value.erase(0, value.find_first_not_of(' '));
-        }
-
-        if (parsed.contains(headerKey)) {
-            parsed[headerKey].push_back(headerValue);
+            parsed[std::string(header.substr(0, colonPos))].emplace_back(header.substr(
+                valueStartOffset == std::string_view::npos ? valueOffset : valueStartOffset
+            ));
         } else {
-            parsed.insert({ headerKey, { headerValue } });
+            parsed["<GDI_CUSTOM:Keyless>"].emplace_back(header);
         }
     }
 
@@ -111,11 +107,11 @@ m_state(paused ? State::PAUSED : State::IN_PROGRESS),
 m_repeat(false),
 m_request(request) { }
 
-proxy::HttpInfo::HttpInfo(const bool paused, const bool repeat, web::WebRequest* request, const std::string& method, const std::string& url) : m_id(globalIndexCounter++),
+proxy::HttpInfo::HttpInfo(const bool paused, const bool repeat, web::WebRequest* request, std::string method, std::string url) : m_id(globalIndexCounter++),
 m_client(Client::GEODE),
 m_state(paused ? State::PAUSED : State::IN_PROGRESS),
 m_repeat(repeat),
-m_request(request, method, url) { }
+m_request(request, std::move(method), std::move(url)) { }
 
 void proxy::HttpInfo::cancel() {
     if (m_state == State::IN_PROGRESS || m_state == State::PAUSED) {
@@ -170,8 +166,8 @@ m_headers(HttpInfo::parseCocosHeaders(request->getHeaders())),
 m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
 m_contentType(HttpInfo::determineContentType(m_url.getPath(), true, m_body)) { }
 
-proxy::HttpInfo::Request::Request(web::WebRequest* request, const std::string& method, const std::string& url) : m_method(method),
-m_url(url, request),
+proxy::HttpInfo::Request::Request(web::WebRequest* request, std::string method, std::string url) : m_method(std::move(method)),
+m_url(std::move(url), request),
 m_headers(request->getHeaders()) {
     const ByteVector body = request->getBody().value_or(ByteVector());
 
@@ -207,8 +203,8 @@ m_headers(Headers()),
 m_statusCode(response->code()),
 m_response(response->string().unwrapOrDefault()),
 m_contentType(HttpInfo::determineContentType(request->m_url.getPath(), false, m_response)) {
-    for (const std::string& header : response->headers()) {
-        m_headers[header] = response->getAllHeadersNamed(header).value_or(std::vector<std::string>());
+    for (const std::string_view header : response->headers()) {
+        m_headers[std::string(header)] = response->getAllHeadersNamed(header).value_or(std::vector<std::string>());
     }
 }
 

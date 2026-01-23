@@ -37,7 +37,7 @@ private:
     CodeBlock();
     void setup() override;
     bool init(const CCSize& size);
-    void showMessage(const std::string& message, const ccColor3B& color = { 0xFF, 0xFF, 0xFF });
+    void showMessage(std::string message, const ccColor3B& color = { 0xFF, 0xFF, 0xFF });
     void scroll(const float x, const float y);
     bool onCopy();
     bool onSend();

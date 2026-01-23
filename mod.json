@@ -29,7 +29,7 @@
     "mac": "2.2074",
     "android": "2.2074"
   },
-  "early-load": true,
+  "early-load": false,
   "dependencies": {
     "geode.custom-keybinds": {
       "version": "1.10.2",

@@ -20,9 +20,9 @@ public:
 protected:
     GETTER(std::vector<CullingCell*>, cells, Cells);
     PROTECTED_GETTER(Stream<CullingCell*>, activeCells, ActiveCells);
-    PROTECTED_GETTER(float, cellHeight, CellHeight);
-    PROTECTED_GETTER(float, maxCellWidth, MaxCellWidth);
-    PROTECTED_GETTER(TableView*, view, View);
+    PRIMITIVE_PROTECTED_GETTER(float, cellHeight, CellHeight);
+    PRIMITIVE_PROTECTED_GETTER(float, maxCellWidth, MaxCellWidth);
+    PRIMITIVE_PROTECTED_GETTER(TableView*, view, View);
     CCPoint m_lastOffset;
     size_t m_scrollLockSteps;
     bool m_xAxisLocked;

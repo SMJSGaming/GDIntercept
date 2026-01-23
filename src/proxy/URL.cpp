@@ -4,26 +4,23 @@ using namespace nlohmann;
 using namespace proxy::enums;
 using namespace geode::prelude;
 
-Stream<std::string> proxy::URL::SUFFIXES;
-
-void proxy::URL::load() {
-    URL::SUFFIXES = json::parse(utils::file::readString(Mod::get()->getResourcesDir() / "suffixes.json").unwrap());
-}
-
-proxy::URL::URL(const std::string& url, web::WebRequest* request) : m_original(url), m_query(json::object()) {
+proxy::URL::URL(std::string url, web::WebRequest* request) : m_original(std::move(url)), m_reconstruction(m_original), m_query(json::object()) {
     if (request != nullptr) {
         const std::unordered_map<std::string, std::string> params = request->getUrlParams();
 
-        if (params.size() && m_original.find('?') == std::string::npos) {
-            m_original += "?";
+        if (params.size() && m_reconstruction.find('?') == std::string::npos) {
+            m_reconstruction.push_back('?');
         }
 
         for (const auto& [key, value] : params) {
-            m_original += key + '=' + value + '&';
+            m_reconstruction.append(key);
+            m_reconstruction.push_back('=');
+            m_reconstruction.append(value);
+            m_reconstruction.push_back('&');
         }
 
-        if (m_original.ends_with('&')) {
-            m_original.pop_back();
+        if (m_reconstruction.ends_with('&')) {
+            m_reconstruction.pop_back();
         }
     }
 
@@ -39,10 +36,6 @@ std::string proxy::URL::stringifyQuery(const bool raw) const {
 }
 
 void proxy::URL::parse() {
-    if (URL::SUFFIXES.empty()) {
-        URL::load();
-    }
-
     size_t index = 0;
 
     this->parseProtocol(index);
@@ -69,11 +62,11 @@ void proxy::URL::parseProtocol(size_t& index) {
         {"steam", Protocol::STEAM},
         {"mailto", Protocol::MAIL},
     };
-    const size_t protocolEnd = m_original.find(":", index);
+    const size_t protocolEnd = m_reconstruction.find(":", index);
     const size_t size = protocolEnd - index;
 
     if (protocolEnd == std::string::npos || (
-        m_protocol = m_original.substr(index, size)
+        m_protocol = m_reconstruction.substr(index, size)
     ).find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos) {
         m_scheme = Protocol::UNKNOWN_PROTOCOL;
         m_protocol = "unknown";
@@ -87,13 +80,13 @@ void proxy::URL::parseProtocol(size_t& index) {
 
     std::transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), toupper);
 
-    index += size + 1 + m_original.substr(protocolEnd + 1).starts_with("//") * 2;
+    index += size + 1 + m_reconstruction.substr(protocolEnd + 1).starts_with("//") * 2;
 }
 
 void proxy::URL::parseLogin(size_t& index) {
-    const size_t loginEnd = m_original.find('@', index);
+    const size_t loginEnd = m_reconstruction.find('@', index);
     const size_t size = loginEnd - index;
-    const std::string login = m_original.substr(index, size);
+    const std::string login = m_reconstruction.substr(index, size);
 
     if (loginEnd != std::string::npos && login.find('/') == std::string::npos) {
         const size_t split = login.find(':');
@@ -109,10 +102,10 @@ void proxy::URL::parseLogin(size_t& index) {
 }
 
 void proxy::URL::parseHost(size_t& index) {
-    const size_t hostEnd = m_original.find('/', index);
-    const size_t size = (hostEnd == std::string::npos ? m_original.size() : hostEnd) - index;
+    const size_t hostEnd = m_reconstruction.find('/', index);
+    const size_t size = (hostEnd == std::string::npos ? m_reconstruction.size() : hostEnd) - index;
 
-    m_subDomains = StringStream::of(m_host = m_original.substr(index, size), '.');
+    m_subDomains = StringStream::of(m_host = m_reconstruction.substr(index, size), '.');
 
     std::string& lastSubDomain = m_subDomains.back();
     const size_t portStart = lastSubDomain.find(':');
@@ -128,19 +121,17 @@ void proxy::URL::parseHost(size_t& index) {
         m_domain = m_domainName = lastSubDomain;
         m_subDomains.pop_back();
     } else for (size_t i = m_subDomains.size() - 1; i >= 0; i--) {
-        const std::string subDomain = m_subDomains[i];
+        const std::string& subDomain = m_subDomains[i];
 
         m_domain = subDomain + (m_domain.empty() ? m_domain : '.' + m_domain);
 
         if (m_tld.empty()) {
             m_tld = subDomain;
-        } else if (URL::SUFFIXES.includes(m_domain)) {
+        } else if (m_domain.find('.') != std::string::npos) {
             m_domainName = subDomain;
 
             m_subDomains.pop_back();
             break;
-        } else {
-            m_sld.push_back(subDomain);
         }
 
         m_subDomains.pop_back();
@@ -151,7 +142,7 @@ void proxy::URL::parseHost(size_t& index) {
 
 void proxy::URL::parsePath(size_t& index) {
     converters::FormToJson converter;
-    std::string fullPath = m_original.substr(index);
+    std::string fullPath = m_reconstruction.substr(index);
     const size_t size = fullPath.size();
     const size_t queryStart = fullPath.find('?');
     const size_t hashStart = fullPath.find('#');

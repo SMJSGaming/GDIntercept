@@ -2,7 +2,21 @@
 
 #include <string>
 #include <vector>
+#include <concepts>
 
+template<typename F, typename Returns, typename ...Args>
+concept returning_lambda = std::invocable<F, Args...> && std::is_convertible_v<std::invoke_result_t<F, Args...>, Returns>;
+
+template<typename F, typename Returns, typename ...PrefixArgs>
+concept basic_lambda = returning_lambda<F, Returns, PrefixArgs...>;
+
+template<typename F, typename Returns, typename ...PrefixArgs>
+concept indexed_lambda = returning_lambda<F, Returns, PrefixArgs..., size_t>;
+
+template<typename F, typename Returns, typename ...PrefixArgs>
+concept stream_lambda = basic_lambda<F, Returns, PrefixArgs...> || indexed_lambda<F, Returns, PrefixArgs...>;
+
+// NOTE! Non constant versions will consume on each iteration
 template<typename T>
 class Stream : public std::vector<T> {
     template <typename>
@@ -11,7 +25,12 @@ class Stream : public std::vector<T> {
     template <typename U>
     struct is_stream<Stream<U>> : std::true_type {};
 public:
-    Stream() = default;
+    Stream& operator=(Stream&&) noexcept(std::is_nothrow_move_assignable_v<std::vector<T>>) = default;
+
+    Stream() noexcept = default;
+    Stream(const Stream& other) = default;
+    Stream(Stream&& other) noexcept = default;  
+    Stream(std::vector<T>&& vector) noexcept : std::vector<T>(std::move(vector)) { }
     Stream(const std::vector<T>& vector) : std::vector<T>(vector) { }
     Stream(const std::initializer_list<T>& list) : std::vector<T>(list) { }
     template <typename I>
@@ -19,122 +38,191 @@ public:
     template <typename ...Args> requires(std::convertible_to<Args, T> && ...)
     Stream(Args&& ...args) : std::vector<T>{ std::forward<Args>(args)... } { }
 
-    template<std::invocable<const T&> F>
-    Stream<T> filter(F&& predicate) const {
-        Stream<T> stream;
-
-        for (const T& element : *this) {
-            if (predicate(element)) {
-                stream.push_back(element);
-            }
-        }
-
-        return stream;
-    }
-
-    template<std::invocable<const T&, const size_t> F>
-    Stream<T> filter(F&& predicate) const {
+    template<stream_lambda<bool, const T&> F>
+    [[nodiscard]] Stream<T> filter(F&& predicate) && {
         Stream<T> stream;
 
         for (size_t i = 0; i < this->size(); i++) {
-            if (predicate(this->at(i), i)) {
-                stream.push_back(this->at(i));
+            T& element = (*this)[i];
+
+            if constexpr (basic_lambda<F, bool, const T&>) {
+                if (predicate(element)) {
+                    stream.emplace_back(std::move(element));
+                }
+            } else {
+                if (predicate(element, i)) {
+                    stream.emplace_back(std::move(element));
+                }
             }
         }
 
         return stream;
     }
 
-    template<std::invocable<const T&> F>
-    bool every(F&& predicate) const {
-        for (const T& element : *this) {
-            if (!predicate(element)) {
-                return false;
+    template<stream_lambda<bool, const T&> F>
+    Stream<T> filter(F&& predicate) const& {
+        Stream<T> stream;
+
+        for (size_t i = 0; i < this->size(); i++) {
+            const T& element = (*this)[i];
+
+            if constexpr (basic_lambda<F, bool, const T&>) {
+                if (predicate(element)) {
+                    stream.emplace_back(element);
+                }
+            } else {
+                if (predicate(element, i)) {
+                    stream.emplace_back(element);
+                }
+            }
+        }
+
+        return stream;
+    }
+
+    template<stream_lambda<bool, T&&> F>
+    [[nodiscard]] bool every(F&& predicate) && {
+        for (size_t i = 0; i < this->size(); i++) {
+            if constexpr (basic_lambda<F, bool, T&&>) {
+                if (!predicate(std::move((*this)[i]))) return false;
+            } else {
+                if (!predicate(std::move((*this)[i]), i)) return false;
             }
         }
 
         return true;
     }
 
-    template<std::invocable<const T&, const size_t> F>
-    bool every(F&& predicate) const {
+    template<stream_lambda<bool, const T&> F>
+    bool every(F&& predicate) const& {
         for (size_t i = 0; i < this->size(); i++) {
-            if (!predicate(this->at(i), i)) {
-                return false;
+            if constexpr (basic_lambda<F, bool, const T&>) {
+                if (!predicate((*this)[i])) return false;
+            } else {
+                if (!predicate((*this)[i]), i) return false;
             }
         }
 
         return true;
     }
 
-    template<std::invocable<const T&> F>
-    bool some(F&& predicate) const {
-        for (const T& element : *this) {
-            if (predicate(element)) {
-                return true;
+    template<stream_lambda<bool, T&&> F>
+    [[nodiscard]] bool some(F&& predicate) && {
+        for (size_t i = 0; i < this->size(); i++) {
+            if constexpr (basic_lambda<F, bool, T&&>) {
+                if (predicate(std::move((*this)[i]))) return true;
+            } else {
+                if (predicate(std::move((*this)[i]), i)) return true;
             }
         }
 
         return false;
     }
 
-    template<std::invocable<const T&, const size_t> F>
-    bool some(F&& predicate) const {
+    template<stream_lambda<bool, const T&> F>
+    bool some(F&& predicate) const& {
         for (size_t i = 0; i < this->size(); i++) {
-            if (predicate(this->at(i), i)) {
-                return true;
+            if constexpr (basic_lambda<F, bool, const T&>) {
+                if (predicate((*this)[i])) return true;
+            } else {
+                if (predicate((*this)[i]), i) return true;
             }
         }
 
         return false;
     }
 
-    template<typename R>
-    Stream<R> map(auto&& mapper) const requires(std::invocable<decltype(mapper), const T&>) {
+    template<typename R, stream_lambda<R, T&&> F>
+    [[nodiscard]] Stream<R> map(F&& mapper) && {
         Stream<R> stream;
 
-        for (const T& element : *this) {
-            stream.push_back(mapper(element));
+        for (size_t i = 0; i < this->size(); i++) {
+            if constexpr (basic_lambda<F, R, T&&>) {
+                stream.emplace_back(mapper(std::move((*this)[i])));
+            } else {
+                stream.emplace_back(mapper(std::move((*this)[i]), i));
+            }
         }
 
         return stream;
     }
 
-    template<typename R>
-    Stream<R> map(auto&& mapper) const requires(std::invocable<decltype(mapper), const T&, const size_t>) { 
+    template<typename R, stream_lambda<R, const T&> F>
+    Stream<R> map(F&& mapper) const& {
         Stream<R> stream;
 
         for (size_t i = 0; i < this->size(); i++) {
-            stream.push_back(mapper(this->at(i), i));
+            if constexpr (basic_lambda<F, R, const T&>) {
+                stream.emplace_back(mapper((*this)[i]));
+            } else {
+                stream.emplace_back(mapper((*this)[i], i));
+            }
         }
 
         return stream;
     }
 
-    template<typename R>
-    R reduce(auto&& reducer, const R& initial) const requires(std::invocable<decltype(reducer), const R&, const T&>) {
-        R accumulator = initial;
-
-        for (const T& element : *this) {
-            accumulator = reducer(accumulator, element);
-        }
-
-        return accumulator;
-    }
-
-    template<typename R>
-    R reduce(auto&& reducer, const R& initial) const requires(std::invocable<decltype(reducer), const R&, const T&, const size_t>) {
-        R accumulator = initial;
-
+    template<typename R, stream_lambda<R, R&&, const T&> F>
+    R reduce(F&& reducer, R initial) const& {
         for (size_t i = 0; i < this->size(); i++) {
-            accumulator = reducer(accumulator, this->at(i), i);
+            if constexpr (basic_lambda<F, R, R&&, const T&>) {
+                initial = reducer(std::move(initial), (*this)[i]);
+            } else {
+                initial = reducer(std::move(initial), (*this)[i], i);
+            }
         }
 
-        return accumulator;
+        return initial;
     }
 
-    template<std::invocable<const T&, const T&> F>
-    Stream<T> sort(F&& comparator = [](const T& a, const T& b) { a < b; }) const {
+    template<typename R, stream_lambda<R, R&&, T&&> F>
+    [[nodiscard]] R reduce(F&& reducer, R initial) && {
+        for (size_t i = 0; i < this->size(); i++) {
+            if constexpr (basic_lambda<F, R, R&&, T&&>) {
+                initial = reducer(std::move(initial), std::move((*this)[i]));
+            } else {
+                initial = reducer(std::move(initial), std::move((*this)[i]), i);
+            }
+        }
+
+        return initial;
+    }
+
+    template<stream_lambda<void, const T&> F>
+    Stream<T> forEach(F&& consumer) && {
+        for (size_t i = 0; i < this->size(); i++) {
+            if constexpr (basic_lambda<F, void, const T&>) {
+                consumer((*this)[i]);
+            } else {
+                consumer((*this)[i], i);
+            }
+        }
+
+        return std::move(*this);
+    }
+
+    template<stream_lambda<void, const T&> F>
+    Stream<T> forEach(F&& consumer) const& {
+        for (size_t i = 0; i < this->size(); i++) {
+            if constexpr (basic_lambda<F, void, const T&>) {
+                consumer((*this)[i]);
+            } else {
+                consumer((*this)[i], i);
+            }
+        }
+
+        return *this;
+    }
+
+    template<basic_lambda<T, const T&, const T&> F>
+    [[nodiscard]] Stream<T> sort(F&& comparator = [](const T& a, const T& b) { return a < b; }) && {
+        std::sort(this->begin(), this->end(), comparator);
+
+        return std::move(*this);
+    }
+
+    template<basic_lambda<T, const T&, const T&> F>
+    Stream<T> sort(F&& comparator = [](const T& a, const T& b) { return a < b; }) const& {
         Stream<T> stream = *this;
 
         std::sort(stream.begin(), stream.end(), comparator);
@@ -142,47 +230,57 @@ public:
         return stream;
     }
 
-    template<std::invocable<const T&> F>
-    Stream<T> forEach(F&& consumer) const {
-        for (const T& element : *this) {
-            consumer(element);
-        }
-
-        return *this;
-    }
-
-    template<std::invocable<const T&, const size_t> F>
-    Stream<T> forEach(F&& consumer) const {
-        for (size_t i = 0; i < this->size(); i++) {
-            consumer(this->at(i), i);
-        }
-
-        return *this;
-    }
-
-    Stream<T> unique() const {
+    [[nodiscard]] Stream<T> unique() && {
         Stream<T> stream;
 
-        for (const T& element : *this) {
-            if (std::find(stream.begin(), stream.end(), element) == stream.end()) {
-                stream.push_back(element);
+        for (T& element : *this) {
+            if (!this->includes(element)) {
+                stream.emplace_back(std::move(element));
             }
         }
 
         return stream;
     }
 
-    auto flat() const requires(is_stream<T>::value) {
-        Stream<typename T::value_type> stream;
+    Stream<T> unique() const& {
+        Stream<T> stream;
 
         for (const T& element : *this) {
-            stream.concat(element);
+            if (!this->includes(element)) {
+                stream.emplace_back(element);
+            }
         }
 
         return stream;
     }
 
-    Stream<T> reverse() const {
+    [[nodiscard]] auto flat() && requires(is_stream<T>::value) {
+        Stream<typename T::value_type> stream;
+
+        for (T& element : *this) {
+            stream.concatInPlace(std::move(element));
+        }
+
+        return stream;
+    }
+
+    auto flat() const& requires(is_stream<T>::value) {
+        Stream<typename T::value_type> stream;
+
+        for (const T& element : *this) {
+            stream.concatInPlace(element);
+        }
+
+        return stream;
+    }
+
+    [[nodiscard]] Stream<T> reverse() && {
+        std::reverse(this->begin(), this->end());
+
+        return std::move(*this);
+    }
+
+    Stream<T> reverse() const& {
         Stream<T> stream = *this;
 
         std::reverse(stream.begin(), stream.end());
@@ -190,57 +288,121 @@ public:
         return stream;
     }
 
-    Stream<T> concat(const Stream<T>& stream) const {
+    [[nodiscard]] Stream<T> concat(Stream<T> stream) && {
+        for (T& element : stream) {
+            this->emplace_back(std::move(element));
+        }
+
+        return std::move(*this);
+    }
+
+    Stream<T> concat(Stream<T> stream) const& {
         Stream<T> result = *this;
 
-        for (const T& element : stream) {
-            result.push_back(element);
+        for (T& element : stream) {
+            result.emplace_back(std::move(element));
         }
 
         return result;
     }
 
-    Stream<T> concat(const std::vector<T>& vector) const {
-        return this->concat(Stream<T>(vector));
+    void concatInPlace(Stream<T>&& stream) {
+        this->reserve(this->size() + stream.size());
+        this->insert(this->end(), std::make_move_iterator(stream.begin()), std::make_move_iterator(stream.end()));
     }
 
-    Stream<T> concat(const std::initializer_list<T>& list) const {
-        return this->concat(Stream<T>(list));
+    [[nodiscard]] Stream<T> concat(std::vector<T> vector) && {
+        return this->concat(std::move(Stream<T>(vector)));
     }
 
-    Stream<T> slice(const size_t start, const size_t end) const {
-        Stream<T> stream;
-
-        for (size_t i = start; i < end; i++) {
-            stream.push_back(this->at(i));
-        }
-
-        return stream;
+    Stream<T> concat(std::vector<T> vector) const& {
+        return this->concat(std::move(Stream<T>(vector)));
     }
 
-    Stream<T> slice(const size_t start) const {
+    [[nodiscard]] Stream<T> concat(std::initializer_list<T> list) && {
+        return this->concat(std::move(list));
+    }
+
+    Stream<T> concat(std::initializer_list<T> list) const& {
+        return this->concat(std::move(list));
+    }
+
+    [[nodiscard]] Stream<T> slice(const size_t start, const size_t end) && {
+        const size_t cappedEnd = std::min(end, this->size());
+
+        return Stream<T>(
+            std::make_move_iterator(this->begin() + (start > cappedEnd ? 0 : start)),
+            std::make_move_iterator(this->begin() + cappedEnd)
+        );
+    }
+
+    [[nodiscard]] Stream<T> slice(const size_t start) && {
         return this->slice(start, this->size());
     }
 
-    Stream<T> splice(const size_t start, const size_t count, const Stream<T>& replacement = {}) const {
-        Stream<T> stream = *this;
+    Stream<T> slice(const size_t start, const size_t end) const& {
+        const size_t cappedEnd = std::min(end, this->size());
 
-        stream.erase(stream.begin() + start, stream.begin() + start + count);
+        return Stream<T>(
+            this->begin() + (start > cappedEnd ? 0 : start),
+            this->begin() + cappedEnd
+        );
+    }
+
+    Stream<T> slice(const size_t start) const& {
+        return this->slice(start, this->size());
+    }
+
+    [[nodiscard]] Stream<T> splice(const size_t start, const size_t count, Stream<T>&& replacement = {}) && {
+        const size_t cappedStart = start >= this->size() ? 0 : start;
+        const size_t cappedCount = std::min(cappedStart + count, this->size());
+
+        this->reserve(cappedStart + replacement.size() + this->size() - cappedCount);
+        this->erase(this->begin() + cappedStart, this->begin() + cappedCount);
 
         if (replacement.size()) {
-            stream.insert(stream.begin() + start, replacement.begin(), replacement.end());
+            this->insert(this->begin() + cappedStart, std::make_move_iterator(replacement.begin()), std::make_move_iterator(replacement.end()));
+        }
+
+        return std::move(*this);
+    }
+
+    Stream<T> splice(const size_t start, const size_t count, const Stream<T>& replacement = {}) const& {
+        const size_t cappedStart = start >= this->size() ? 0 : start;
+        const size_t cappedCount = std::min(cappedStart + count, this->size());
+        Stream<T> stream = *this;
+
+        stream.reserve(cappedStart + replacement.size() + this->size() - cappedCount);
+        stream.erase(stream.begin() + cappedStart, stream.begin() + cappedCount);
+
+        if (replacement.size()) {
+            stream.insert(stream.begin() + cappedStart, replacement.begin(), replacement.end());
         }
 
         return stream;
     }
 
     template<typename R>
-    Stream<R> cast() const {
+    [[nodiscard]] Stream<R> cast() && {
+        return this->map<R>([](T&& element) { return static_cast<R>(element); });
+    }
+
+    template<typename R>
+    Stream<R> cast() const& {
         return this->map<R>([](const T& element) { return static_cast<R>(element); });
     }
 
     template<std::invocable F>
-    Stream<T> orExecute(F&& execution) const {
+    [[nodiscard]] Stream<T> orExecute(F&& execution) && {
+        if (this->empty()) {
+            execution();
+        }
+
+        return std::move(*this);
+    }
+
+    template<std::invocable F>
+    Stream<T> orExecute(F&& execution) const& {
         if (this->empty()) {
             execution();
         }
@@ -251,29 +413,21 @@ public:
     bool includes(const T& value) const {
         return std::find(this->begin(), this->end(), value) != this->end();
     }
-
-    bool includes(const std::vector<T>::iterator& iterator) const {
-        return iterator != this->end();
-    }
-
-    auto getIterator(const T& value) const {
-        return std::find(this->begin(), this->end(), value);
-    }
 };
 
 class IntStream {
 public:
     template<typename T = long long> requires(std::is_arithmetic_v<T>)
-    static Stream<T> range(const T exclusiveEnd) {
+    [[nodiscard]] static Stream<T> range(const T exclusiveEnd) {
         return IntStream::range<T>(0, exclusiveEnd);
     }
 
     template<typename T = long long> requires(std::is_arithmetic_v<T>)
-    static Stream<T> range(const T includeStart, const T exclusiveEnd) {
+    [[nodiscard]] static Stream<T> range(const T includeStart, const T exclusiveEnd) {
         Stream<T> stream;
 
         for (T i = includeStart; i < exclusiveEnd; i++) {
-            stream.push_back(i);
+            stream.emplace_back(i);
         }
 
         return stream;
@@ -282,15 +436,19 @@ public:
 
 class StringStream {
 public:
-    static Stream<std::string> of(const std::string& input, const char delimiter = '\n') {
-        std::stringstream stream(input);
-        Stream<std::string> result;
+    [[nodiscard]] static Stream<std::string> of(const std::string_view input, const char delimiter = '\n') {
+        Stream<std::string> stream;
+        size_t start = 0;
 
-        for (std::string line; std::getline(stream, line, delimiter);) {
-            result.push_back(line);
+        stream.reserve(std::count(input.begin(), input.end(), delimiter) + 1);
+
+        for (size_t end; (end = input.find(delimiter, start)) != std::string_view::npos; start = end + 1) {
+            stream.emplace_back(input.substr(start, end - start));
         }
 
-        return result;
+        stream.emplace_back(input.substr(start));
+
+        return stream;
     }
 };
 

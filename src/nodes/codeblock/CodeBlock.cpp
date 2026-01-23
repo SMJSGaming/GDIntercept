@@ -95,13 +95,12 @@ void CodeBlock::setCode(const HttpInfo::Content& code) {
     CullingList* list = reinterpret_cast<CullingList*>(this->getNode());
     JSONTokenizer tokenizer;
 
-    Stream<CodeLineCell*> cells = StringStream::of(m_code = code.contents).map<CodeLineCell*>([&](const std::string& line, const size_t i) {
-        return CodeLineCell::create({
-            code.type == ContentType::BINARY ?
-                list->getContentWidth() :
-                lineNumberWidth + theme.code.paddingCenter + fontSize.width * std::min<size_t>(2000, line.size()) + theme.code.paddingRight,
-            lineHeight
-        }, i + 1, lineNumberWidth, { code.type, line }, tokenizer);
+    Stream<CodeLineCell*> cells = StringStream::of(m_code = code.contents).map<CodeLineCell*>([&](std::string&& line, const size_t i) {
+        const float lineWidth = code.type == ContentType::BINARY ?
+            list->getContentWidth() :
+            lineNumberWidth + theme.code.paddingCenter + fontSize.width * std::min<size_t>(2000, line.size()) + theme.code.paddingRight;
+
+        return CodeLineCell::create({ lineWidth, lineHeight }, i + 1, lineNumberWidth, { code.type, std::move(line) }, tokenizer);
     });
 
     list->setCells(cells.cast<CullingCell*>());
@@ -148,9 +147,9 @@ HttpInfo* CodeBlock::getActiveInfo() const {
     return m_info;
 }
 
-void CodeBlock::showMessage(const std::string& message, const ccColor3B& color) {
+void CodeBlock::showMessage(std::string message, const ccColor3B& color) {
     CCNode* node = this->getNode();
-    TextAlertPopup* alert = TextAlertPopup::create(message, 0.5f, 0.6f, 150, "");
+    TextAlertPopup* alert = TextAlertPopup::create(std::move(message), 0.5f, 0.6f, 150, "");
 
     alert->setPosition(node->getContentSize() / 2);
     alert->m_label->setColor(color);

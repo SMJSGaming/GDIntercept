@@ -26,7 +26,7 @@ bool RescalingNode::init(CCNode* node, const CCSize& size) {
 }
 
 void RescalingNode::setNode(CCNode* node) {
-    const CCSize size = this->getContentSize();
+    const CCSize& size = this->getContentSize();
 
     OPT(m_node)->removeFromParent();
     m_node = node;

@@ -32,10 +32,10 @@ namespace proxy {
             PROXY_GETTER(URL, url, URL);
             PROXY_GETTER(Headers, headers, Headers);
             PROXY_GETTER(std::string, body, Body);
-            PROXY_GETTER(enums::ContentType, contentType, ContentType);
+            PROXY_PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
 
             Request(cocos2d::extension::CCHttpRequest* request);
-            Request(geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
+            Request(geode::utils::web::WebRequest* request, std::string method, std::string url);
 
             friend class HttpInfo;
         };
@@ -47,11 +47,11 @@ namespace proxy {
             Content getResponseContent(const bool raw = true) const;
         private:
             PROXY_GETTER(Headers, headers, Headers);
-            PROXY_GETTER(int, statusCode, StatusCode);
-            PROXY_GETTER(size_t, responseTime, ResponseTime);
+            PROXY_PRIMITIVE_GETTER(int, statusCode, StatusCode);
+            PROXY_PRIMITIVE_GETTER(size_t, responseTime, ResponseTime);
             PROXY_GETTER(std::string, response, Response);
-            PROXY_GETTER(enums::ContentType, contentType, ContentType);
-            PROXY_BOOL_GETTER(received, Received);
+            PROXY_PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
+            PROXY_PRIMITIVE_GETTER(bool, received, Received);
             Request* m_request;
 
             Response();
@@ -72,26 +72,26 @@ namespace proxy {
     private:
         static const LookupTable<enums::ContentType, converters::Converter*> CONVERTERS;
 
-        static Content getContent(const bool raw, const enums::ContentType originalContentType, const std::string& path, const std::string& original);
+        static Content getContent(const bool raw, const enums::ContentType originalContentType, const std::string_view path, const std::string_view original);
         static Content getHeaders(const bool raw, const Headers& headers);
-        static enums::ContentType determineContentType(const std::string& path, const bool isBody, const std::string& content);
+        static enums::ContentType determineContentType(const std::string_view path, const bool isBody, const std::string_view content);
         static Headers parseCocosHeaders(const gd::vector<char>* headers);
         static Headers parseCocosHeaders(const gd::vector<gd::string>& headers);
 
-        PROXY_GETTER(size_t, id, ID);
-        PROXY_GETTER(enums::Client, client, Client);
-        PROXY_GETTER(enums::State, state, State);
+        PROXY_PRIMITIVE_GETTER(size_t, id, ID);
+        PROXY_PRIMITIVE_GETTER(enums::Client, client, Client);
+        PROXY_PRIMITIVE_GETTER(enums::State, state, State);
         PROXY_GETTER(Request, request, Request);
         PROXY_GETTER(Response, response, Response);
-        PROXY_BOOL_GETTER(repeat, Repeat);
+        PROXY_PRIMITIVE_GETTER(bool, repeat, Repeat);
 
         HttpInfo(const bool paused, cocos2d::extension::CCHttpRequest* request);
-        HttpInfo(const bool paused, const bool repeat, geode::utils::web::WebRequest* request, const std::string& method, const std::string& url);
+        HttpInfo(const bool paused, const bool repeat, geode::utils::web::WebRequest* request, std::string method, std::string url);
         void resume();
 
         friend class ProxyHandler;
     };
 
     #undef PROXY_GETTER
-    #undef PROXY_BOOL_GETTER
+    #undef PROXY_PRIMITIVE_GETTER
 }

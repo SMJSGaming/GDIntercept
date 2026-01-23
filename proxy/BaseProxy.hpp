@@ -8,9 +8,9 @@
 
 namespace proxy {
     #define PROXY_GETTER(type, name, capital_name) \
-        public: type get##capital_name() const { return m_##name; } \
+        public: const type& get##capital_name() const noexcept { return m_##name; } \
         protected: type m_##name
-    #define PROXY_BOOL_GETTER(name, capital_name) \
-        public: bool is##capital_name() const { return m_##name; } \
-        protected: bool m_##name
+    #define PROXY_PRIMITIVE_GETTER(type, name, capital_name) \
+        public: type get##capital_name() const noexcept { return m_##name; } \
+        protected: type m_##name
 }

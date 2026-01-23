@@ -20,7 +20,7 @@ namespace SideBarCell {
         const StandardCallback callback;
 
         SideBarActionButton();
-        SideBarActionButton(const std::string& name, const std::string& icon, const StandardCallback& callback);
+        SideBarActionButton(std::string name, std::string icon, const StandardCallback& callback);
         bool isEmpty() const;
     };
 
@@ -58,7 +58,7 @@ private:
     CCLabelBMFont* m_name;
     CodeBlock* m_block;
     bool m_enabled;
-    GETTER(bool, state, State);
+    PRIMITIVE_GETTER(bool, state, State);
 
     ActionCell(CodeBlock* block, const SideBarCell::SideBarAction& action);
     bool init() override;

@@ -1,6 +1,6 @@
 #include "MonospaceLabel.hpp"
 
-MonospaceLabel* MonospaceLabel::create(const std::string& string, const std::string& font, const float scale) {
+MonospaceLabel* MonospaceLabel::create(const std::string_view string, const std::string_view font, const float scale) {
     MonospaceLabel* instance = new MonospaceLabel();
 
     if (instance && instance->init(string, font, scale)) {
@@ -14,12 +14,12 @@ MonospaceLabel* MonospaceLabel::create(const std::string& string, const std::str
     }
 }
 
-CCSize MonospaceLabel::getCharacterSize(const std::string& font) {
-    return CCLabelBMFont::create("M", font.c_str())->getContentSize();
+CCSize MonospaceLabel::getCharacterSize(const std::string_view font) {
+    return CCLabelBMFont::create("M", font.data())->getContentSize();
 }
 
-bool MonospaceLabel::init(const std::string& string, const std::string& font, const float scale) {
-    ESCAPE_WHEN(!this->initWithString(string.c_str(), font.c_str()), false);
+bool MonospaceLabel::init(const std::string_view string, const std::string_view font, const float scale) {
+    ESCAPE_WHEN(!this->initWithString(string.data(), font.data()), false);
 
     this->setScale(scale);
 

@@ -15,15 +15,15 @@ CaptureCell* CaptureCell::create(const size_t index, const HttpInfo* info, const
 }
 
 template<>
-std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> CaptureCell::makeBadgeInfo(const std::string& name, CCSprite* sprite) {
-    return { name, sprite, [sprite](GLubyte opacity) {
+std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> CaptureCell::makeBadgeInfo(std::string name, CCSprite* sprite) {
+    return { std::move(name), sprite, [sprite](GLubyte opacity) {
         sprite->setOpacity(opacity);
     } };
 }
 
 template<>
-std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> CaptureCell::makeBadgeInfo(const std::string& name, Character* character) {
-    return { name, character, [character](GLubyte opacity) {
+std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> CaptureCell::makeBadgeInfo(std::string name, Character* character) {
+    return { std::move(name), character, [character](GLubyte opacity) {
         character->setOpacity(opacity);
     } };
 }
@@ -36,17 +36,19 @@ bool CaptureCell::init(const size_t index, const CCSize& size) {
     const float menuScale = 0.3f;
     const float menuPositionX = size.width - 20;
     const bool hideBadges = Mod::get()->getSettingValue<bool>("hide-badges");
-    const HttpInfo::Request request = m_info->getRequest();
-    const URL url = request.getURL();
-    const std::string method(request.getMethod());
-    const std::string path(url.getPath());
-    std::string cutoffPath(path == "/" ? "" : path.substr(path.substr(0, path.size() - 1).find_last_of('/')));
+    const HttpInfo::Request& request = m_info->getRequest();
+    const URL& url = request.getURL();
+    const std::string& path = url.getPath();
+    std::string requestLabel = request.getMethod();
 
-    if (cutoffPath.empty()) {
-        cutoffPath = url.getHost();
+    requestLabel.push_back(' ');
+    requestLabel.append(path == "/" ? "" : path.substr(path.substr(0, path.size() - 1).find_last_of('/')));
+
+    if (requestLabel.back() == ' ') {
+        requestLabel.append(url.getHost());
     }
 
-    CCLabelBMFont* label = CCLabelBMFont::create((method + ' ' + cutoffPath).c_str(), "bigFont.fnt");
+    CCLabelBMFont* label = CCLabelBMFont::create(requestLabel.c_str(), "bigFont.fnt");
     ButtonSprite* button = ButtonSprite::create("View", "bigFont.fnt", "GJ_button_01.png");
     CCMenu* menu = CCMenu::createWithItem(CCMenuItemSpriteExtra::create(
         button,
@@ -96,7 +98,7 @@ bool CaptureCell::init(const size_t index, const CCSize& size) {
     m_mainLayer->addChild(label);
     m_mainLayer->addChild(menu);
 
-    for (size_t i = 0; i < method.size(); i++) {
+    for (size_t i = 0; i < request.getMethod().size(); i++) {
         cocos::getChild<CCSprite>(label, i)->setColor(this->colorForMethod());
     }
 
@@ -148,7 +150,7 @@ std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> Capt
         ); break;
     }
 
-    if (m_info->isRepeat()) {
+    if (m_info->getRepeat()) {
         badges.push_back(this->makeBadgeInfo("Request Repeat", CCSprite::createWithSpriteFrameName("reset-gold.png"_spr)));
     }
 
@@ -157,7 +159,7 @@ std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> Capt
 }
 
 ccColor3B CaptureCell::colorForMethod() {
-    const std::string& method(m_info->getRequest().getMethod());
+    const std::string& method = m_info->getRequest().getMethod();
 
     if (method == "GET") {
         return { 0xA8, 0x96, 0xFF };

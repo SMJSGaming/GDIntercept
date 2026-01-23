@@ -12,7 +12,7 @@ namespace proxy {
     class ProxyHandler : public CCObject {
     public:
         static ProxyHandler* create(CCHttpRequest* request);
-        static ProxyHandler* create(web::WebRequest* request, const std::string& method, const std::string& url);
+        static ProxyHandler* create(web::WebRequest* request, std::string method, std::string url);
         static std::string getCopyHandshake();
         static std::deque<ProxyHandler*> getFilteredProxies();
         static bool isProxy(CCHttpRequest* request);
@@ -30,9 +30,9 @@ namespace proxy {
 
         static void registerProxy(ProxyHandler* proxy);
 
-        GETTER(HttpInfo*, info, Info);
-        GETTER(CCHttpRequest*, cocosRequest, CocosRequest);
-        GETTER(web::WebRequest*, modRequest, ModRequest);
+        PRIMITIVE_GETTER(HttpInfo*, info, Info);
+        PRIMITIVE_GETTER(CCHttpRequest*, cocosRequest, CocosRequest);
+        PRIMITIVE_GETTER(web::WebRequest*, modRequest, ModRequest);
         GETTER(web::WebTask, modTask, ModTask);
         CCObject* m_originalTarget;
         SEL_HttpResponse m_originalProxy;
@@ -40,7 +40,7 @@ namespace proxy {
         bool m_finished;
 
         ProxyHandler(CCHttpRequest* request);
-        ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url);
+        ProxyHandler(web::WebRequest* request, std::string method, std::string url);
         ~ProxyHandler();
         size_t calculateResponseTime();
         void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);

@@ -1,7 +1,7 @@
 #include "Badge.hpp"
 
-Badge* Badge::create(const std::string& name, CCNode* node, const std::function<void(GLubyte)>& opacityCallback) {
-    Badge* instance = new Badge(name, node, opacityCallback);
+Badge* Badge::create(std::string name, CCNode* node, const std::function<void(GLubyte)>& opacityCallback) {
+    Badge* instance = new Badge(std::move(name), node, opacityCallback);
 
     if (instance && instance->init()) {
         instance->autorelease();
@@ -14,8 +14,8 @@ Badge* Badge::create(const std::string& name, CCNode* node, const std::function<
     }
 }
 
-Badge::Badge(const std::string& name, CCNode* node, const std::function<void(GLubyte)>& opacityCallback) : HoverNode(),
-m_name(name),
+Badge::Badge(std::string name, CCNode* node, const std::function<void(GLubyte)>& opacityCallback) : HoverNode(),
+m_name(std::move(name)),
 m_node(node),
 m_tooltip(nullptr),
 m_opacityCallback(opacityCallback) { }

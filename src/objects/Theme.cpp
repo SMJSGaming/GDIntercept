@@ -16,7 +16,7 @@ Theme::Color::operator ccColor4B() const {
 
 Theme::Color::Color(const GLubyte a) : r(0), g(0), b(0), a(a) { }
 
-Theme::Color::Color(const std::string hex) : r(0), g(0), b(0), a(255) {
+Theme::Color::Color(const std::string_view hex) : r(0), g(0), b(0), a(255) {
     this->extractChannels(hex);
 }
 
@@ -34,13 +34,13 @@ bool Theme::Color::isOpaque() const {
     return a == 255;
 }
 
-void Theme::Color::extractChannels(const std::string& hex) {
+void Theme::Color::extractChannels(const std::string_view hex) {
     ESCAPE_WHEN(hex.size() < 2,);
 
-    const std::string hexStr = hex.substr(1);
+    const std::string_view hexStr = hex.substr(1);
     const size_t size = hexStr.size();
 
-    ESCAPE_WHEN(!hex.starts_with("#") || hexStr.find_first_not_of("0123456789ABCDEFabcdef") != std::string::npos || (size > 4 && size != 6 && size != 8),);
+    ESCAPE_WHEN(!hex.starts_with("#") || hexStr.find_first_not_of("0123456789ABCDEFabcdef") != std::string_view::npos || (size > 4 && size != 6 && size != 8),);
 
     if (size < 3) {
         r = g = b = extractChannel(hexStr, 0, size == 1);
@@ -60,15 +60,15 @@ void Theme::Color::extractChannels(const std::string& hex) {
     }
 }
 
-GLubyte Theme::Color::extractChannel(const std::string& hexString, const size_t index, const bool isShort) const {
+GLubyte Theme::Color::extractChannel(const std::string_view hexString, const size_t index, const bool isShort) const {
     const size_t channelSize = 1 + !isShort;
-    const std::string channel = hexString.substr(channelSize * index, channelSize);
+    const GLubyte byte = utils::numFromString<GLubyte>(hexString.substr(channelSize * index, channelSize), 16).unwrapOr(0);
 
-    return utils::numFromString<GLubyte>((isShort ? "" : channel) + channel, 16).unwrapOr(0);
+    return isShort ? (byte << 4) | byte : byte;
 }
 
-CCLabelBMFont* Theme::Font::createLabel(const std::string& text) const {
-    CCLabelBMFont* label = CCLabelBMFont::create(text.c_str(), fontName.c_str());
+CCLabelBMFont* Theme::Font::createLabel(const std::string_view text) const {
+    CCLabelBMFont* label = CCLabelBMFont::create(text.data(), fontName.c_str());
 
     label->setScale(fontScale);
 
@@ -210,7 +210,7 @@ Theme::Theme Theme::Theme::createTheme(const json& obj) {
     };
 }
 
-Theme::Color Theme::Theme::colorOrDefault(const json& obj, const std::string& key, const Color &override, const std::optional<GLubyte>& alpha) {
+Theme::Color Theme::Theme::colorOrDefault(const json& obj, const std::string_view key, const Color &override, const std::optional<GLubyte>& alpha) {
     if (obj.contains(key)) {
         return obj.at(key);
     } else {
@@ -228,7 +228,7 @@ const Theme::Theme Theme::getTheme() {
     const std::string theme = Mod::get()->getSettingValue<DynamicEnumValue>("theme");
 
     if (Theme::CACHED_THEMES.contains(theme)) {
-        return Theme::CACHED_THEMES.at(theme);
+        return Theme::CACHED_THEMES.at(std::move(theme));
     } else {
         // Dark is a default theme and will always exist unless someone messes with the default themes, in which case I can't guarantee anything
         return Theme::CACHED_THEMES.at("Dark");

@@ -20,8 +20,8 @@ ProxyHandler* ProxyHandler::create(CCHttpRequest* request) {
     return instance;
 }
 
-ProxyHandler* ProxyHandler::create(web::WebRequest* request, const std::string& method, const std::string& url) {
-    ProxyHandler* instance = new ProxyHandler(request, method, url);
+ProxyHandler* ProxyHandler::create(web::WebRequest* request, std::string method, std::string url) {
+    ProxyHandler* instance = new ProxyHandler(request, std::move(method), std::move(url));
 
     instance->retain();
     Loader::get()->queueInMainThread([instance]{ RequestEvent(instance->getInfo()).post(); });
@@ -34,7 +34,7 @@ std::string ProxyHandler::getCopyHandshake() {
 }
 
 std::deque<ProxyHandler*> ProxyHandler::getFilteredProxies() {
-    const std::string filter(Mod::get()->getSettingValue<std::string>("filter"));
+    const std::string filter = Mod::get()->getSettingValue<std::string>("filter");
     std::deque<ProxyHandler*> proxies;
 
     if (ProxyHandler::CACHED_PROXIES.empty() || filter == "None") {
@@ -166,7 +166,7 @@ m_finished(false) {
     }
 }
 
-ProxyHandler::ProxyHandler(web::WebRequest* request, const std::string& method, const std::string& url) : m_modRequest(new web::WebRequest(*request)),
+ProxyHandler::ProxyHandler(web::WebRequest* request, std::string method, std::string url) : m_modRequest(new web::WebRequest(*request)),
 m_cocosRequest(nullptr),
 m_info(nullptr),
 m_originalTarget(nullptr),
@@ -177,12 +177,12 @@ m_finished(false) {
 
     m_modRequest->removeHeader(resendSignature);
 
-    m_info = new HttpInfo(ProxyHandler::PAUSED, isRepeat, m_modRequest, method, url);
+    m_info = new HttpInfo(ProxyHandler::PAUSED, isRepeat, m_modRequest, std::move(method), std::move(url));
 
     ProxyHandler::registerProxy(this);
     ProxyHandler::HANDLED_IDS.push_back(m_modRequest->getID());
 
-    m_modTask = web::WebTask::run([this, url](auto progress, auto cancelled) -> web::WebTask::Result {
+    m_modTask = web::WebTask::run([this](auto progress, auto cancelled) -> web::WebTask::Result {
         web::WebResponse* response = nullptr;
 
         while (m_info->isPaused()) {
@@ -194,7 +194,7 @@ m_finished(false) {
         ESCAPE_WHEN(m_info->isCancelled(), this->onCancel());
 
         m_start = std::chrono::high_resolution_clock::now();
-        web::WebTask task = m_modRequest->send(m_info->getRequest().getMethod(), url);
+        web::WebTask task = m_modRequest->send(m_info->getRequest().getMethod(), m_info->getRequest().getURL().getOriginal());
 
         task.listen([&response](const web::WebResponse* taskResponse) {
             response = new web::WebResponse(*taskResponse);
@@ -213,7 +213,7 @@ m_finished(false) {
 
             return *response;
         }
-    }, fmt::format("Proxy for {} {}", method, url));
+    }, fmt::format("Proxy for {} {}", m_info->getRequest().getMethod(), m_info->getRequest().getURL().getOriginal()));
 }
 
 ProxyHandler::~ProxyHandler() {

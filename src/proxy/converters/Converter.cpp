@@ -8,7 +8,7 @@ proxy::converters::Converter::Converter(const enums::ContentType resultContentTy
     m_resultContentType = resultContentType;
 }
 
-bool proxy::converters::isInt(const std::string& str) {
+bool proxy::converters::isInt(const std::string_view str) {
     if (str.empty()) {
         return false;
     }
@@ -18,7 +18,7 @@ bool proxy::converters::isInt(const std::string& str) {
     return str.substr(negative, str.size() - negative).find_first_not_of("0123456789") == std::string::npos && (!negative || str.size() > 1);
 }
 
-bool proxy::converters::isNumber(const std::string& str) {
+bool proxy::converters::isNumber(const std::string_view str) {
     if (str.empty()) {
         return false;
     }
@@ -26,46 +26,48 @@ bool proxy::converters::isNumber(const std::string& str) {
     const size_t decimalPos = str.find('.');
 
     return converters::isInt(str.substr(0, decimalPos)) && (
-        decimalPos == std::string::npos ||
-        str.substr(decimalPos + 1).find_first_not_of("0123456789") == std::string::npos
+        decimalPos == std::string_view::npos ||
+        str.find_first_not_of("0123456789", decimalPos + 1) == std::string_view::npos
     );
 }
 
-bool proxy::converters::isBool(const std::string& str) {
+bool proxy::converters::isBool(const std::string_view str) {
     return str == "true" || str == "false";
 }
 
-bool proxy::converters::isNull(const std::string& str) {
+bool proxy::converters::isNull(const std::string_view str) {
     return str == "null";
 }
 
-bool proxy::converters::isString(const std::string& str) {
-    if (str.empty()) {
+bool proxy::converters::isString(const std::string_view str) {
+    if (str.size() < 2) {
         return false;
     }
 
     const char firstChar = str.at(0);
 
-    if ((firstChar == '\'' || firstChar == '"') && str.find('\n') == std::string::npos && str.ends_with(firstChar)) {
-        std::stringstream stream(str.substr(1));
-        std::string section;
-
-        for (size_t i = 0; std::getline(stream, section, firstChar); i += section.size() + 1) {
-            const bool eol = section.size() + 1 + i == str.size();
-            const size_t lastNonEscape = section.find_last_not_of('\\') ;
-
-            if ((lastNonEscape == std::string::npos ?  lastNonEscape : section.size()) % 2 == eol) {
-                return false;
-            }
-        }
-
-        return true;
-    } else {
+    if ((firstChar != '"' && firstChar != '\'') || str.back() != firstChar) {
         return false;
+    } else if (str.size() == 2) {
+        return true;
     }
+
+    bool isEscaped = false;
+
+    for (size_t i = 1; i < str.size() - 1; i++) {
+        if (isEscaped) {
+            isEscaped = false;
+        } else if (str[i] == firstChar) {
+            return false;
+        } else if (str[i] == '\\') {
+            isEscaped = true;
+        }
+    }
+
+    return !isEscaped;
 }
 
-bool proxy::converters::shouldSanitize(const std::string& key) {
+bool proxy::converters::shouldSanitize(const std::string_view key) {
     static const Stream<std::string> sensitiveKeys = {
         "password",
         "pass",
@@ -78,7 +80,7 @@ bool proxy::converters::shouldSanitize(const std::string& key) {
         "gjp2"
     };
 
-    return Mod::get()->getSettingValue<bool>("censor-data") && sensitiveKeys.includes(key);
+    return Mod::get()->getSettingValue<bool>("censor-data") && sensitiveKeys.includes(std::string(key));
 }
 
 std::string proxy::converters::safeDump(const nlohmann::json& json, const size_t indent, const bool quoteless) {
@@ -89,7 +91,7 @@ std::string proxy::converters::safeDump(const nlohmann::json& json, const size_t
     }
 }
 
-nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string& key, const std::string& str) {
+nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string_view key, const std::string_view str) {
     if (converters::shouldSanitize(key)) {
         return json("********");
     } else if (converters::isNull(str)) {

@@ -4,7 +4,7 @@ JSONTokenizer::JSONTokenizer() : m_token(Token::UNKNOWN), m_futureToken(Token::U
     this->reset();
 }
 
-std::vector<JSONTokenizer::TokenOffset> JSONTokenizer::parseLine(const std::string& code) {
+std::vector<JSONTokenizer::TokenOffset> JSONTokenizer::parseLine(const std::string_view code) {
     const size_t length = code.size();
     bool previousWasAccepted = true;
     std::vector<TokenOffset> tokens;
@@ -26,7 +26,7 @@ std::vector<JSONTokenizer::TokenOffset> JSONTokenizer::parseLine(const std::stri
 
         if (code[i] != ' ' || (m_token == Token::STRING || m_token == Token::NUMBER)) {
             if (previousWasAccepted && m_token == Token::STRING && !m_escape && back.token == m_token) {
-                back.length = (i = code.find_first_of(std::string() + m_openQuote + '\\', i)) - back.offset;
+                back.length = (i = code.find_first_of(std::string(1, m_openQuote) + '\\', i)) - back.offset;
             }
 
             previousWasAccepted = this->determineCharToken(code[i], code.substr(i), previousWasAccepted);
@@ -54,7 +54,7 @@ std::vector<JSONTokenizer::TokenOffset> JSONTokenizer::parseLine(const std::stri
     return tokens;
 }
 
-bool JSONTokenizer::determineCharToken(const char character, const std::string& truncatedCode, const bool previousWasAccepted) {
+bool JSONTokenizer::determineCharToken(const char character, const std::string_view truncatedCode, const bool previousWasAccepted) {
     if (m_token == Token::SEPARATOR) {
         if (character == ':') {
             m_futureToken = Token::UNKNOWN;

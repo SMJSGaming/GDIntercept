@@ -2,37 +2,42 @@
 
 proxy::converters::RawToBinary::RawToBinary() : Converter(enums::ContentType::BINARY) { };
 
-bool proxy::converters::RawToBinary::canConvert(const std::string& path, const bool isBody, const std::string& original) const {
-    return original.find_first_of('\0') != std::string::npos;
+bool proxy::converters::RawToBinary::canConvert(const std::string_view path, const bool isBody, const std::string_view original) const {
+    return original.find_first_of('\0') != std::string_view::npos;
 }
 
-std::string proxy::converters::RawToBinary::convert(const std::string& path, const std::string& original) const {
+std::string proxy::converters::RawToBinary::convert(const std::string_view path, const std::string_view original) const {
     static constexpr char hex[] = "0123456789ABCDEF";
     std::string result;
 
-    result.reserve(std::min(original.size() * 3 - 1, 0ull));
+    if (original.empty()) {
+        return result;
+    }
+
+    result.reserve(original.size() * 3 - 1);
 
     for (size_t i = 0; i < original.size(); i++) {
         const unsigned char byte = static_cast<unsigned char>(original[i]);
 
         if (i != 0) {
-            result += (i % 16 == 0) ? '\n' : ' ';
+            result.push_back((i % 16 == 0) ? '\n' : ' ');
         }
 
-        result += hex[byte >> 4];
-        result += hex[byte & 0xF];
+        result.push_back(hex[byte >> 4]);
+        result.push_back(hex[byte & 0xF]);
     }
 
     return result;
 }
 
-std::string proxy::converters::RawToBinary::toRaw(const std::string& path, const std::string& original) const {
-    std::istringstream stream(original);
-    std::stringstream result;
+std::string proxy::converters::RawToBinary::toRaw(const std::string_view path, const std::string_view original) const {
+    std::string result;
 
-    for (std::string line; std::getline(stream, line);) {
-        result << geode::utils::numFromString<unsigned int>(line, 16).unwrapOr(0);
+    result.reserve(original.size() / 3 + 1);
+
+    for (size_t i = 0; (i + 1) < original.size(); i += 3) {
+        result.push_back((this->hexValue(original[i]) << 4) | this->hexValue(original[i + 1]));
     }
 
-    return result.str();
+    return result;
 }

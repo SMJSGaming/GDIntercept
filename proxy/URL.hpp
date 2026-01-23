@@ -7,28 +7,24 @@
 namespace proxy {
     class URL {
     public:
-        static void load();
-
         std::string getBasicUrl() const;
         std::string stringifyQuery(const bool raw = false) const;
 
-        URL(const std::string& url, geode::utils::web::WebRequest* request = nullptr);
+        URL(std::string url, geode::utils::web::WebRequest* request = nullptr);
     private:
-        static Stream<std::string> SUFFIXES;
-
-        PROXY_GETTER(enums::Origin, origin, Origin);
+        PROXY_PRIMITIVE_GETTER(enums::Origin, origin, Origin);
         PROXY_GETTER(std::string, original, Original);
-        PROXY_GETTER(enums::Protocol, scheme, Scheme);
+        PROXY_GETTER(std::string, reconstruction, Reconstruction);
+        PROXY_PRIMITIVE_GETTER(enums::Protocol, scheme, Scheme);
         PROXY_GETTER(std::string, protocol, Protocol);
         PROXY_GETTER(std::string, username, Username);
         PROXY_GETTER(std::string, password, Password);
         PROXY_GETTER(std::string, domainName, DomainName);
         PROXY_GETTER(std::string, domain, Domain);
         PROXY_GETTER(std::vector<std::string>, subDomains, SubDomains);
-        PROXY_GETTER(std::vector<std::string>, sld, SLD);
         PROXY_GETTER(std::string, host, Host);
         PROXY_GETTER(std::string, tld, TLD);
-        PROXY_GETTER(int, port, Port);
+        PROXY_PRIMITIVE_GETTER(int, port, Port);
         PROXY_GETTER(std::string, path, Path);
         PROXY_GETTER(std::string, queryString, QueryString);
         PROXY_GETTER(std::string, hash, Hash);

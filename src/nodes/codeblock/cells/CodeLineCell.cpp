@@ -46,7 +46,8 @@ void CodeLineCell::initRender() {
     ), theme.code.font.fontName, theme.code.font.fontScale);
     CCLayerColor* numberBackground = CCLayerColor::create(theme.code.background, codeLineWidth, this->getContentHeight());
 
-    m_tokens.filter([&](const JSONTokenizer::TokenOffset& tokenOffset) { return tokenOffset.offset >= labelLength; })
+    m_tokens.orExecute([&]() { codeLabel->setColor(theme.code.syntax.text); })
+        .filter([&](const JSONTokenizer::TokenOffset& tokenOffset) { return tokenOffset.offset < labelLength; })
         .forEach([&](const JSONTokenizer::TokenOffset& tokenOffset) {
             IntStream::range(tokenOffset.offset, std::min(labelLength, tokenOffset.offset + tokenOffset.length))
                 .map<CCSprite*>([&](const int i) { return cocos::getChild<CCSprite>(codeLabel, i); })
@@ -66,8 +67,7 @@ void CodeLineCell::initRender() {
                         default: theme.code.syntax.text.applyTo(character); break;
                     }
                 });
-        })
-        .orExecute([&]() { codeLabel->setColor(theme.code.syntax.text); });
+        });
 
     lineNumberLabel->setAnchorPoint(CENTER_RIGHT);
     theme.code.foreground.applyTo(lineNumberLabel);

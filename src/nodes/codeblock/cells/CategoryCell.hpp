@@ -10,7 +10,7 @@ class CategoryCell;
 
 namespace SideBarCell {
     struct SideBarCategory {
-        bool operator ==(const SideBarCategory& other) const;
+        bool operator==(const SideBarCategory& other) const;
 
         const std::string name;
         const std::string icon;

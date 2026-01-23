@@ -4,22 +4,22 @@
 #include "../BaseProxy.hpp"
 
 namespace proxy::converters {
-    bool isInt(const std::string& str);
-    bool isNumber(const std::string& str);
-    bool isBool(const std::string& str);
-    bool isNull(const std::string& str);
-    bool isString(const std::string& str);
-    bool shouldSanitize(const std::string& key);
+    bool isInt(const std::string_view str);
+    bool isNumber(const std::string_view str);
+    bool isBool(const std::string_view str);
+    bool isNull(const std::string_view str);
+    bool isString(const std::string_view str);
+    bool shouldSanitize(const std::string_view key);
     std::string safeDump(const nlohmann::json& json, const size_t indent = 2, const bool quoteless = false);
-    nlohmann::json getPrimitiveJsonType(const std::string& key, const std::string& str);
+    nlohmann::json getPrimitiveJsonType(const std::string_view key, const std::string_view str);
 
     class Converter {
     public:
         Converter(const enums::ContentType resultContentType);
-        virtual bool canConvert(const std::string& path, const bool isBody, const std::string& original) const = 0;
-        virtual std::string convert(const std::string& path, const std::string& original) const = 0;
-        virtual std::string toRaw(const std::string& path, const std::string& original) const = 0;
-        PROXY_GETTER(bool, needsSanitization, NeedsSanitization);
-        PROXY_GETTER(enums::ContentType, resultContentType, ResultContentType);
+        virtual bool canConvert(const std::string_view path, const bool isBody, const std::string_view original) const = 0;
+        virtual std::string convert(const std::string_view path, const std::string_view original) const = 0;
+        virtual std::string toRaw(const std::string_view path, const std::string_view original) const = 0;
+        PROXY_PRIMITIVE_GETTER(bool, needsSanitization, NeedsSanitization);
+        PROXY_PRIMITIVE_GETTER(enums::ContentType, resultContentType, ResultContentType);
     };
 }

@@ -25,7 +25,7 @@ void SideBar::switchView(CCObject* sender) {
 }
 
 void SideBar::executeAction(CCObject* sender) {
-    const ActionID id = typeinfo_cast<CCMenuItemSpriteExtra*>(sender)->getID();
+    const ActionID id = ActionID(typeinfo_cast<CCMenuItemSpriteExtra*>(sender)->getID());
     const SideBarAction& action = id.isOpen ? SideBar::OPEN_ACTION : m_actions.at(id.getCategory(m_actions)).at(id.index);
     ActionCell* cell = id.isOpen ? m_openCell : m_actionCells.at(id.cellIndex);
 

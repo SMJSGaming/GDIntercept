@@ -13,7 +13,7 @@ protected:
         return true;
     }
 
-    void bind(const std::string& key, const std::function<void()>& callback) {
+    void bind(std::string key, const std::function<void()>& callback) {
         #ifdef KEYBINDS_ENABLED
             this->template addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
                 if (event->isDown()) {
@@ -21,7 +21,7 @@ protected:
                 }
 
                 return ListenerResult::Propagate;
-            }, key);
+            }, std::move(key));
         #endif
     }
 

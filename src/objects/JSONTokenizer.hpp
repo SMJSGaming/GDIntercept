@@ -25,7 +25,7 @@ public:
     };
 
     JSONTokenizer();
-    std::vector<TokenOffset> parseLine(const std::string& code);
+    std::vector<TokenOffset> parseLine(const std::string_view code);
 private:
     Token m_token;
     Token m_futureToken;
@@ -36,7 +36,7 @@ private:
     size_t m_constantCounter;
     std::string m_closesExpected;
 
-    bool determineCharToken(const char character, const std::string& truncatedCode, const bool previousWasAccepted);
+    bool determineCharToken(const char character, const std::string_view truncatedCode, const bool previousWasAccepted);
     bool checkString(const char character, const size_t charactersLeft);
     bool checkObjectTerminator(const char character);
     void reset();

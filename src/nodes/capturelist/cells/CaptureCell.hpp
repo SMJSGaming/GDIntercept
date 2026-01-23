@@ -13,7 +13,7 @@ public:
     void deactivate();
 private:
     template<typename T>
-    static std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> makeBadgeInfo(const std::string& name, T* node);
+    static std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> makeBadgeInfo(std::string name, T* node);
 
     const HttpInfo* m_info;
     std::function<void(CaptureCell*)> m_switchCell;

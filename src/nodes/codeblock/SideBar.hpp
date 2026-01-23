@@ -30,7 +30,7 @@ private:
         size_t index;
         size_t cellIndex;
 
-        ActionID(const std::string& id);
+        ActionID(const std::string_view id);
         SideBarCell::SideBarCategory getCategory(const Categories& actions) const;
     };
 
