@@ -59,8 +59,7 @@
       "resources/*.png"
     ],
     "files": [
-      "resources/themes/*.json",
-      "resources/suffixes.json"
+      "resources/themes/*.json"
     ]
   },
   "settings": {
