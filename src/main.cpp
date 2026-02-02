@@ -261,7 +261,9 @@ $execute {
             "filter",
             "cache-limit",
             "censor-data",
-            "raw-data"
+            "raw-data",
+            "decode-data",
+            "max-characters-per-line"
         };
         static const Stream<std::string> sideMenuReloads = {
             "minimize-side-menu"

@@ -95,6 +95,19 @@
       "type": "bool",
       "default": false
     },
+    "decode-data": {
+      "name": "Decode Response Data",
+      "description": "Decodes and parses encoded strings in official GD responses. May be slow for larger strings.",
+      "type": "bool",
+      "default": true
+    },
+    "max-characters-per-line": {
+      "name": "Max Characters Per Line",
+      "description": "The maximum amount of characters rendered in 1 line. -1 will remove the limit. May be slow for larger strings.",
+      "type": "int",
+      "default": 2000,
+      "min": -1
+    },
     "minimize-side-menu": {
       "name": "Minimize Side Menu",
       "description": "Minimizes the side menu to only show icons.",

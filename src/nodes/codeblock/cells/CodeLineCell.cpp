@@ -38,11 +38,11 @@ m_lineNumberWidth(lineNumberWidth) {
 void CodeLineCell::initRender() {
     const Theme::Theme theme = Theme::getTheme();
     const float codeLineWidth = this->getCodeLineWidth();
-    const size_t labelLength = m_code.contents.size();
+    const size_t labelLength = std::min<size_t>(m_code.contents.size(), Mod::get()->getSettingValue<unsigned int>("max-characters-per-line"));
     MonospaceLabel* lineNumberLabel = MonospaceLabel::create(std::to_string(m_lineNumber), theme.code.font.fontName, theme.code.font.fontScale);
     MonospaceLabel* codeLabel = MonospaceLabel::create(m_code.contents.substr(
         0,
-        std::min<size_t>(m_code.contents.size(), 2000)
+        labelLength
     ), theme.code.font.fontName, theme.code.font.fontScale);
     CCLayerColor* numberBackground = CCLayerColor::create(theme.code.background, codeLineWidth, this->getContentHeight());
 
@@ -51,7 +51,6 @@ void CodeLineCell::initRender() {
         .forEach([&](const JSONTokenizer::TokenOffset& tokenOffset) {
             IntStream::range(tokenOffset.offset, std::min(labelLength, tokenOffset.offset + tokenOffset.length))
                 .map<CCSprite*>([&](const int i) { return cocos::getChild<CCSprite>(codeLabel, i); })
-                .filter([](CCSprite* character) { return character != nullptr; })
                 .forEach([&](CCSprite* character) {
                     switch (tokenOffset.token) {
                         case JSONTokenizer::Token::CORRUPT: theme.code.syntax.error.applyTo(character); break;
