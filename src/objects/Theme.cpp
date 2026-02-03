@@ -106,7 +106,7 @@ void Theme::Theme::loadDirectory(const std::filesystem::path& path) {
             continue;
         }
 
-        const json theme = json::parse(text.unwrap());
+        const json theme = ordered_json::parse(text.unwrap());
 
         if (theme.contains("name") && theme.contains("theme")) try {
             Theme::CACHED_THEMES.insert(theme.at("name").get<std::string>(), Theme::createTheme(theme.at("theme")));

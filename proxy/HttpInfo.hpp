@@ -8,7 +8,7 @@
 #include "converters/FormToJson.hpp"
 #include "converters/JsonToJson.hpp"
 #include "converters/RawToBinary.hpp"
-#include "converters/RobTopToJson.hpp"
+#include "converters/RobTopToJsonV2.hpp"
 #include "URL.hpp"
 
 namespace proxy {

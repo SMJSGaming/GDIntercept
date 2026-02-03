@@ -4,7 +4,7 @@ using namespace nlohmann;
 using namespace proxy::enums;
 using namespace geode::prelude;
 
-proxy::URL::URL(std::string url, web::WebRequest* request) : m_original(std::move(url)), m_reconstruction(m_original), m_query(json::object()) {
+proxy::URL::URL(std::string url, web::WebRequest* request) : m_original(std::move(url)), m_reconstruction(m_original), m_query(ordered_json::object()) {
     if (request != nullptr) {
         const std::unordered_map<std::string, std::string> params = request->getUrlParams();
 
@@ -156,7 +156,7 @@ void proxy::URL::parsePath(size_t& index) {
     }
 
     if (queryStart != std::string::npos && converter.canConvert(m_path, false, m_queryString = fullPath.substr(queryStart + 1))) {
-        m_query = json::parse(converter.convert(m_path, m_queryString));
+        m_query = ordered_json::parse(converter.convert(m_path, m_queryString));
     }
 
     index += size;

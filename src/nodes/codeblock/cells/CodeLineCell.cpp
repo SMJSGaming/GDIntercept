@@ -38,12 +38,9 @@ m_lineNumberWidth(lineNumberWidth) {
 void CodeLineCell::initRender() {
     const Theme::Theme theme = Theme::getTheme();
     const float codeLineWidth = this->getCodeLineWidth();
-    const size_t labelLength = std::min<size_t>(m_code.contents.size(), Mod::get()->getSettingValue<unsigned int>("max-characters-per-line"));
+    const size_t labelLength = std::min<size_t>(m_code.contents.size(), Mod::get()->getSettingValue<int64_t>("max-characters-per-line"));
     MonospaceLabel* lineNumberLabel = MonospaceLabel::create(std::to_string(m_lineNumber), theme.code.font.fontName, theme.code.font.fontScale);
-    MonospaceLabel* codeLabel = MonospaceLabel::create(m_code.contents.substr(
-        0,
-        labelLength
-    ), theme.code.font.fontName, theme.code.font.fontScale);
+    MonospaceLabel* codeLabel = MonospaceLabel::create(m_code.contents.substr(0, labelLength), theme.code.font.fontName, theme.code.font.fontScale);
     CCLayerColor* numberBackground = CCLayerColor::create(theme.code.background, codeLineWidth, this->getContentHeight());
 
     m_tokens.orExecute([&]() { codeLabel->setColor(theme.code.syntax.text); })

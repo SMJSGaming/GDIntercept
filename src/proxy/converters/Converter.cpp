@@ -80,10 +80,10 @@ bool proxy::converters::shouldSanitize(const std::string_view key) {
         "gjp2"
     };
 
-    return Mod::get()->getSettingValue<bool>("censor-data") && sensitiveKeys.includes(std::string(key));
+    return sensitiveKeys.includes(std::string(key));
 }
 
-std::string proxy::converters::safeDump(const nlohmann::json& json, const size_t indent, const bool quoteless) {
+std::string proxy::converters::safeDump(const nlohmann::ordered_json& json, const size_t indent, const bool quoteless) {
     if (quoteless && json.is_string()) {
         return json.get<std::string>();
     } else {
@@ -92,7 +92,7 @@ std::string proxy::converters::safeDump(const nlohmann::json& json, const size_t
 }
 
 nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string_view key, const std::string_view str) {
-    if (converters::shouldSanitize(key)) {
+    if (converters::shouldSanitize(key) && Mod::get()->getSettingValue<bool>("censor-data")) {
         return json("********");
     } else if (converters::isNull(str)) {
         return json();

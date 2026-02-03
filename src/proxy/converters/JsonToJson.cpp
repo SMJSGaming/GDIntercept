@@ -9,7 +9,7 @@ bool proxy::converters::JsonToJson::canConvert(const std::string_view path, cons
 }
 
 std::string proxy::converters::JsonToJson::convert(const std::string_view path, const std::string_view original) const {
-    json object = json::parse(original);
+    ordered_json object = ordered_json::parse(original);
 
     recursiveSanitize(object);
 
@@ -20,7 +20,7 @@ std::string proxy::converters::JsonToJson::toRaw(const std::string_view path, co
     return converters::safeDump(json::parse(original), -1);
 }
 
-void proxy::converters::JsonToJson::recursiveSanitize(json& object) const {
+void proxy::converters::JsonToJson::recursiveSanitize(ordered_json& object) const {
     for (const auto& [key, value] : object.items()) {
         if (value.is_array() || value.is_object()) {
             recursiveSanitize(value);

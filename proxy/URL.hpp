@@ -28,7 +28,7 @@ namespace proxy {
         PROXY_GETTER(std::string, path, Path);
         PROXY_GETTER(std::string, queryString, QueryString);
         PROXY_GETTER(std::string, hash, Hash);
-        PROXY_GETTER(nlohmann::json, query, Query);
+        PROXY_GETTER(nlohmann::ordered_json, query, Query);
 
         void parse();
         void parseProtocol(size_t& index);

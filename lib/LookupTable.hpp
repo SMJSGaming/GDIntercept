@@ -25,7 +25,6 @@ public:
     }
 
     LookupTable() { }
-
     LookupTable(const std::initializer_list<Entry>& table) : m_table(table) { }
 
     std::vector<Entry>::iterator begin() {

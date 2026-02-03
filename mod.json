@@ -97,16 +97,17 @@
     },
     "decode-data": {
       "name": "Decode Response Data",
-      "description": "Decodes and parses encoded strings in official GD responses. May be slow for larger strings.",
+      "description": "Decodes and parses encoded strings in official GD responses. Formats with excesive sizes won't be parsed.",
       "type": "bool",
       "default": true
     },
     "max-characters-per-line": {
       "name": "Max Characters Per Line",
-      "description": "The maximum amount of characters rendered in 1 line. -1 will remove the limit. May be slow for larger strings.",
+      "description": "The maximum amount of characters rendered in 1 line. May be slow for larger strings.",
       "type": "int",
       "default": 2000,
-      "min": -1
+      "min": 0,
+      "max": 15000
     },
     "minimize-side-menu": {
       "name": "Minimize Side Menu",

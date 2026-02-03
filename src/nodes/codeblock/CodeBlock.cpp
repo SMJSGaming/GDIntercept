@@ -89,16 +89,17 @@ void CodeBlock::setCode(const HttpInfo::Content& code) {
     const float lineNumberWidth = fontSize.width * std::to_string(
         std::count(code.contents.begin(), code.contents.end(), '\n') + 1
     ).size() + theme.code.paddingLeft;
+    const size_t maxCharacters = Mod::get()->getSettingValue<int64_t>("max-characters-per-line");
     const float lineHeight = fontSize.height + theme.code.font.lineHeight;
     TracklessScrollbar* scrollbarX = std::get<0>(m_scrollbars);
     TracklessScrollbar* scrollbarY = std::get<1>(m_scrollbars);
     CullingList* list = reinterpret_cast<CullingList*>(this->getNode());
     JSONTokenizer tokenizer;
 
-    Stream<CodeLineCell*> cells = StringStream::of(m_code = code.contents).map<CodeLineCell*>([&](std::string&& line, const size_t i) {
+    Stream<CodeLineCell*> cells = StringStream::of(m_code = code.contents, '\n').map<CodeLineCell*>([&](std::string&& line, const size_t i) {
         const float lineWidth = code.type == ContentType::BINARY ?
             list->getContentWidth() :
-            lineNumberWidth + theme.code.paddingCenter + fontSize.width * std::min<size_t>(2000, line.size()) + theme.code.paddingRight;
+            lineNumberWidth + theme.code.paddingCenter + fontSize.width * std::min<size_t>(maxCharacters, line.size()) + theme.code.paddingRight;
 
         return CodeLineCell::create({ lineWidth, lineHeight }, i + 1, lineNumberWidth, { code.type, std::move(line) }, tokenizer);
     });

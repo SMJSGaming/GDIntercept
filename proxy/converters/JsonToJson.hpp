@@ -10,6 +10,6 @@ namespace proxy::converters {
         std::string convert(const std::string_view path, const std::string_view original) const override;
         std::string toRaw(const std::string_view path, const std::string_view original) const override;
     private:
-        void recursiveSanitize(nlohmann::json& object) const;
+        void recursiveSanitize(nlohmann::ordered_json& object) const;
     };
 }

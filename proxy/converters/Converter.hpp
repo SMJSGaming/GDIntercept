@@ -10,7 +10,7 @@ namespace proxy::converters {
     bool isNull(const std::string_view str);
     bool isString(const std::string_view str);
     bool shouldSanitize(const std::string_view key);
-    std::string safeDump(const nlohmann::json& json, const size_t indent = 2, const bool quoteless = false);
+    std::string safeDump(const nlohmann::ordered_json& json, const size_t indent = 2, const bool quoteless = false);
     nlohmann::json getPrimitiveJsonType(const std::string_view key, const std::string_view str);
 
     class Converter {

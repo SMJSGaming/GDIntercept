@@ -8,11 +8,11 @@ using namespace proxy::prelude;
 static size_t globalIndexCounter = 1;
 
 const LookupTable<ContentType, proxy::converters::Converter*> proxy::HttpInfo::CONVERTERS({
+    { ContentType::BINARY, new RawToBinary() },
     { ContentType::XML, new XmlToXml() },
     { ContentType::JSON, new JsonToJson() },
-    { ContentType::ROBTOP, new RobTopToJson() },
-    { ContentType::FORM, new FormToJson() },
-    { ContentType::BINARY, new RawToBinary() }
+    { ContentType::ROBTOP, new RobTopToJsonV2() },
+    { ContentType::FORM, new FormToJson() }
 });
 
 proxy::HttpInfo::Content proxy::HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string_view path, const std::string_view original) {
@@ -21,7 +21,7 @@ proxy::HttpInfo::Content proxy::HttpInfo::getContent(const bool raw, const Conte
 
         if (!raw) {
             return { converter->getResultContentType(), converter->convert(path, original) };
-        } else if (converter->getNeedsSanitization()) {
+        } else if (Mod::get()->getSettingValue<bool>("censor-data") && converter->getNeedsSanitization()) {
             return { originalContentType, converter->toRaw(path, converter->convert(path, original)) };
         }
     }
@@ -44,7 +44,7 @@ proxy::HttpInfo::Content proxy::HttpInfo::getHeaders(const bool raw, const Heade
 
         return { ContentType::UNKNOWN_CONTENT, std::move(rawHeaders) };
     } else {
-        json content = json::object();
+        ordered_json content = ordered_json::object();
 
         for (const auto& [headerKey, list] : headers) {
             content[headerKey] = list.size() == 1 ? json(list.at(0)) : json(list);
@@ -69,7 +69,7 @@ ContentType proxy::HttpInfo::determineContentType(const std::string_view path, c
 }
 
 proxy::HttpInfo::Headers proxy::HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
-    return HttpInfo::parseCocosHeaders(StringStream::of(std::string_view(headers->begin(), headers->end()))
+    return HttpInfo::parseCocosHeaders(StringStream::of(std::string_view(headers->begin(), headers->end()), '\n')
         .map<gd::string>([](std::string&& header) {
             if (header.back() == '\r') {
                 header.pop_back();

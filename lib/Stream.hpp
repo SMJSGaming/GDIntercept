@@ -188,21 +188,19 @@ public:
         return initial;
     }
 
-    template<stream_lambda<void, const T&> F>
-    Stream<T> forEach(F&& consumer) && {
+    template<stream_lambda<void, T&&> F>
+    void forEach(F&& consumer) && {
         for (size_t i = 0; i < this->size(); i++) {
-            if constexpr (basic_lambda<F, void, const T&>) {
-                consumer((*this)[i]);
+            if constexpr (basic_lambda<F, void, T&&>) {
+                consumer(std::move((*this)[i]));
             } else {
-                consumer((*this)[i], i);
+                consumer(std::move((*this)[i]), i);
             }
         }
-
-        return std::move(*this);
     }
 
     template<stream_lambda<void, const T&> F>
-    Stream<T> forEach(F&& consumer) const& {
+    void forEach(F&& consumer) const& {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, void, const T&>) {
                 consumer((*this)[i]);
@@ -210,8 +208,6 @@ public:
                 consumer((*this)[i], i);
             }
         }
-
-        return *this;
     }
 
     template<basic_lambda<T, const T&, const T&> F>
@@ -436,13 +432,30 @@ public:
 
 class StringStream {
 public:
-    [[nodiscard]] static Stream<std::string> of(const std::string_view input, const char delimiter = '\n') {
+    [[nodiscard]] static Stream<std::string> of(const std::string_view input, const char delimiter) {
         Stream<std::string> stream;
         size_t start = 0;
 
-        stream.reserve(std::count(input.begin(), input.end(), delimiter) + 1);
-
         for (size_t end; (end = input.find(delimiter, start)) != std::string_view::npos; start = end + 1) {
+            stream.emplace_back(input.substr(start, end - start));
+        }
+
+        stream.emplace_back(input.substr(start));
+
+        return stream;
+    }
+
+    [[nodiscard]] static Stream<std::string> of(const std::string_view input, const std::string_view delimiter) {
+        Stream<std::string> stream;
+        size_t start = 0;
+
+        if (delimiter.empty()) {
+            stream.emplace_back(input);
+
+            return stream;
+        }
+
+        for (size_t end; (end = input.find(delimiter, start)) != std::string_view::npos; start = end + delimiter.size()) {
             stream.emplace_back(input.substr(start, end - start));
         }
 
