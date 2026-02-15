@@ -15,7 +15,7 @@ CenterLabel* CenterLabel::create(const std::string_view string, const std::strin
 }
 
 bool CenterLabel::init(const std::string_view string, const std::string_view font) {
-    ESCAPE_WHEN(!this->initWithString(string.data(), font.data()), false);
+    ESCAPE_WHEN(!this->initWithString(StringBuffer(string).c_str(), StringBuffer(font).c_str()), false);
 
     return true;
 }

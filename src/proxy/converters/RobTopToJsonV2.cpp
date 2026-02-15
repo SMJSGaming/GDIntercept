@@ -1,6 +1,6 @@
 #include "../../../proxy/converters/RobTopToJsonV2.hpp"
 
-using namespace geode;
+using namespace geode::prelude;
 using namespace nlohmann;
 
 const std::string proxy::converters::RobTopToJsonV2::Object::METADATA_DELIMITER = "#";
@@ -287,22 +287,22 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parse(std::string_view o
 
     switch (m_decodeStrategy.encodings) {
         case Encodings::B64: {
-            auto result = geode::utils::base64::decodeString(original);
+            auto result = utils::base64::decodeString(original);
 
             if (result.isOk()) {
                 original = decodedOriginal = std::move(result).unwrap();
             }
         } break;
         case Encodings::B64_XOR: {
-            std::string_view decodeString = m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original;
+            StringBuffer decodeString(m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original);
 
-            original = decodedOriginal = cocos2d::ZipUtils::base64DecodeEnc(gd::string(decodeString.data(), decodeString.size()), std::to_string(m_decodeStrategy.key));
+            original = decodedOriginal = cocos2d::ZipUtils::base64DecodeEnc(gd::string(decodeString.c_str(), decodeString.size()), std::to_string(m_decodeStrategy.key));
         } break;
         case Encodings::B64_GZIP_XOR: {
-            std::string_view decodeString = m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original;
+            StringBuffer decodeString(m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original);
 
             original = decodedOriginal = cocos2d::ZipUtils::decompressString(
-                gd::string(decodeString.data(), decodeString.size()),
+                gd::string(decodeString.c_str(), decodeString.size()),
                 m_decodeStrategy.key,
                 m_decodeStrategy.key
             );

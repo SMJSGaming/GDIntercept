@@ -68,7 +68,7 @@ GLubyte Theme::Color::extractChannel(const std::string_view hexString, const siz
 }
 
 CCLabelBMFont* Theme::Font::createLabel(const std::string_view text) const {
-    CCLabelBMFont* label = CCLabelBMFont::create(text.data(), fontName.c_str());
+    CCLabelBMFont* label = CCLabelBMFont::create(StringBuffer(text).c_str(), fontName.c_str());
 
     label->setScale(fontScale);
 

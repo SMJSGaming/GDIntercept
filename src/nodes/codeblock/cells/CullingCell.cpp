@@ -2,7 +2,7 @@
 
 CullingCell::CullingCell(const CCSize& size) : CullingCell("", size) { }
 
-CullingCell::CullingCell(const std::string_view id, const CCSize& size) : TableViewCell(id.data(), size.width, size.height),
+CullingCell::CullingCell(const std::string_view id, const CCSize& size) : TableViewCell(StringBuffer(id).c_str(), size.width, size.height),
 m_active(false),
 m_rendered(false) {
     m_listType = BoomListType::Default;

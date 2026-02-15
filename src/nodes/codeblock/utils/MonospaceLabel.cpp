@@ -15,11 +15,11 @@ MonospaceLabel* MonospaceLabel::create(const std::string_view string, const std:
 }
 
 CCSize MonospaceLabel::getCharacterSize(const std::string_view font) {
-    return CCLabelBMFont::create("M", font.data())->getContentSize();
+    return CCLabelBMFont::create("M", StringBuffer(font).c_str())->getContentSize();
 }
 
 bool MonospaceLabel::init(const std::string_view string, const std::string_view font, const float scale) {
-    ESCAPE_WHEN(!this->initWithString(string.data(), font.data()), false);
+    ESCAPE_WHEN(!this->initWithString(StringBuffer(string).c_str(), StringBuffer(font).c_str()), false);
 
     this->setScale(scale);
 

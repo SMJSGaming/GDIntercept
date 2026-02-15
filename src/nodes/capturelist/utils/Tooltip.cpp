@@ -15,7 +15,7 @@ Tooltip* Tooltip::create(const std::string_view text, const float scale, const G
 }
 
 bool Tooltip::init(const std::string_view text, const float scale, const GLubyte opacity) {
-    CCLabelBMFont* label = CCLabelBMFont::create(text.data(), "bigFont.fnt");
+    CCLabelBMFont* label = CCLabelBMFont::create(StringBuffer(text).c_str(), "bigFont.fnt");
 
     label->setScale(scale);
 
