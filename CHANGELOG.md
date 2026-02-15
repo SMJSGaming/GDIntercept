@@ -12,6 +12,7 @@
 - Added better memory management for proxies
 - Added univeral keybind support
 - Added repeatable keybinds
+- Added iOS support
 - Moved keybind settings to the GDIntercept settings
 - Made Geode proxies less intrusive in the client
 - Fixed incompatibilities with other Geode web hooking mods
