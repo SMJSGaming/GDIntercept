@@ -39,10 +39,9 @@ jobs:
       - name: Build
         uses: geode-sdk/build-geode-mod@main
         with:
-          build-config: 'RelWithDebInfo'
+          build-config: 'Release'
           combine: true
           cli: 'latest'
-          bundle-pdb: true
           target: ${{ matrix.config.target }}
 
   package-deploy:
