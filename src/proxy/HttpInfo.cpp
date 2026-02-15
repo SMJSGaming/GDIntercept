@@ -69,7 +69,7 @@ ContentType HttpInfo::determineContentType(const std::string_view path, const bo
 }
 
 HttpInfo::Headers HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
-    return HttpInfo::parseCocosHeaders(StringStream::of(std::string_view(headers->begin(), headers->end()), '\n')
+    return HttpInfo::parseCocosHeaders(StringStream::of(std::string_view(headers->data(), headers->size()), '\n')
         .map<gd::string>([](std::string&& header) {
             if (header.back() == '\r') {
                 header.pop_back();
