@@ -39,7 +39,7 @@ jobs:
       - name: Build
         uses: geode-sdk/build-geode-mod@main
         with:
-          build-config: 'Release'
+          build-config: 'RelWithDebInfo'
           combine: true
           cli: 'latest'
           bundle-pdb: true
