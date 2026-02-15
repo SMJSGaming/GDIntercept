@@ -294,14 +294,18 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parse(std::string_view o
             }
         } break;
         case Encodings::B64_XOR: {
-            gd::string input = gd::string(m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original);
+            std::string_view decodeString = m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original;
 
-            original = decodedOriginal = cocos2d::ZipUtils::base64DecodeEnc(input, std::to_string(m_decodeStrategy.key));
+            original = decodedOriginal = cocos2d::ZipUtils::base64DecodeEnc(gd::string(decodeString.data(), decodeString.size()), std::to_string(m_decodeStrategy.key));
         } break;
         case Encodings::B64_GZIP_XOR: {
-            gd::string input = gd::string(m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original);
+            std::string_view decodeString = m_decodeStrategy.skip ? original.substr(m_decodeStrategy.skip) : original;
 
-            original = decodedOriginal = cocos2d::ZipUtils::decompressString(input, m_decodeStrategy.key, m_decodeStrategy.key);
+            original = decodedOriginal = cocos2d::ZipUtils::decompressString(
+                gd::string(decodeString.data(), decodeString.size()),
+                m_decodeStrategy.key,
+                m_decodeStrategy.key
+            );
         } break;
         // Clang will otherwise warn about fall-through
         case Encodings::NONE: break;

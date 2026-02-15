@@ -75,7 +75,7 @@ HttpInfo::Headers HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
                 header.pop_back();
             }
 
-            return header;
+            return gd::string(std::move(header));
         })
         .filter([](const std::string_view header) { return header.size(); }));
 }
