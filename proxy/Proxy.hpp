@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <Geode/loader/Event.hpp>
 #include "HttpInfo.hpp"
 
 namespace proxy {
@@ -10,86 +11,41 @@ namespace proxy {
         using namespace proxy::converters;
     }
 
-    class ProxyEvent : public geode::Event {
+    class ProxyFilter {
     public:
-        HttpInfo* getInfo() const;
-        HttpInfo::Request getRequest() const;
-    protected:
-        HttpInfo* m_info;
+        ProxyFilter(const enums::EventState state, const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
+        ProxyFilter(const enums::EventState state, std::vector<std::string> urlParts);
+        ProxyFilter(cocos2d::CCNode* target, const enums::EventState state, const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
+        ProxyFilter(cocos2d::CCNode* target, const enums::EventState state, std::vector<std::string> urlParts);
 
-        ProxyEvent(HttpInfo* info);
-    };
-
-    class RequestEvent : public ProxyEvent {
+        bool validate(const enums::EventState state, std::shared_ptr<HttpInfo> info) const;
+        enums::EventState getState() const;
+        enums::OriginFilter getOrigin() const;
+        const StringStream& getURLParts() const;
     private:
-        RequestEvent(HttpInfo* info);
-
-        friend class ProxyHandler;
-    };
-
-    class ResponseEvent : public ProxyEvent {
-    public:
-        HttpInfo::Response getResponse() const;
-    private:
-        ResponseEvent(HttpInfo* info);
-
-        friend class ProxyHandler;
-    };
-
-    class CancelEvent : public ProxyEvent {
-    private:
-        CancelEvent(HttpInfo* info);
-
-        friend class HttpInfo;
-        friend class ProxyHandler;
-    };
-        
-
-    template<typename T> requires std::is_base_of_v<ProxyEvent, T>
-    class ProxyFilter : public geode::EventFilter<T> {
-    public:
-        geode::ListenerResult handle(std::function<geode::ListenerResult(T*)> callback, T* event) {
-            const URL url = event->getRequest().getURL();
-
-            if ((m_urlParts.empty() || m_urlParts.some([&](const std::string_view part) {
-                    return url.getBasicUrl().find(part) != std::string_view::npos;
-            })) && (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin()))) {
-                return callback(event);
-            } else {
-                return geode::ListenerResult::Stop;
-            }
-        }
-    protected:
+        enums::EventState m_state;
         enums::OriginFilter m_origin;
-        Stream<std::string> m_urlParts;
-
-        ProxyFilter(const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER) : m_origin(origin) { };
-        ProxyFilter(const std::vector<std::string>& urlParts) : m_origin(enums::OriginFilter::ALL_FILTER), m_urlParts(urlParts) { };
-        ProxyFilter(cocos2d::CCNode* target, const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER) : m_origin(origin) { };
-        ProxyFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts) : m_origin(enums::OriginFilter::ALL_FILTER), m_urlParts(urlParts) { };
+        StringStream m_urlParts;
     };
 
-    class RequestFilter : public ProxyFilter<RequestEvent> {
+    class ProxyEvent : private geode::ThreadSafeEvent<ProxyEvent, bool(const enums::EventState, std::shared_ptr<HttpInfo>)> {
     public:
-        RequestFilter(const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
-        RequestFilter(const std::vector<std::string>& urlParts);
-        RequestFilter(cocos2d::CCNode* target, const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
-        RequestFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts);
-    };
+        ProxyEvent(ProxyFilter filter);
 
-    class ResponseFilter : public ProxyFilter<ResponseEvent> {
-    public:
-        ResponseFilter(const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
-        ResponseFilter(const std::vector<std::string>& urlParts);
-        ResponseFilter(cocos2d::CCNode* target, const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
-        ResponseFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts);
-    };
+        bool send(std::shared_ptr<HttpInfo> info);
 
-    class CancelFilter : public ProxyFilter<CancelEvent> {
-    public:
-        CancelFilter(const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
-        CancelFilter(const std::vector<std::string>& urlParts);
-        CancelFilter(cocos2d::CCNode* target, const enums::OriginFilter origin = enums::OriginFilter::ALL_FILTER);
-        CancelFilter(cocos2d::CCNode* target, const std::vector<std::string>& urlParts);
+        template<class Callable>
+        geode::comm::ListenerHandle listen(Callable listener, int priority = 0) {
+            return ThreadSafeEvent::listen([
+                filter = m_filter,
+                listener = std::move(listener)
+            ](const enums::EventState state, std::shared_ptr<HttpInfo> info) {
+                if (filter->validate(state, info)) {
+                    listener(info);
+                }
+            }, priority);
+        }
+    private:
+        std::shared_ptr<ProxyFilter> m_filter;
     };
 }

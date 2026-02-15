@@ -7,7 +7,7 @@
 
 class CaptureCell : public GenericListCell {
 public:
-    static CaptureCell* create(const size_t index, const HttpInfo* info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell);
+    static CaptureCell* create(const size_t index, std::shared_ptr<HttpInfo> info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell);
 
     void activate();
     void deactivate();
@@ -15,10 +15,10 @@ private:
     template<typename T>
     static std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> makeBadgeInfo(std::string name, T* node);
 
-    const HttpInfo* m_info;
+    PRIMITIVE_GETTER(std::shared_ptr<HttpInfo>, info, Info);
     std::function<void(CaptureCell*)> m_switchCell;
 
-    CaptureCell(const HttpInfo* info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell);
+    CaptureCell(std::shared_ptr<HttpInfo> info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell);
     bool init(const size_t index, const CCSize& size);
     std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> badgesForRequest();
     ccColor3B colorForMethod();

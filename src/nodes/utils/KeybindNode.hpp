@@ -6,23 +6,25 @@ template<Node T = CCNode>
 class KeybindNode : public T {
 protected:
     bool init() {
-        #ifdef KEYBINDS_ENABLED
-            this->setup();
-        #endif
+        this->setup();
 
         return true;
     }
 
-    void bind(std::string key, const std::function<void()>& callback) {
-        #ifdef KEYBINDS_ENABLED
-            this->template addEventListener<InvokeBindFilter>([=, this](const InvokeBindEvent* event) {
-                if (event->isDown()) {
-                    callback();
-                }
+    template<typename F> requires(std::invocable<F>)
+    void bind(std::string keybindName, F&& callback, const bool repeatable = false) {
+        this->addEventListener(KeybindSettingPressedEventV3(Mod::get(), std::move(keybindName)), [
+            callback = std::forward<F>(callback),
+            repeatable
+        ](const Keybind& keybind, const bool down, const bool repeat) {
+            if (down && (repeatable || !repeat)) {
+                callback();
 
+                return ListenerResult::Stop;
+            } else {
                 return ListenerResult::Propagate;
-            }, std::move(key));
-        #endif
+            }
+       });
     }
 
     virtual void setup() = 0;

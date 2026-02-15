@@ -36,19 +36,19 @@ m_lineNumberWidth(lineNumberWidth) {
 }
 
 void CodeLineCell::initRender() {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     const float codeLineWidth = this->getCodeLineWidth();
     const size_t labelLength = std::min<size_t>(m_code.contents.size(), Mod::get()->getSettingValue<int64_t>("max-characters-per-line"));
     MonospaceLabel* lineNumberLabel = MonospaceLabel::create(std::to_string(m_lineNumber), theme.code.font.fontName, theme.code.font.fontScale);
     MonospaceLabel* codeLabel = MonospaceLabel::create(m_code.contents.substr(0, labelLength), theme.code.font.fontName, theme.code.font.fontScale);
     CCLayerColor* numberBackground = CCLayerColor::create(theme.code.background, codeLineWidth, this->getContentHeight());
 
-    m_tokens.orExecute([&]() { codeLabel->setColor(theme.code.syntax.text); })
-        .filter([&](const JSONTokenizer::TokenOffset& tokenOffset) { return tokenOffset.offset < labelLength; })
-        .forEach([&](const JSONTokenizer::TokenOffset& tokenOffset) {
-            IntStream::range(tokenOffset.offset, std::min(labelLength, tokenOffset.offset + tokenOffset.length))
-                .map<CCSprite*>([&](const int i) { return cocos::getChild<CCSprite>(codeLabel, i); })
-                .forEach([&](CCSprite* character) {
+    m_tokens.orExecute([&theme, codeLabel]() { theme.code.syntax.text.applyTo(codeLabel); })
+        .filter([labelLength](const JSONTokenizer::TokenOffset& tokenOffset) { return tokenOffset.offset < labelLength; })
+        .forEach([&theme, labelLength, codeLabel](const JSONTokenizer::TokenOffset& tokenOffset) {
+            IntStream<size_t>::range(tokenOffset.offset, std::min(labelLength, tokenOffset.offset + tokenOffset.length))
+                .map<CCSprite*>([codeLabel](const int i) { return codeLabel->getChildByIndex<CCSprite>(i); })
+                .forEach([&theme, tokenOffset](CCSprite* character) {
                     switch (tokenOffset.token) {
                         case JSONTokenizer::Token::CORRUPT: theme.code.syntax.error.applyTo(character); break;
                         case JSONTokenizer::Token::KEY: theme.code.syntax.key.applyTo(character); break;

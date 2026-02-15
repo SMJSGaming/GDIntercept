@@ -87,14 +87,14 @@ m_block(block),
 m_enabled(true) { }
 
 bool ActionCell::init() {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
 
     ESCAPE_WHEN(!HoverNode::init(), false);
     ESCAPE_WHEN(!CCLayerColor::initWithColor(theme.menu.foreground), false);
 
     CCLabelBMFont* referenceSizeNode = theme.menu.font.createLabel("0");
     const bool oldState = m_state;
-    const float referenceHeight = cocos::getChild(referenceSizeNode, 0)->getContentHeight() * theme.menu.font.fontScale;
+    const float referenceHeight = referenceSizeNode->getChildByIndex(0)->getContentHeight() * theme.menu.font.fontScale;
     const float height = referenceSizeNode->getScaledContentHeight() + theme.menu.font.lineHeight;
     const CCSize referenceSize = { referenceHeight, referenceHeight };
     m_icon = RescalingNode::create(CCNode::create(), referenceSize);
@@ -127,7 +127,7 @@ bool ActionCell::init() {
 
 void ActionCell::setState(const bool state) {
     m_state = state || m_action.off.isEmpty();
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     const SideBarActionButton button = m_state ? m_action.on : m_action.off;
     CCSprite* icon = CCSprite::createWithSpriteFrameName(button.icon.c_str());
 
@@ -152,7 +152,7 @@ bool ActionCell::isEnabled() const {
 }
 
 void ActionCell::enable() {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     CCSprite* icon = typeinfo_cast<CCSprite*>(m_icon->getNode());
 
     m_enabled = true;
@@ -162,7 +162,7 @@ void ActionCell::enable() {
 }
 
 void ActionCell::disable() {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     CCSprite* icon = typeinfo_cast<CCSprite*>(m_icon->getNode());
 
     m_enabled = false;

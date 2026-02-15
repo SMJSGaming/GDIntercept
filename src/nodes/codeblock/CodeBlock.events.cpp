@@ -19,24 +19,24 @@ const SideBar::Categories CodeBlock::ACTIONS {
     { { "Save Files", "saves.png"_spr }, {
         { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } } },
         { { "Save", "download.png"_spr, [](CodeBlock* block) { return block->onSave(); } }, [](CodeBlock* block) {
-            return block->m_info;
+            return block->m_info != nullptr;
         } }
     } },
     { { "Current Request", "link.png"_spr }, {
         { { "Copy", "copy.png"_spr, [](CodeBlock* block) { return block->onCopy(); } }, [](CodeBlock* block) {
-            return block->m_info;
+            return block->m_info != nullptr;
         } },
         { { "Resend", "redo.png"_spr, [](CodeBlock* block) { return block->onSend(); } }, [](CodeBlock* block) {
-            return block->m_info;
+            return block->m_info != nullptr;
         } },
         { { "Cancel", "cancel.png"_spr, [](CodeBlock* block) { return block->onCancel(); } }, [](CodeBlock* block) {
-            return block->m_info && (block->m_info->isInProgress() || block->m_info->isPaused());
+            return block->m_info && block->m_info->getClient() == Client::COCOS && (block->m_info->isInProgress() || block->m_info->isPaused());
         } }
     } },
     { {"Settings", "settings.png"_spr }, {
         {
-            { "Resume All", "resume.png"_spr, [](CodeBlock* block) { return block->onResume(); } },
-            { "Pause All", "pause.png"_spr, [](CodeBlock* block) { return block->onPause(); } },
+            { "Resume Cocos", "resume.png"_spr, [](CodeBlock* block) { return block->onResume(); } },
+            { "Pause Cocos", "pause.png"_spr, [](CodeBlock* block) { return block->onPause(); } },
             [](CodeBlock* block) { return ProxyHandler::isPaused(); }
         },
         { "raw-data", { "Raw", "Formatted" }, { "raw.png"_spr, "simplified.png"_spr }, false, {
@@ -53,29 +53,29 @@ const SideBar::Categories CodeBlock::ACTIONS {
 bool CodeBlock::ACCEPTED_PAUSES = false;
 
 void CodeBlock::setup() {
-    this->bind("open_save_files"_spr, [this]() {
+    this->bind("open_save_files", [this]() {
         this->onOpenSaveFiles();
     });
-    this->bind("open_theme_files"_spr, [this]() {
+    this->bind("open_theme_files", [this]() {
         this->onOpenThemeFiles();
     });
-    this->bind("save_packet"_spr, [this]() {
+    this->bind("save_packet", [this]() {
         this->onSave();
     });
-    this->bind("copy_code_block"_spr, [this]() {
+    this->bind("copy_code_block", [this]() {
         this->onCopy();
     });
-    this->bind("resend_packet"_spr, [this]() {
+    this->bind("resend_packet", [this]() {
         this->onSend();
     });
-    this->bind("pause_packet"_spr, [this]() {
+    this->bind("pause_packet", [this]() {
         if (ProxyHandler::isPaused()) {
             this->onResume();
         } else {
             this->onPause();
         }
     });
-    this->bind("raw_code_block"_spr, [this]() {
+    this->bind("raw_code_block", [this]() {
         Mod* mod = Mod::get();
 
         if (mod->getSettingValue<bool>("raw-data")) {
@@ -93,34 +93,34 @@ void CodeBlock::setup() {
         }
     });
 
-    this->bind("code_line_up"_spr, [this]() {
-        const Theme::Theme theme = Theme::getTheme();
+    this->bind("code_line_up", [this]() {
+        const Theme::Theme& theme = Theme::getTheme();
 
         this->scroll(0, -(theme.code.font.getTrueFontSize().height + theme.code.font.lineHeight));
-    });
-    this->bind("code_line_down"_spr, [this]() {
-        const Theme::Theme theme = Theme::getTheme();
+    }, true);
+    this->bind("code_line_down", [this]() {
+        const Theme::Theme& theme = Theme::getTheme();
 
         this->scroll(0, theme.code.font.getTrueFontSize().height + theme.code.font.lineHeight);
-    });
-    this->bind("code_page_up"_spr, [this]() {
+    }, true);
+    this->bind("code_page_up", [this]() {
         this->scroll(0, -this->getNode()->getContentHeight());
-    });
-    this->bind("code_page_down"_spr, [this]() {
+    }, true);
+    this->bind("code_page_down", [this]() {
         this->scroll(0, this->getNode()->getContentHeight());
-    });
-    this->bind("code_page_left"_spr, [this]() {
+    }, true);
+    this->bind("code_page_left", [this]() {
         const CullingList* list = typeinfo_cast<CullingList*>(this->getNode());
         const std::vector<CullingCell*>& cells = list->getCells();
 
         this->scroll(cells.empty() ? 0 : list->getContentWidth() - typeinfo_cast<CodeLineCell*>(cells.front())->getCodeLineWidth(), 0);
-    });
-    this->bind("code_page_right"_spr, [this]() {
+    }, true);
+    this->bind("code_page_right", [this]() {
         const CullingList* list = typeinfo_cast<CullingList*>(this->getNode());
         const std::vector<CullingCell*>& cells = list->getCells();
 
         this->scroll(cells.empty() ? 0 : -(list->getContentWidth() - typeinfo_cast<CodeLineCell*>(cells.front())->getCodeLineWidth()), 0);
-    });
+    }, true);
 }
 
 bool CodeBlock::onCopy() {
@@ -140,15 +140,13 @@ bool CodeBlock::onSend() {
         request.bodyString(body);
     }
 
-    request.header(ProxyHandler::getCopyHandshake(), "true");
-
     for (const auto& [name, list] : original.getHeaders()) {
-        for (const std::string_view value : list) {
-            request.header(name, value);
+        for (const std::string value : list) {
+            request.header(name, std::move(value));
         }
     }
 
-    (void) request.send(method, original.getURL().getReconstruction());
+    m_resendTasks.emplace_back(async::spawn(request.send(method, original.getURL().getReconstruction())));
 
     this->showMessage("Request Resent");
 
@@ -178,42 +176,28 @@ bool CodeBlock::onOpenThemeFiles() {
 
 bool CodeBlock::onSave() {
     Mod* mod = Mod::get();
-    const HttpInfo::Request& request = m_info->getRequest();
-    const URL& url = request.getURL();
-    const HttpInfo::Response& response = m_info->getResponse();
-    std::string host = url.getHost();
-    std::string bodyContent = request.getBodyContent().contents;
-    std::string responseContent = response.getResponseContent().contents;
-    std::string filename = fmt::format("{:%d-%m-%Y %H.%M.%S} - {}.txt", fmt::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())), host);
-    std::string contents = fmt::format("Method: {}\nProtocol: {}\nHost: {}\nPath: {}\nQuery: {}\nRequest Headers: {}\nBody:{}\nResponse Headers: {}\nResponse:{}",
-        request.getMethod(),
-        url.getProtocol(),
-        std::move(host),
-        url.getPath(),
-        url.stringifyQuery(),
-        request.getHeaderList(true).contents,
-        bodyContent.empty() ? "" : fmt::format("\n{}", std::move(bodyContent)),
-        response.getHeaderList(true).contents,
-        responseContent.empty() ? "" : fmt::format("\n{}", std::move(responseContent))
-    );
+    std::string filename = fmt::format("{:%d-%m-%Y %H.%M.%S} - {}.txt", geode::localtime(std::time(nullptr)), m_info->getRequest().getURL().getHost());
 
-    utils::file::pick(file::PickMode::OpenFolder, {
+    async::spawn(utils::file::pick(file::PickMode::OpenFolder, {
         .defaultPath = mod->getSavedValue("default-path", mod->getSaveDir())
-    }).listen([this, mod, filename = std::move(filename), contents = std::move(contents)](const Result<std::filesystem::path>* path) {
-        Loader::get()->queueInMainThread([this, mod, path, filename = std::move(filename), contents = std::move(contents)]{
-            if (path->isErr()) {
+    }), [
+        this,
+        mod,
+        filename = std::move(filename),
+        contents = m_info->toString()
+    ](const Result<std::optional<std::filesystem::path>> result) {
+        Loader::get()->queueInMainThread([this, mod, result, filename = std::move(filename), contents = std::move(contents)]{
+            if (result.isErr()) {
                 this->showMessage("Error Picking File", { 0xFF, 0x00, 0x00 });
-            } else if (utils::file::writeString(path->unwrap() / std::move(filename), std::move(contents)).isOk()) {
-                mod->setSavedValue("default-path", path->unwrap());
+            } else if (!result.unwrap()) {
+                this->showMessage("File Save Cancelled", { 0xFF, 0xFF, 0x00 });
+            } else if (utils::file::writeString(result.unwrap().value() / std::move(filename), std::move(contents)).isOk()) {
+                mod->setSavedValue("default-path", std::move(result).unwrap());
 
                 this->showMessage("File Saved");
             } else {
                 this->showMessage("Error Saving File", { 0xFF, 0x00, 0x00 });
             }
-        });
-    }, [](std::monostate*){}, [this]{
-        Loader::get()->queueInMainThread([this]{
-            this->showMessage("File Save Cancelled", { 0xFF, 0xFF, 0x00 });
         });
     });
 
@@ -228,9 +212,9 @@ bool CodeBlock::onPause() {
         return true;
     } else {
         FLAlertLayer::create(this, "Pausing Requests",
-            "<cr>All requests</c> will be <cy>paused</c> until you resume them. "
-            "This means that you will no longer be able to send or receive online data from any mod or GD.\n\n"
-            "Are you sure you want to <cy>pause</c> <cr>all requests</c>?"
+            "<cr>All Cocos requests</c> will be <cy>paused</c> until you resume them. "
+            "This means that you will no longer be able to send or receive online data from GD.\n\n"
+            "Are you sure you want to <cy>pause</c> <cr>all Cocos requests</c>?"
         , "Cancel", "Ok")->show();
 
         return false;
@@ -268,20 +252,15 @@ void CodeBlock::onInfo() {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     } else {
         const HttpInfo::Request& request = m_info->getRequest();
-        const HttpInfo::Response& response = m_info->getResponse();
+        const std::optional<HttpInfo::Response>& response = m_info->getResponse();
         const URL& url = request.getURL();
         LookupTable<std::string, std::string> info {
             { "Client", m_info->getClient() == Client::COCOS ? "Cocos2D-X" : "Geode" },
-            { "Status Code", response.stringifyStatusCode() },
             { "Method", request.getMethod() },
             { "Protocol", url.getProtocol() },
             { "Host", url.getHost() },
             { "Path", url.getPath() }
         };
-
-        if (m_info->isCompleted()) {
-            info.emplace("Method", "Response Time", fmt::format("{}ms", response.getResponseTime()));
-        }
 
         if (url.getUsername().size() || url.getPassword().size()) {
             info.emplace("Host", {
@@ -292,6 +271,11 @@ void CodeBlock::onInfo() {
 
         if (url.getHash().size()) {
             info.insert("Hash", url.getHash());
+        }
+
+        if (m_info->isCompleted()) {
+            info.insert("Status Code", response->stringifyStatusCode());
+            info.insert("Response Time", fmt::format("{}ms", response->getResponseTime()));
         }
 
         this->setCode({ ContentType::UNKNOWN_CONTENT, info.reduce<std::string>([](std::string acc, const auto& entry) {
@@ -331,22 +315,22 @@ void CodeBlock::onRequestHeaders() {
 }
 
 void CodeBlock::onResponse() {
-    if (!m_info) {
+    if (!m_info || m_info->isInProgress() || m_info->isPaused()) {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
-    } else if (m_info->responseReceived()) {
-        this->setCode(m_info->getResponse().getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
+    } else if (m_info->isCompleted()) {
+        this->setCode(m_info->getResponse()->getResponseContent(Mod::get()->getSettingValue<bool>("raw-data")));
     } else {
-        this->setCode({ ContentType::UNKNOWN_CONTENT, m_info->getResponse().stringifyStatusCode() });
+        this->setCode({ ContentType::JSON, m_info->getResponse()->stringifyStatusCode() });
     }
 }
 
 void CodeBlock::onResponseHeaders() {
-    if (!m_info) {
+    if (!m_info || m_info->isInProgress() || m_info->isPaused()) {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
-    } else if (m_info->responseReceived()) {
-        this->setCode(m_info->getResponse().getHeaderList(Mod::get()->getSettingValue<bool>("raw-data")));
+    } else if (m_info->isCompleted()) {
+        this->setCode(m_info->getResponse()->getHeaderList(Mod::get()->getSettingValue<bool>("raw-data")));
     } else {
-        this->setCode({ ContentType::UNKNOWN_CONTENT, m_info->getResponse().stringifyStatusCode() });
+        this->setCode({ ContentType::JSON, m_info->getResponse()->stringifyStatusCode() });
     }
 }
 

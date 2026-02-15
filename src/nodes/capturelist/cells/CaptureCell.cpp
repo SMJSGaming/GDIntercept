@@ -1,6 +1,6 @@
 #include "CaptureCell.hpp"
 
-CaptureCell* CaptureCell::create(const size_t index, const HttpInfo* info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) {
+CaptureCell* CaptureCell::create(const size_t index, std::shared_ptr<HttpInfo> info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) {
     CaptureCell* instance = new CaptureCell(info, size, switchCell);
 
     if (instance && instance->init(index, size)) {
@@ -28,7 +28,7 @@ std::tuple<std::string, CCNode*, std::function<void(GLubyte)>> CaptureCell::make
     } };
 }
 
-CaptureCell::CaptureCell(const HttpInfo* info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) : GenericListCell("", size),
+CaptureCell::CaptureCell(std::shared_ptr<HttpInfo> info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) : GenericListCell("", size),
 m_info(info),
 m_switchCell(switchCell) { }
 
@@ -99,7 +99,7 @@ bool CaptureCell::init(const size_t index, const CCSize& size) {
     m_mainLayer->addChild(menu);
 
     for (size_t i = 0; i < request.getMethod().size(); i++) {
-        cocos::getChild<CCSprite>(label, i)->setColor(this->colorForMethod());
+        label->getChildByIndex<CCSprite>(i)->setColor(this->colorForMethod());
     }
 
     return true;

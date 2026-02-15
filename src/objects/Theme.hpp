@@ -131,9 +131,9 @@ namespace Theme {
             return obj.contains(key) ? constructor(obj.at(key)) : defaultObj;
         }
 
-        friend const Theme getTheme();
+        friend const Theme& getTheme();
     };
 
-    const Theme getTheme();
+    const Theme& getTheme();
     void from_json(const json& json, Color& color);
 };

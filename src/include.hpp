@@ -11,17 +11,11 @@
 #include "objects/Theme.hpp"
 #include "proxy/ProxyHandler.hpp"
 
-#if defined(GEODE_IS_WINDOWS) || defined(GEODE_IS_ANDROID64)
-    #define KEYBINDS_ENABLED
-    #include <geode.custom-keybinds/include/Keybinds.hpp>
-
-    using namespace keybinds;
-#endif
-
 using namespace proxy;
 using namespace nlohmann;
 using namespace geode::prelude;
 using namespace proxy::prelude;
+using Modifier = KeyboardInputData::Modifiers;
 
 #define PADDING 5.0f
 #define FULL_OPACITY 0xFF

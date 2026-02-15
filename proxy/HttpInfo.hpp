@@ -12,14 +12,14 @@
 #include "URL.hpp"
 
 namespace proxy {
-    class HttpInfo {
+    class HttpInfo : std::enable_shared_from_this<HttpInfo> {
     public:
         struct Content {
             enums::ContentType type;
             std::string contents;
         };
 
-        typedef std::unordered_map<std::string, std::vector<std::string>> Headers;
+        typedef geode::utils::StringMap<std::vector<std::string>> Headers;
 
         class Request {
         public:
@@ -35,7 +35,9 @@ namespace proxy {
             PROXY_PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
 
             Request(cocos2d::extension::CCHttpRequest* request);
-            Request(geode::utils::web::WebRequest* request, std::string method, std::string url);
+            Request(const geode::utils::web::WebRequest& request);
+            Request(const Request&) = delete;
+            Request& operator=(const Request&) = delete;
 
             friend class HttpInfo;
         };
@@ -52,15 +54,21 @@ namespace proxy {
             PROXY_GETTER(std::string, response, Response);
             PROXY_PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
             PROXY_PRIMITIVE_GETTER(bool, received, Received);
-            Request* m_request;
+            const Request* m_request;
 
-            Response();
-            Response(Request* request, cocos2d::extension::CCHttpResponse* response, const size_t responseTime);
-            Response(Request* request, geode::utils::web::WebResponse* response, const size_t responseTime);
+            Response(const int code);
+            Response(const Request* request, cocos2d::extension::CCHttpResponse* response, const size_t responseTime);
+            Response(const Request* request, const geode::utils::web::WebResponse& response, const size_t responseTime);
+            Response& operator=(const Response&) = delete;
 
             friend class ProxyHandler;
             friend class HttpInfo;
         };
+
+        HttpInfo(cocos2d::extension::CCHttpRequest* request);
+        HttpInfo(const bool repeat, const geode::utils::web::WebRequest& request);
+        HttpInfo(const HttpInfo&) = delete;
+        HttpInfo& operator=(const HttpInfo&) = delete;
 
         void cancel();
         bool isPaused() const;
@@ -68,7 +76,8 @@ namespace proxy {
         bool isCompleted() const;
         bool isFaulty() const;
         bool isCancelled() const;
-        bool responseReceived() const;
+        bool hasResponse() const;
+        std::string toString() const;
     private:
         static const LookupTable<enums::ContentType, converters::Converter*> CONVERTERS;
 
@@ -82,11 +91,9 @@ namespace proxy {
         PROXY_PRIMITIVE_GETTER(enums::Client, client, Client);
         PROXY_PRIMITIVE_GETTER(enums::State, state, State);
         PROXY_GETTER(Request, request, Request);
-        PROXY_GETTER(Response, response, Response);
+        PROXY_GETTER(std::optional<Response>, response, Response);
         PROXY_PRIMITIVE_GETTER(bool, repeat, Repeat);
 
-        HttpInfo(const bool paused, cocos2d::extension::CCHttpRequest* request);
-        HttpInfo(const bool paused, const bool repeat, geode::utils::web::WebRequest* request, std::string method, std::string url);
         void resume();
 
         friend class ProxyHandler;

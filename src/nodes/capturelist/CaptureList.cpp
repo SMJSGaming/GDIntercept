@@ -2,7 +2,7 @@
 
 size_t CaptureList::ACTIVE = 0;
 
-CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
+CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<HttpInfo>)>& switchInfo) {
     CaptureList* instance = new CaptureList();
 
     if (instance && instance->init(size, cellHeight, switchInfo)) {
@@ -16,9 +16,9 @@ CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, con
     }
 }
 
-bool CaptureList::init(const CCSize& size, const float cellHeight, const std::function<void(HttpInfo*)>& switchInfo) {
+bool CaptureList::init(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<HttpInfo>)>& switchInfo) {
     const CCSize listSize = size - 1;
-    std::deque<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
+    Stream<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
     bool activated = false;
 
     ESCAPE_WHEN(!KeybindNode::init(), false);
@@ -28,7 +28,7 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     this->setPaddingLeft(1);
 
     for (size_t i = 0; i < proxies.size(); i++) {
-        HttpInfo* info = proxies.at(i)->getInfo();
+        std::shared_ptr<HttpInfo> info = proxies.at(i)->getInfo();
         CaptureCell* capture = CaptureCell::create(i, info, {
             listSize.width,
             cellHeight

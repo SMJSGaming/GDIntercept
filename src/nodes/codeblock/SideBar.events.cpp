@@ -3,7 +3,7 @@
 using namespace SideBarCell;
 
 void SideBar::setup() {
-    this->bind("collapse_side_bar"_spr, [this]() {
+    this->bind("collapse_side_bar", [this]() {
         Mod* mod = Mod::get();
 
         mod->setSettingValue("minimize-side-menu", !mod->getSettingValue<bool>("minimize-side-menu"));

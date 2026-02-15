@@ -10,7 +10,10 @@ namespace proxy {
         std::string getBasicUrl() const;
         std::string stringifyQuery(const bool raw = false) const;
 
-        URL(std::string url, geode::utils::web::WebRequest* request = nullptr);
+        URL(std::string url);
+        URL(std::string url, const geode::utils::web::WebRequest& request);
+        URL(const URL&) = delete;
+        URL& operator=(const URL&) = delete;
     private:
         PROXY_PRIMITIVE_GETTER(enums::Origin, origin, Origin);
         PROXY_GETTER(std::string, original, Original);

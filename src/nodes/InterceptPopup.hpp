@@ -5,7 +5,7 @@
 #include "codeblock/CodeBlock.hpp"
 #include "capturelist/CaptureList.hpp"
 
-class InterceptPopup : public Popup<> {
+class InterceptPopup : public Popup {
 public:
     static InterceptPopup* get();
     static void scene();
@@ -15,7 +15,7 @@ public:
     void reloadCode();
     void reloadSideBar();
 protected:
-    bool setup() override;
+    bool init(const CCSize& size);
 private:
     static CCSize POPUP_PADDING;
     static float UI_PADDING;

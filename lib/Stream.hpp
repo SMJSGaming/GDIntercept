@@ -4,6 +4,9 @@
 #include <vector>
 #include <concepts>
 
+template<typename T>
+class Stream;
+
 template<typename F, typename Returns, typename ...Args>
 concept returning_lambda = std::invocable<F, Args...> && std::is_convertible_v<std::invoke_result_t<F, Args...>, Returns>;
 
@@ -13,16 +16,19 @@ concept basic_lambda = returning_lambda<F, Returns, PrefixArgs...>;
 template<typename F, typename Returns, typename ...PrefixArgs>
 concept indexed_lambda = returning_lambda<F, Returns, PrefixArgs..., size_t>;
 
-template<typename F, typename Returns, typename ...PrefixArgs>
-concept stream_lambda = basic_lambda<F, Returns, PrefixArgs...> || indexed_lambda<F, Returns, PrefixArgs...>;
+template<typename F, typename Returns, typename Value, typename ...PrefixArgs>
+concept full_lambda = returning_lambda<F, Returns, PrefixArgs..., size_t, Stream<Value>&>;
+
+template<typename F, typename Returns, typename Value, typename ...PrefixArgs>
+concept stream_lambda = basic_lambda<F, Returns, PrefixArgs...> || indexed_lambda<F, Returns, PrefixArgs...> || full_lambda<F, Returns, Value, PrefixArgs...>;
 
 // NOTE! Non constant versions will consume on each iteration
 template<typename T>
 class Stream : public std::vector<T> {
-    template <typename>
+    template<typename>
     struct is_stream : std::false_type {};
 
-    template <typename U>
+    template<typename U>
     struct is_stream<Stream<U>> : std::true_type {};
 public:
     Stream& operator=(Stream&&) noexcept(std::is_nothrow_move_assignable_v<std::vector<T>>) = default;
@@ -33,12 +39,12 @@ public:
     Stream(std::vector<T>&& vector) noexcept : std::vector<T>(std::move(vector)) { }
     Stream(const std::vector<T>& vector) : std::vector<T>(vector) { }
     Stream(const std::initializer_list<T>& list) : std::vector<T>(list) { }
-    template <typename I>
+    template<typename I>
     Stream(const I& begin, const I& end) : std::vector<T>(begin, end) { }
-    template <typename ...Args> requires(std::convertible_to<Args, T> && ...)
+    template<typename ...Args> requires(std::convertible_to<Args, T> && ...)
     Stream(Args&& ...args) : std::vector<T>{ std::forward<Args>(args)... } { }
 
-    template<stream_lambda<bool, const T&> F>
+    template<stream_lambda<bool, T, const T&> F>
     [[nodiscard]] Stream<T> filter(F&& predicate) && {
         Stream<T> stream;
 
@@ -46,20 +52,18 @@ public:
             T& element = (*this)[i];
 
             if constexpr (basic_lambda<F, bool, const T&>) {
-                if (predicate(element)) {
-                    stream.emplace_back(std::move(element));
-                }
+                if (predicate(element)) stream.emplace_back(std::move(element));
+            } else if constexpr (indexed_lambda<F, bool, const T&>) {
+                if (predicate(element, i)) stream.emplace_back(std::move(element));
             } else {
-                if (predicate(element, i)) {
-                    stream.emplace_back(std::move(element));
-                }
+                if (predicate(element, i, *this)) stream.emplace_back(std::move(element));
             }
         }
 
         return stream;
     }
 
-    template<stream_lambda<bool, const T&> F>
+    template<stream_lambda<bool, T, const T&> F>
     Stream<T> filter(F&& predicate) const& {
         Stream<T> stream;
 
@@ -67,157 +71,175 @@ public:
             const T& element = (*this)[i];
 
             if constexpr (basic_lambda<F, bool, const T&>) {
-                if (predicate(element)) {
-                    stream.emplace_back(element);
-                }
+                if (predicate(element)) stream.emplace_back(element);
+            } else if constexpr (indexed_lambda<F, bool, const T&>) {
+                if (predicate(element, i)) stream.emplace_back(element);
             } else {
-                if (predicate(element, i)) {
-                    stream.emplace_back(element);
-                }
+                if (predicate(element, i, *this)) stream.emplace_back(element);
             }
         }
 
         return stream;
     }
 
-    template<stream_lambda<bool, T&&> F>
+    template<stream_lambda<bool, T, T&&> F>
     [[nodiscard]] bool every(F&& predicate) && {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, bool, T&&>) {
                 if (!predicate(std::move((*this)[i]))) return false;
-            } else {
+            } else if constexpr (indexed_lambda<F, bool, T&&>) {
                 if (!predicate(std::move((*this)[i]), i)) return false;
+            } else {
+                if (!predicate(std::move((*this)[i]), i, *this)) return false;
             }
         }
 
         return true;
     }
 
-    template<stream_lambda<bool, const T&> F>
+    template<stream_lambda<bool, T, const T&> F>
     bool every(F&& predicate) const& {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, bool, const T&>) {
                 if (!predicate((*this)[i])) return false;
+            } else if constexpr (indexed_lambda<F, bool, const T&>)  {
+                if (!predicate((*this)[i], i)) return false;
             } else {
-                if (!predicate((*this)[i]), i) return false;
+                if (!predicate((*this)[i], i, *this)) return false;
             }
         }
 
         return true;
     }
 
-    template<stream_lambda<bool, T&&> F>
+    template<stream_lambda<bool, T, T&&> F>
     [[nodiscard]] bool some(F&& predicate) && {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, bool, T&&>) {
                 if (predicate(std::move((*this)[i]))) return true;
-            } else {
+            } else if constexpr (indexed_lambda<F, bool, T&&>) {
                 if (predicate(std::move((*this)[i]), i)) return true;
+            } else {
+                if (predicate(std::move((*this)[i]), i, *this)) return true;
             }
         }
 
         return false;
     }
 
-    template<stream_lambda<bool, const T&> F>
+    template<stream_lambda<bool, T, const T&> F>
     bool some(F&& predicate) const& {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, bool, const T&>) {
                 if (predicate((*this)[i])) return true;
+            } else if constexpr (indexed_lambda<F, bool, const T&>) {
+                if (predicate((*this)[i], i)) return true;
             } else {
-                if (predicate((*this)[i]), i) return true;
+                if (predicate((*this)[i], i, *this)) return true;
             }
         }
 
         return false;
     }
 
-    template<typename R, stream_lambda<R, T&&> F>
+    template<typename R, stream_lambda<R, T, T&&> F>
     [[nodiscard]] Stream<R> map(F&& mapper) && {
         Stream<R> stream;
 
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, R, T&&>) {
                 stream.emplace_back(mapper(std::move((*this)[i])));
-            } else {
+            } else if constexpr (indexed_lambda<F, R, T&&>) {
                 stream.emplace_back(mapper(std::move((*this)[i]), i));
+            } else {
+                stream.emplace_back(mapper(std::move((*this)[i]), i, *this));
             }
         }
 
         return stream;
     }
 
-    template<typename R, stream_lambda<R, const T&> F>
+    template<typename R, stream_lambda<R, T, const T&> F>
     Stream<R> map(F&& mapper) const& {
         Stream<R> stream;
 
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, R, const T&>) {
                 stream.emplace_back(mapper((*this)[i]));
-            } else {
+            } else if constexpr (indexed_lambda<F, R, const T&>) {
                 stream.emplace_back(mapper((*this)[i], i));
+            } else {
+                stream.emplace_back(mapper((*this)[i], i, *this));
             }
         }
 
         return stream;
     }
 
-    template<typename R, stream_lambda<R, R&&, const T&> F>
-    R reduce(F&& reducer, R initial) const& {
-        for (size_t i = 0; i < this->size(); i++) {
-            if constexpr (basic_lambda<F, R, R&&, const T&>) {
-                initial = reducer(std::move(initial), (*this)[i]);
-            } else {
-                initial = reducer(std::move(initial), (*this)[i], i);
-            }
-        }
-
-        return initial;
-    }
-
-    template<typename R, stream_lambda<R, R&&, T&&> F>
+    template<typename R, stream_lambda<R, T, R&&, T&&> F>
     [[nodiscard]] R reduce(F&& reducer, R initial) && {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, R, R&&, T&&>) {
                 initial = reducer(std::move(initial), std::move((*this)[i]));
-            } else {
+            } else if constexpr (indexed_lambda<F, R, R&&, T&&>) {
                 initial = reducer(std::move(initial), std::move((*this)[i]), i);
+            } else {
+                initial = reducer(std::move(initial), std::move((*this)[i]), i, *this);
             }
         }
 
         return initial;
     }
 
-    template<stream_lambda<void, T&&> F>
+    template<typename R, stream_lambda<R, T, R&&, const T&> F>
+    R reduce(F&& reducer, R initial) const& {
+        for (size_t i = 0; i < this->size(); i++) {
+            if constexpr (basic_lambda<F, R, R&&, const T&>) {
+                initial = reducer(std::move(initial), (*this)[i]);
+            } else if constexpr (indexed_lambda<F, R, R&&, const T&>) {
+                initial = reducer(std::move(initial), (*this)[i], i);
+            } else {
+                initial = reducer(std::move(initial), (*this)[i], i, *this);
+            }
+        }
+
+        return initial;
+    }
+
+    template<stream_lambda<void, T, T&&> F>
     void forEach(F&& consumer) && {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, void, T&&>) {
                 consumer(std::move((*this)[i]));
-            } else {
+            } else if constexpr (indexed_lambda<F, void, T&&>) {
                 consumer(std::move((*this)[i]), i);
+            } else {
+                consumer(std::move((*this)[i]), i, *this);
             }
         }
     }
 
-    template<stream_lambda<void, const T&> F>
+    template<stream_lambda<void, T, const T&> F>
     void forEach(F&& consumer) const& {
         for (size_t i = 0; i < this->size(); i++) {
             if constexpr (basic_lambda<F, void, const T&>) {
                 consumer((*this)[i]);
-            } else {
+            } else if constexpr (indexed_lambda<F, void, const T&>) {
                 consumer((*this)[i], i);
+            } else {
+                consumer((*this)[i], i, *this);
             }
         }
     }
 
-    template<basic_lambda<T, const T&, const T&> F>
+    template<basic_lambda<T, T, const T&, const T&> F>
     [[nodiscard]] Stream<T> sort(F&& comparator = [](const T& a, const T& b) { return a < b; }) && {
         std::sort(this->begin(), this->end(), comparator);
 
         return std::move(*this);
     }
 
-    template<basic_lambda<T, const T&, const T&> F>
+    template<basic_lambda<T, T, const T&, const T&> F>
     Stream<T> sort(F&& comparator = [](const T& a, const T& b) { return a < b; }) const& {
         Stream<T> stream = *this;
 
@@ -411,16 +433,16 @@ public:
     }
 };
 
-class IntStream {
+template<typename T = long long> requires(std::is_arithmetic_v<T>)
+class IntStream : public Stream<T> {
+    using Stream<T>::Stream;
 public:
-    template<typename T = long long> requires(std::is_arithmetic_v<T>)
-    [[nodiscard]] static Stream<T> range(const T exclusiveEnd) {
-        return IntStream::range<T>(0, exclusiveEnd);
+    [[nodiscard]] static IntStream<T> range(const T exclusiveEnd) {
+        return IntStream::range(0, exclusiveEnd);
     }
 
-    template<typename T = long long> requires(std::is_arithmetic_v<T>)
-    [[nodiscard]] static Stream<T> range(const T includeStart, const T exclusiveEnd) {
-        Stream<T> stream;
+    [[nodiscard]] static IntStream<T> range(const T includeStart, const T exclusiveEnd) {
+        IntStream<T> stream;
 
         for (T i = includeStart; i < exclusiveEnd; i++) {
             stream.emplace_back(i);
@@ -430,10 +452,11 @@ public:
     }
 };
 
-class StringStream {
+class StringStream : public Stream<std::string> {
+    using Stream::Stream;
 public:
-    [[nodiscard]] static Stream<std::string> of(const std::string_view input, const char delimiter) {
-        Stream<std::string> stream;
+    [[nodiscard]] static StringStream of(const std::string_view input, const char delimiter) {
+        StringStream stream;
         size_t start = 0;
 
         for (size_t end; (end = input.find(delimiter, start)) != std::string_view::npos; start = end + 1) {
@@ -445,8 +468,8 @@ public:
         return stream;
     }
 
-    [[nodiscard]] static Stream<std::string> of(const std::string_view input, const std::string_view delimiter) {
-        Stream<std::string> stream;
+    [[nodiscard]] static StringStream of(const std::string_view input, const std::string_view delimiter) {
+        StringStream stream;
         size_t start = 0;
 
         if (delimiter.empty()) {
@@ -463,7 +486,11 @@ public:
 
         return stream;
     }
+
+    bool includes(const std::string_view value) const {
+        return std::find(this->begin(), this->end(), value) != this->end();
+    }
 };
 
-template <typename I>
+template<typename I>
 Stream(const I&, const I&) -> Stream<typename std::iterator_traits<I>::value_type>;

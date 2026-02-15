@@ -18,7 +18,7 @@ void InterceptPopup::scene() {
     if (!InterceptPopup::get()) {
         InterceptPopup* instance = new InterceptPopup(uiSize);
 
-        if (instance && instance->initAnchored(uiSize.width, uiSize.height)) {
+        if (instance && instance->init(uiSize)) {
             instance->m_noElasticity = true;
             instance->setID("intercept_popup"_spr);
             instance->autorelease();
@@ -36,7 +36,9 @@ m_codeBlock(nullptr),
 m_list(nullptr),
 m_settings(nullptr) { }
 
-bool InterceptPopup::setup() {
+bool InterceptPopup::init(const CCSize& size) {
+    ESCAPE_WHEN(!Popup::init(size.width, size.height), false);
+
     this->setTitle("Intercepted Requests");
     this->setupCodeBlock();
     this->setupList();
@@ -57,7 +59,7 @@ bool InterceptPopup::setup() {
 }
 
 void InterceptPopup::reloadList() {
-    OPT(m_list)->removeFromParentAndCleanup(true);
+    OPT(m_list)->removeFromParent();
 
     this->preReload();
     this->setupList();
@@ -65,7 +67,7 @@ void InterceptPopup::reloadList() {
 }
 
 void InterceptPopup::reloadCodeBlock(const bool recycleInfo) {
-    OPT(m_codeBlock)->removeFromParentAndCleanup(true);
+    OPT(m_codeBlock)->removeFromParent();
 
     this->preReload();
     this->setupCodeBlock(recycleInfo);
@@ -105,7 +107,7 @@ void InterceptPopup::setupList() {
     m_list = CaptureList::create({
         m_captureCellWidth,
         this->getPageHeight()
-    }, cellHeight, [this](HttpInfo* info) {
+    }, cellHeight, [this](std::shared_ptr<HttpInfo> info) {
         m_codeBlock->updateInfo(info);
     });
 
@@ -115,7 +117,7 @@ void InterceptPopup::setupList() {
 }
 
 void InterceptPopup::setupCodeBlock(const bool recycleInfo) {
-    HttpInfo* info = recycleInfo ? m_codeBlock->getActiveInfo() : nullptr;
+    std::shared_ptr<HttpInfo> info = recycleInfo ? m_codeBlock->getActiveInfo() : nullptr;
 
     m_codeBlock = CodeBlock::create({
         m_size.width - m_leftColumnXPosition - InterceptPopup::UI_PADDING,

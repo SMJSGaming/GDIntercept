@@ -1,14 +1,9 @@
 #include "Tooltip.hpp"
 
 Tooltip* Tooltip::create(const std::string_view text, const float scale, const GLubyte opacity) {
-    CCLabelBMFont* label = CCLabelBMFont::create(text.data(), "bigFont.fnt");
     Tooltip* instance = new Tooltip();
 
-    label->setScale(scale);
-
-    CCSize labelSize = label->getScaledContentSize() + ccp(PADDING, PADDING) * 2;
-
-    if (instance && instance->initAnchored(labelSize.width, labelSize.height, label, opacity, "square02_001.png")) {
+    if (instance && instance->init(text, scale, opacity)) {
         instance->autorelease();
 
         return instance;
@@ -19,7 +14,15 @@ Tooltip* Tooltip::create(const std::string_view text, const float scale, const G
     }
 }
 
-bool Tooltip::setup(CCLabelBMFont* label, const GLubyte opacity) {
+bool Tooltip::init(const std::string_view text, const float scale, const GLubyte opacity) {
+    CCLabelBMFont* label = CCLabelBMFont::create(text.data(), "bigFont.fnt");
+
+    label->setScale(scale);
+
+    const CCSize labelSize = label->getScaledContentSize() + ccp(PADDING, PADDING) * 2;
+
+    ESCAPE_WHEN(!Popup::init(labelSize.width, labelSize.height, "square02_001.png"), false);
+
     this->ignoreAnchorPointForPosition(false);
     this->setContentSize(m_size);
     this->setOpacity(0);

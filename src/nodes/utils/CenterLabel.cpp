@@ -28,11 +28,11 @@ void CenterLabel::updateLabel() {
     referenceLabel->setScale(this->getScale());
 
     if (count) {
-        CCSprite* referenceSprite = cocos::getChild<CCSprite>(this, 0);
+        CCSprite* referenceSprite = this->getChildByIndex<CCSprite>(0);
         const float heightAddition = referenceLabel->getContentHeight() / 2 - referenceSprite->getPositionY();
 
         for (int i = 0; i < count; i++) {
-            CCNode* child = cocos::getChild(this, i);
+            CCNode* child = this->getChildByIndex(i);
 
             child->setPositionY(child->getPositionY() + heightAddition);
         }

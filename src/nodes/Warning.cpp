@@ -18,12 +18,11 @@ void Warning::show() {
     Warning::WARNING->addChild(label);
 
     ProxyHandler::pauseAll();
-    SceneManager::get()->keepAcrossScenes(Warning::WARNING);
+    OverlayManager::get()->addChild(Warning::WARNING);
 }
 
 void Warning::hide() {
     ESCAPE_WHEN(!Warning::WARNING,);
-    SceneManager::get()->forget(Warning::WARNING);
     Warning::WARNING->removeFromParent();
     Warning::WARNING = nullptr;
 }

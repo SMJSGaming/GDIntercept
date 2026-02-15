@@ -20,15 +20,16 @@ public:
 
     void reloadCode();
     void reloadSideBar();
-    void updateInfo(HttpInfo* info);
+    void updateInfo(std::shared_ptr<HttpInfo> info);
     void setCode(const HttpInfo::Content& code);
-    HttpInfo* getActiveInfo() const;
+    std::shared_ptr<HttpInfo> getActiveInfo() const;
 private:
     static const std::vector<SideBarCell::SideBarView> VIEWS;
     static const SideBar::Categories ACTIONS;
     static bool ACCEPTED_PAUSES;
 
-    HttpInfo* m_info;
+    std::shared_ptr<HttpInfo> m_info;
+    std::vector<arc::TaskHandle<web::WebResponse>> m_resendTasks;
     SideBar* m_bar;
     std::string m_code;
     std::tuple<TracklessScrollbar*, TracklessScrollbar*> m_scrollbars;

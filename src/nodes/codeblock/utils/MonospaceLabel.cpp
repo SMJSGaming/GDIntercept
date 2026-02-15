@@ -36,6 +36,6 @@ void MonospaceLabel::updateLabel() {
     const size_t count = this->getChildrenCount();
 
     for (size_t i = 0; i < count; i++) {
-        cocos::getChild(this, i)->setPositionX((i + 0.5f) * characterWidth);
+        this->getChildByIndex(i)->setPositionX((i + 0.5f) * characterWidth);
     }
 }

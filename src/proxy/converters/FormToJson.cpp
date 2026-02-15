@@ -25,7 +25,7 @@ bool proxy::converters::FormToJson::canConvert(const std::string_view path, cons
 std::string proxy::converters::FormToJson::convert(const std::string_view path, const std::string_view original) const {
     ordered_json object(ordered_json::object());
 
-    StringStream::of(original, '&').forEach([&](const std::string_view section) {
+    StringStream::of(original, '&').forEach([&object](const std::string_view section) {
         const size_t equalPos = section.find('=');
         const std::string_view key = section.substr(0, equalPos);
 

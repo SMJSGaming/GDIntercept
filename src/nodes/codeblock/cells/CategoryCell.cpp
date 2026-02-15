@@ -25,13 +25,13 @@ CategoryCell* CategoryCell::create(const SideBarCategory& view) {
 }
 
 bool CategoryCell::init(const SideBarCategory& view) {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
 
     ESCAPE_WHEN(!CCLayerColor::initWithColor(theme.menu.categoryBackground), false);
     ESCAPE_WHEN(!SharedWidthNode::init(), false);
 
     CCLabelBMFont* referenceSizeNode = theme.menu.font.createLabel("0");
-    const float referenceHeight = cocos::getChild(referenceSizeNode, 0)->getContentHeight() * theme.menu.font.fontScale;
+    const float referenceHeight = referenceSizeNode->getChildByIndex(0)->getContentHeight() * theme.menu.font.fontScale;
     const float height = referenceSizeNode->getScaledContentHeight() + theme.menu.font.lineHeight;
     const CCSize referenceSize = { referenceHeight, referenceHeight };
     CCSprite* icon = CCSprite::createWithSpriteFrameName(view.icon.c_str());
@@ -73,7 +73,7 @@ void CategoryCell::onScaleToMax() {
 }
 
 void CategoryCell::draw() {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     const CCSize& size = this->getContentSize();
 
     SharedWidthNode::draw();

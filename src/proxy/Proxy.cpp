@@ -1,48 +1,50 @@
 #include "../../proxy/Proxy.hpp"
 
-using namespace nlohmann;
+using namespace proxy::prelude;
 using namespace geode::prelude;
 
-proxy::ProxyEvent::ProxyEvent(HttpInfo* info) : m_info(info) { }
+ProxyFilter::ProxyFilter(const enums::EventState state, const enums::OriginFilter origin) :
+m_state(state),
+m_origin(origin) { };
 
-proxy::HttpInfo* proxy::ProxyEvent::getInfo() const {
-    return m_info;
+ProxyFilter::ProxyFilter(const enums::EventState state, std::vector<std::string> urlParts) :
+m_state(state),
+m_origin(enums::OriginFilter::ALL_FILTER),
+m_urlParts(std::move(urlParts)) { };
+
+ProxyFilter::ProxyFilter(cocos2d::CCNode* target, const enums::EventState state, const enums::OriginFilter origin) :
+m_state(state),
+m_origin(origin) { };
+
+ProxyFilter::ProxyFilter(cocos2d::CCNode* target, const enums::EventState state, std::vector<std::string> urlParts) :
+m_state(state),
+m_origin(enums::OriginFilter::ALL_FILTER),
+m_urlParts(std::move(urlParts)) { };
+
+bool ProxyFilter::validate(const enums::EventState state, std::shared_ptr<HttpInfo> info) const {
+    const URL& url = info->getRequest().getURL();
+
+    return m_state == state &&
+        (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin())) &&
+        (m_urlParts.empty() || m_urlParts.some([&url](const std::string_view part) {
+            return url.getBasicUrl().find(part) != std::string_view::npos;
+        }));
 }
 
-proxy::HttpInfo::Request proxy::ProxyEvent::getRequest() const {
-    return m_info->getRequest();
+enums::EventState ProxyFilter::getState() const {
+    return m_state;
 }
 
-proxy::RequestEvent::RequestEvent(HttpInfo* info) : ProxyEvent(info) { }
-
-proxy::ResponseEvent::ResponseEvent(HttpInfo* info) : ProxyEvent(info) { }
-
-proxy::HttpInfo::Response proxy::ResponseEvent::getResponse() const {
-    return m_info->getResponse();
+enums::OriginFilter ProxyFilter::getOrigin() const {
+    return m_origin;
 }
 
-proxy::CancelEvent::CancelEvent(HttpInfo* info) : ProxyEvent(info) { }
+const StringStream& ProxyFilter::getURLParts() const {
+    return m_urlParts;
+}
 
-proxy::RequestFilter::RequestFilter(const enums::OriginFilter origin) : ProxyFilter(origin) { }
+ProxyEvent::ProxyEvent(ProxyFilter filter) : m_filter(std::make_shared<ProxyFilter>(std::move(filter))) { }
 
-proxy::RequestFilter::RequestFilter(const std::vector<std::string>& urlParts) : ProxyFilter(urlParts) { }
-
-proxy::RequestFilter::RequestFilter(CCNode* target, const enums::OriginFilter origin) : ProxyFilter(target, origin) { }
-
-proxy::RequestFilter::RequestFilter(CCNode* target, const std::vector<std::string>& urlParts) : ProxyFilter(target, urlParts) { }
-
-proxy::ResponseFilter::ResponseFilter(const enums::OriginFilter origin) : ProxyFilter(origin) { }
-
-proxy::ResponseFilter::ResponseFilter(const std::vector<std::string>& urlParts) : ProxyFilter(urlParts) { }
-
-proxy::ResponseFilter::ResponseFilter(CCNode* target, const enums::OriginFilter origin) : ProxyFilter(target, origin) { }
-
-proxy::ResponseFilter::ResponseFilter(CCNode* target, const std::vector<std::string>& urlParts) : ProxyFilter(target, urlParts) { }
-
-proxy::CancelFilter::CancelFilter(const enums::OriginFilter origin) : ProxyFilter(origin) { }
-
-proxy::CancelFilter::CancelFilter(const std::vector<std::string>& urlParts) : ProxyFilter(urlParts) { }
-
-proxy::CancelFilter::CancelFilter(CCNode* target, const enums::OriginFilter origin) : ProxyFilter(target, origin) { }
-
-proxy::CancelFilter::CancelFilter(CCNode* target, const std::vector<std::string>& urlParts) : ProxyFilter(target, urlParts) { }
+bool ProxyEvent::send(std::shared_ptr<HttpInfo> info) {
+    return ThreadSafeEvent::send(m_filter->getState(), info);
+}

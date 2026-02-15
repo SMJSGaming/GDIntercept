@@ -17,7 +17,7 @@ CodeBlock* CodeBlock::create(const CCSize& size) {
 CodeBlock::CodeBlock() : m_info(nullptr) { }
 
 bool CodeBlock::init(const CCSize& size) {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     ESCAPE_WHEN(!KeybindNode::init(), false);
     ESCAPE_WHEN(!Border::init(theme.code.background, size), false);
 
@@ -52,7 +52,7 @@ void CodeBlock::reloadCode() {
 }
 
 void CodeBlock::reloadSideBar() {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     TracklessScrollbar* scrollbarX = std::get<0>(m_scrollbars);
 
     m_bar->reloadState();
@@ -75,8 +75,8 @@ void CodeBlock::reloadSideBar() {
     this->resizeList();
 }
 
-void CodeBlock::updateInfo(HttpInfo* info) {
-    if (info != m_info) {
+void CodeBlock::updateInfo(std::shared_ptr<HttpInfo> info) {
+    if (info != m_info && (info == nullptr || m_info == nullptr || info->getID() != m_info->getID())) {
         m_info = info;
 
         this->reloadCode();
@@ -84,7 +84,7 @@ void CodeBlock::updateInfo(HttpInfo* info) {
 }
 
 void CodeBlock::setCode(const HttpInfo::Content& code) {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
     const CCSize fontSize = MonospaceLabel::getCharacterSize(theme.code.font.fontName) * theme.code.font.fontScale;
     const float lineNumberWidth = fontSize.width * std::to_string(
         std::count(code.contents.begin(), code.contents.end(), '\n') + 1
@@ -111,8 +111,8 @@ void CodeBlock::setCode(const HttpInfo::Content& code) {
             m_scrollbars = { nullptr, scrollbarY };
 
             this->setPaddingBottom(1);
-            m_corner->removeFromParentAndCleanup(true);
-            scrollbarX->removeFromParentAndCleanup(true);
+            m_corner->removeFromParent();
+            scrollbarX->removeFromParent();
             scrollbarY->setPositionY(this->getPaddingBottom());
             scrollbarY->setContentHeight(this->getContentHeight() - theme.code.scrollbar.size + this->getPaddingY() * 2);
         }
@@ -144,7 +144,7 @@ void CodeBlock::setCode(const HttpInfo::Content& code) {
     this->resizeList();
 }
 
-HttpInfo* CodeBlock::getActiveInfo() const {
+std::shared_ptr<HttpInfo> CodeBlock::getActiveInfo() const {
     return m_info;
 }
 

@@ -4,24 +4,26 @@ using namespace nlohmann;
 using namespace proxy::enums;
 using namespace geode::prelude;
 
-proxy::URL::URL(std::string url, web::WebRequest* request) : m_original(std::move(url)), m_reconstruction(m_original), m_query(ordered_json::object()) {
-    if (request != nullptr) {
-        const std::unordered_map<std::string, std::string> params = request->getUrlParams();
+proxy::URL::URL(std::string url) : m_original(std::move(url)), m_reconstruction(m_original), m_query(ordered_json::object()) {
+    this->parse();
+}
 
-        if (params.size() && m_reconstruction.find('?') == std::string::npos) {
-            m_reconstruction.push_back('?');
-        }
+proxy::URL::URL(std::string url, const web::WebRequest& request) : m_original(std::move(url)), m_reconstruction(m_original), m_query(ordered_json::object()) {
+    const StringMap<std::string> params = request.getUrlParams();
 
-        for (const auto& [key, value] : params) {
-            m_reconstruction.append(key);
-            m_reconstruction.push_back('=');
-            m_reconstruction.append(value);
-            m_reconstruction.push_back('&');
-        }
+    if (params.size() && m_reconstruction.find('?') == std::string::npos) {
+        m_reconstruction.push_back('?');
+    }
 
-        if (m_reconstruction.ends_with('&')) {
-            m_reconstruction.pop_back();
-        }
+    for (const auto& [key, value] : params) {
+        m_reconstruction.append(key);
+        m_reconstruction.push_back('=');
+        m_reconstruction.append(value);
+        m_reconstruction.push_back('&');
+    }
+
+    if (m_reconstruction.ends_with('&')) {
+        m_reconstruction.pop_back();
     }
 
     this->parse();
@@ -121,20 +123,19 @@ void proxy::URL::parseHost(size_t& index) {
         m_domain = m_domainName = lastSubDomain;
         m_subDomains.pop_back();
     } else for (size_t i = m_subDomains.size() - 1; i >= 0; i--) {
-        const std::string& subDomain = m_subDomains[i];
-
-        m_domain = subDomain + (m_domain.empty() ? m_domain : '.' + m_domain);
-
-        if (m_tld.empty()) {
-            m_tld = subDomain;
-        } else if (m_domain.find('.') != std::string::npos) {
-            m_domainName = subDomain;
-
-            m_subDomains.pop_back();
-            break;
-        }
+        std::string subDomain = m_subDomains[i];
 
         m_subDomains.pop_back();
+
+        if (m_tld.empty()) {
+            m_domain = '.' + subDomain;
+            m_tld = std::move(subDomain);
+        } else {
+            m_domain = subDomain + m_domain;
+            m_domainName = std::move(subDomain);
+
+            break;
+        }
     }
 
     index += size;

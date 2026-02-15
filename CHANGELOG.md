@@ -1,5 +1,27 @@
 # GDIntercept Changelog
 
+## v0.8.0 - GD/Geode Version Migration
+
+- Migrated to Geode V5
+- Migrated to GD 2.208x
+- Extensively optimized the mod
+- Created a v2 RobTop response to JSON parser
+- Made the minimized menu setting default false
+- Added auto decoding for RobTop responses
+- Added a setting for max line size
+- Added better memory management for proxies
+- Added univeral keybind support
+- Added repeatable keybinds
+- Moved keybind settings to the GDIntercept settings
+- Made Geode proxies less intrusive in the client
+- Fixed incompatibilities with other Geode web hooking mods
+- Fixed keyless headers not showing
+- Fixed list headers not showing all values
+- Fixed to raw conversions causing crashes in certain edge cases
+- Fixed excesive number sizes causing crashes
+- Fixed excesive line sizes causing lag spikes when culled
+- Disabled pausing/cancelling for Geode proxies
+
 ## v0.7.2 (2025-02-15) - Fixed Raw Delimiter Usage
 
 - Fixed an issue where the entry delimiter was used rather than the main delimiter between values

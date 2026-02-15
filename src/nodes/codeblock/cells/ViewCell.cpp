@@ -21,7 +21,7 @@ ViewCell* ViewCell::create(const SideBarView& view) {
 }
 
 bool ViewCell::init(const SideBarView& view) {
-    const Theme::Theme theme = Theme::getTheme();
+    const Theme::Theme& theme = Theme::getTheme();
 
     ESCAPE_WHEN(!HoverNode<CCLayerColor>::init(), false);
     ESCAPE_WHEN(!CCLayerColor::initWithColor(theme.menu.foreground), false);

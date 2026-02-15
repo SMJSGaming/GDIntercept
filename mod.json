@@ -1,6 +1,6 @@
 {
-  "geode": "4.10.0",
-  "version": "v0.7.2",
+  "geode": "5.0.0-beta.1",
+  "version": "v0.8.0",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "developers": [
@@ -25,21 +25,11 @@
     "developer"
   ],
   "gd": {
-    "win": "2.2074",
-    "mac": "2.2074",
-    "android": "2.2074"
+    "win": "2.2081",
+    "mac": "2.2081",
+    "android": "2.2081"
   },
   "early-load": false,
-  "dependencies": {
-    "geode.custom-keybinds": {
-      "version": "1.10.2",
-      "importance": "required",
-      "platforms": [
-        "win",
-        "android64"
-      ]
-    }
-  },
   "resources": {
     "fonts": {
       "consola": {
@@ -115,6 +105,7 @@
       "type": "bool",
       "default": false
     },
+
     "list-settings": {
       "type": "title",
       "name": "List Settings",
@@ -142,13 +133,14 @@
       "type": "bool",
       "default": false
     },
+
     "proxy-settings": {
       "type": "title",
       "name": "Proxy Settings",
       "description": "Settings related to the proxy server."
     },
-    "confirm-pause-between-plays": {
-      "name": "Confirm Pause Between Plays",
+    "pause-between-plays": {
+      "name": "Pause Between Plays",
       "description": "If this is enabled, GDI will remember the pause option between session.",
       "type": "bool",
       "default": false
@@ -172,6 +164,181 @@
       "description": "Logs all requests/responses made in the current session to the Geode console once a response is received.",
       "type": "bool",
       "default": false
+    },
+
+    "general_keybinds": {
+      "type": "title",
+      "name": "General Keybinds",
+      "description": "All the general keybind settings."
+    },
+    "open_capture_menu": {
+      "type": "keybind",
+      "name": "Open Capture Menu",
+      "description": "Opens the menu with the captured packets.",
+      "default": "Alt+I"
+    },
+    "next_packet": {
+      "type": "keybind",
+      "name": "Next Packet",
+      "description": "Selects the next packet in the capture menu.",
+      "default": ["Tab", "Shift+Down"]
+    },
+    "previous_packet": {
+      "type": "keybind",
+      "name": "Previous Packet",
+      "description": "Selects the previous packet in the capture menu.",
+      "default": ["Shift+Tab", "Shift+Up"]
+    },
+
+    "side_bar_keybinds": {
+      "type": "title",
+      "name": "Side Bar Keybinds",
+      "description": "All the side bar keybind settings."
+    },
+    "collapse_side_bar": {
+      "type": "keybind",
+      "name": "Collapse Side Bar",
+      "description": "Toggles the side bar between collapsed and expanded.",
+      "default": {
+        "win": "Ctrl+Enter",
+        "android": "Ctrl+Enter",
+        "mac": "Cmd+Enter",
+        "ios": "Cmd+Enter"
+      }
+    },
+    "open_save_files": {
+      "type": "keybind",
+      "name": "Open Save Files",
+      "description": "Opens the save folder of GDIntercept.",
+      "default": {
+        "win": "Ctrl+O",
+        "android": "Ctrl+O",
+        "mac": "Cmd+O",
+        "ios": "Cmd+O"
+      }
+    },
+    "open_theme_files": {
+      "type": "keybind",
+      "name": "Open Theme Files",
+      "description": "Opens the theme folder of GDIntercept.",
+      "default": "Alt+O"
+    },
+    "save_packet": {
+      "type": "keybind",
+      "name": "Save Packet",
+      "description": "Saves the selected packet to a file.",
+      "default": {
+        "win": "Ctrl+S",
+        "android": "Ctrl+S",
+        "mac": "Cmd+S",
+        "ios": "Cmd+S"
+      }
+    },
+    "copy_code_block": {
+      "type": "keybind",
+      "name": "Copy View",
+      "description": "Copies the contents of the current code in view.",
+      "default": {
+        "win": "Ctrl+C",
+        "android": "Ctrl+C",
+        "mac": "Cmd+C",
+        "ios": "Cmd+C"
+      }
+    },
+    "resend_packet": {
+      "type": "keybind",
+      "name": "Resend Packet",
+      "description": "Resends the selected packet.",
+      "default": {
+        "win": "Ctrl+R",
+        "android": "Ctrl+R",
+        "mac": "Cmd+R",
+        "ios": "Cmd+R"
+      }
+    },
+    "pause_packet": {
+      "type": "keybind",
+      "name": "Pause/Resume Packet",
+      "description": "Either pauses or resumes the selected packet.",
+      "default": {
+        "win": "Ctrl+Space",
+        "android": "Ctrl+Space",
+        "mac": "Cmd+Space",
+        "ios": "Cmd+Space"
+      }
+    },
+
+    "code_block_keybinds": {
+      "type": "title",
+      "name": "Code Block Keybinds",
+      "description": "All the code block keybind settings."
+    },
+    "raw_code_block": {
+      "type": "keybind",
+      "name": "Raw/Formatted Code",
+      "description": "Either shows the raw or formatted code.",
+      "default": {
+        "win": "Ctrl+L",
+        "android": "Ctrl+L",
+        "mac": "Cmd+L",
+        "ios": "Cmd+L"
+      }
+    },
+    "code_line_up": {
+      "type": "keybind",
+      "name": "Line Up",
+      "description": "Scrolls one line up in the code block.",
+      "default": "Up"
+    },
+    "code_line_down": {
+      "type": "keybind",
+      "name": "Line Down",
+      "description": "Scrolls one line down in the code block.",
+      "default": "Down"
+    },
+    "code_page_up": {
+      "type": "keybind",
+      "name": "Page Up",
+      "description": "Scrolls one page up in the code block.",
+      "default": {
+        "win": ["PageUp", "Ctrl+Up"],
+        "android": ["PageUp", "Ctrl+Up"],
+        "mac": ["PageUp", "Cmd+Up"],
+        "ios": ["PageUp", "Cmd+Up"]
+      }
+    },
+    "code_page_down": {
+      "type": "keybind",
+      "name": "Page Down",
+      "description": "Scrolls one page down in the code block.",
+      "default": {
+        "win": ["PageDown", "Ctrl+Down"],
+        "android": ["PageDown", "Ctrl+Down"],
+        "mac": ["PageDown", "Cmd+Down"],
+        "ios": ["PageDown", "Cmd+Down"]
+      }
+    },
+    "code_page_left": {
+      "type": "keybind",
+      "name": "Page Left",
+      "description": "Scrolls one page left in the code block.",
+      "default": {
+        "win": "Ctrl+Left",
+        "android": "Ctrl+Left",
+        "mac": "Cmd+Left",
+        "ios": "Cmd+Left"
+      }
+    },
+    "code_page_right": {
+      "type": "keybind",
+      "name": "Page Right",
+      "description": "Scrolls one page right in the code block.",
+      "default": {
+        "win": "Ctrl+Right",
+        "android": "Ctrl+Right",
+        "mac": "Cmd+Right",
+        "ios": "Cmd+Right"
+      }
     }
   }
 }

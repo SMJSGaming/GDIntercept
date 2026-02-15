@@ -25,7 +25,7 @@ void Character::setCString(const char* label) {
 void Character::updateLabel() {
     if (m_rescale) {
         CCLabelBMFont::updateLabel();
-        CCNode* characterNode = cocos::getChild(this, 0);
+        CCNode* characterNode = this->getChildByIndex(0);
 
         characterNode->setScale(this->getContentHeight() / characterNode->getContentHeight());
         characterNode->setPositionY(this->getContentHeight() / 2);

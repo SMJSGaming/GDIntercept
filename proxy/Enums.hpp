@@ -56,4 +56,11 @@ namespace proxy::enums {
         OTHER_FILTER,
         ALL_FILTER
     };
+
+    enum class EventState {
+        REQUEST,
+        PROGRESS,
+        RESPONSE,
+        CANCEL
+    };
 }

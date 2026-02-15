@@ -50,7 +50,7 @@ void CullingList::reloadData() {
 
     m_view->reloadData();
 
-    Stream(m_cells).forEach([&](CullingCell* cell) { m_maxCellWidth = std::max(m_maxCellWidth, cell->m_width); });
+    Stream(m_cells).forEach([this](CullingCell* cell) { m_maxCellWidth = std::max(m_maxCellWidth, cell->m_width); });
 
     m_view->m_contentLayer->setPositionX(0);
     m_view->m_contentLayer->setContentSize({ m_maxCellWidth, m_cellHeight * m_cells.size() });
@@ -182,25 +182,26 @@ void CullingList::update(const float dt) {
         m_scrollLockSteps--;
     }
 
+    // Why does this need to happen every step and not in moved
     m_view->m_contentLayer->setPositionX(std::min(0.0f, std::max(m_view->getContentWidth() - m_maxCellWidth, m_lastOffset.x)));
-    m_activeCells.forEach([&](CullingCell* cell) { this->horizontalRender(cell); });
+    m_activeCells.forEach([this](CullingCell* cell) { this->horizontalRender(cell); });
 
     ESCAPE_WHEN(m_activeCells.size() && (!moved || shouldSkipCulling),);
     const size_t offset = size - (renderAll ? 0 : std::max<int>(0, std::floor(-m_lastOffset.y / m_cellHeight))) - 1;
     const size_t amount = renderAll ? size : std::min<size_t>(std::ceil(this->getContentHeight() / m_cellHeight), size) + 1;
     Stream<CullingCell*> newActiveCells;
 
-    IntStream::range(amount)
-        .map<size_t>([&](const size_t i) { return offset - i; })
-        .filter([&](const size_t index) { return renderAll || (index >= 0 && index < size); })
-        .forEach([&](const size_t index) {
+    IntStream<size_t>::range(amount)
+        .map<size_t>([offset](const size_t i) { return offset - i; })
+        .filter([renderAll, size](const size_t index) { return renderAll || (index >= 0 && index < size); })
+        .forEach([this, &newActiveCells](const size_t index) {
             CullingCell* cell = this->renderCell(index);
 
             this->horizontalRender(cell);
             newActiveCells.push_back(cell);
         });
 
-    m_activeCells.filter([&](CullingCell* cell) { return !newActiveCells.includes(cell); })
+    m_activeCells.filter([&newActiveCells](CullingCell* cell) { return !newActiveCells.includes(cell); })
         .forEach([](CullingCell* cell) {
             cell->removeFromParentAndCleanup(false);
             cell->discard();
