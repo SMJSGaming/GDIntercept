@@ -100,7 +100,7 @@ $execute {
     }, Mod::get());
 }
 
-$on_mod(Loaded) {
+$on_game(Loaded) {
     DynamicEnum::registerLoader("theme"_spr, Theme::Theme::load);
     DynamicEnum::registerLoader("theme"_spr, []{
         OPT(InterceptPopup::get())->reloadCodeBlock(true);

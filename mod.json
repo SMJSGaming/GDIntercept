@@ -30,7 +30,7 @@
     "mac": "2.2081",
     "ios": "2.2081"
   },
-  "early-load": false,
+  "early-load": true,
   "resources": {
     "fonts": {
       "consola": {

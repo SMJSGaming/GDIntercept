@@ -13,6 +13,7 @@
 - Added univeral keybind support
 - Added repeatable keybinds
 - Added iOS support
+- Added early loading
 - Moved keybind settings to the GDIntercept settings
 - Made Geode proxies less intrusive in the client
 - Fixed incompatibilities with other Geode web hooking mods

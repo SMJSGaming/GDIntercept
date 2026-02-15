@@ -9,7 +9,13 @@ float InterceptPopup::CAPTURE_CELL_HEIGHT = 20;
 float InterceptPopup::CAPTURE_CELL_BADGE_HEIGHT = 10;
 
 InterceptPopup* InterceptPopup::get() {
-    return typeinfo_cast<InterceptPopup*>(CCDirector::sharedDirector()->getRunningScene()->getChildByID("intercept_popup"_spr));
+    CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+
+    if (scene) {
+        return typeinfo_cast<InterceptPopup*>(scene->getChildByID("intercept_popup"_spr));
+    } else {
+        return nullptr;
+    }
 }
 
 void InterceptPopup::scene() {
