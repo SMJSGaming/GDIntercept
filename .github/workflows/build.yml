@@ -42,6 +42,7 @@ jobs:
           build-config: 'Release'
           combine: true
           cli: 'latest'
+          export-symbols: true
           target: ${{ matrix.config.target }}
 
   package-deploy:
