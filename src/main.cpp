@@ -3,7 +3,7 @@
 #include "settings/DynamicEnum.hpp"
 
 $on_game(Loaded) {
-    listenForKeybindSettingPresses("open_capture_menu", [](const Keybind& keybind, const bool down, const bool repeat, const double time) {
+    listenForKeybindSettingPresses("open_capture_menu", [](const Keybind& keybind, const bool down, const bool repeat) {
         if (down && !repeat) {
             InterceptPopup::scene();
 

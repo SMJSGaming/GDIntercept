@@ -41,7 +41,7 @@ jobs:
         with:
           build-config: 'Release'
           combine: true
-          cli: 'nightly'
+          cli: 'latest'
           export-symbols: true
           target: ${{ matrix.config.target }}
 
