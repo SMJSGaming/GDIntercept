@@ -254,39 +254,32 @@ void CodeBlock::onInfo() {
         const HttpInfo::Request& request = m_info->getRequest();
         const std::optional<HttpInfo::Response>& response = m_info->getResponse();
         const URL& url = request.getURL();
-        LookupTable<std::string, std::string> info {
-            { "Client", m_info->getClient() == Client::COCOS ? "Cocos2D-X" : "Geode" },
-            { "Method", request.getMethod() },
-            { "Protocol", url.getProtocol() },
-            { "Host", url.getHost() },
-            { "Path", url.getPath() }
-        };
+        StringBuffer info;
+
+        info.append("Client: {}\nMethod: {}\nProtocol: {}\nHost: {}",
+            m_info->getClient() == Client::COCOS ? "Cocos2D-X" : "Geode",
+            request.getMethod(),
+            url.getProtocol(),
+            url.getHost()
+        );
 
         if (url.getUsername().size() || url.getPassword().size()) {
-            info.emplace("Host", {
-                { "Username", url.getUsername() },
-                { "Password", url.getPassword() }
-            });
+            info.append("\nUsername: {}", url.getUsername());
+            info.append("\nPassword: {}", url.getPassword());
         }
 
+        info.append("\nPath: {}", url.getPath());
+
         if (url.getHash().size()) {
-            info.insert("Hash", url.getHash());
+            info.append("\nHash: {}", url.getHash());
         }
 
         if (m_info->isCompleted()) {
-            info.insert("Status Code", response->stringifyStatusCode());
-            info.insert("Response Time", fmt::format("{}ms", response->getResponseTime()));
+            info.append("\nStatus Code: {}", response->stringifyStatusCode());
+            info.append("\nResponse Time: {}", fmt::format("{}ms", response->getResponseTime()));
         }
 
-        this->setCode({ ContentType::UNKNOWN_CONTENT, info.reduce<std::string>([](std::string acc, const auto& entry) {
-            if (!acc.empty()) {
-                acc.push_back('\n');
-            }
-
-            return acc.append(entry.first)
-                .append(": ")
-                .append(entry.second);
-        }, "") });
+        this->setCode({ ContentType::UNKNOWN_CONTENT, info.str() });
     }
 }
 

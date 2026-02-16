@@ -16,7 +16,7 @@ protected:
         this->addEventListener(KeybindSettingPressedEventV3(Mod::get(), std::move(keybindName)), [
             callback = std::forward<F>(callback),
             repeatable
-        ](const Keybind& keybind, const bool down, const bool repeat) {
+        ](const Keybind& keybind, const bool down, const bool repeat, const double time) {
             if (down && (repeatable || !repeat)) {
                 callback();
 
