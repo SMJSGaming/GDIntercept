@@ -192,7 +192,7 @@ void CullingList::update(const float dt) {
     Stream<CullingCell*> newActiveCells;
 
     IntStream<size_t>::range(amount)
-        .map<size_t>([offset](const size_t i) { return offset - i; })
+        .map([offset](const size_t i) { return offset - i; })
         .filter([renderAll, size](const size_t index) { return renderAll || (index >= 0 && index < size); })
         .forEach([this, &newActiveCells](const size_t index) {
             CullingCell* cell = this->renderCell(index);

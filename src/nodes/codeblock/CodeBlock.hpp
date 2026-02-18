@@ -40,7 +40,9 @@ private:
     bool init(const CCSize& size);
     void showMessage(std::string message, const ccColor3B& color = { 0xFF, 0xFF, 0xFF });
     void scroll(const float x, const float y);
-    bool onCopy();
+    bool onCopyView();
+    bool onCopyInfo();
+    bool onCopyCurl();
     bool onSend();
     bool onCancel();
     bool onOpenSaveFiles();

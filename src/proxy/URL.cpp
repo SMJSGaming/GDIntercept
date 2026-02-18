@@ -30,7 +30,7 @@ proxy::URL::URL(std::string url, const web::WebRequest& request) : m_original(st
 }
 
 std::string proxy::URL::getBasicUrl() const {
-    return fmt::format("{}://{}/{}", m_protocol, this->getHost(), m_path);
+    return fmt::format("{}://{}/{}", m_stringScheme, this->getHost(), m_path);
 }
 
 std::string proxy::URL::stringifyQuery(const bool raw) const {
@@ -40,10 +40,10 @@ std::string proxy::URL::stringifyQuery(const bool raw) const {
 void proxy::URL::parse() {
     size_t index = 0;
 
-    this->parseProtocol(index);
+    this->parseScheme(index);
     this->parseLogin(index);
 
-    if (m_scheme == Protocol::HTTP || m_scheme == Protocol::HTTPS || m_scheme == Protocol::WS || m_scheme == Protocol::WSS || m_scheme == Protocol::FTP) {
+    if (m_scheme != Scheme::FILE && m_scheme != Scheme::STEAM && m_scheme != Scheme::MAIL && m_scheme != Scheme::UNKNOWN_SCHEME) {
         this->parseHost(index);
         this->determineOrigin();
     } else {
@@ -53,36 +53,35 @@ void proxy::URL::parse() {
     this->parsePath(index);
 }
 
-void proxy::URL::parseProtocol(size_t& index) {
-    static const std::unordered_map<std::string, Protocol> translations {
-        {"http", Protocol::HTTP},
-        {"https", Protocol::HTTPS},
-        {"ws", Protocol::WS},
-        {"wss", Protocol::WSS},
-        {"ftp", Protocol::FTP},
-        {"file", Protocol::FILE},
-        {"steam", Protocol::STEAM},
-        {"mailto", Protocol::MAIL},
+void proxy::URL::parseScheme(size_t& index) {
+    static const geode::utils::StringMap<Scheme> translations {
+        {"http", Scheme::HTTP},
+        {"https", Scheme::HTTPS},
+        {"ws", Scheme::WS},
+        {"wss", Scheme::WSS},
+        {"ftp", Scheme::FTP},
+        {"sftp", Scheme::SFTP},
+        {"file", Scheme::FILE},
+        {"steam", Scheme::STEAM},
+        {"mailto", Scheme::MAIL},
     };
-    const size_t protocolEnd = m_reconstruction.find(":", index);
-    const size_t size = protocolEnd - index;
+    const size_t schemeEnd = m_reconstruction.find(":", index);
+    const size_t size = schemeEnd - index;
 
-    if (protocolEnd == std::string::npos || (
-        m_protocol = m_reconstruction.substr(index, size)
+    if (schemeEnd == std::string::npos || (
+        m_stringScheme = m_reconstruction.substr(index, size)
     ).find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos) {
-        m_scheme = Protocol::UNKNOWN_PROTOCOL;
-        m_protocol = "unknown";
+        m_scheme = Scheme::UNKNOWN_SCHEME;
+        m_stringScheme = "unknown";
 
         return;
-    } else if (translations.contains(m_protocol)) {
-        m_scheme = translations.at(m_protocol);
     } else {
-        m_scheme = Protocol::UNKNOWN_PROTOCOL;
+        m_scheme = translations.contains(m_stringScheme) ? translations.at(m_stringScheme) : Scheme::UNKNOWN_SCHEME;
     }
 
-    std::transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), toupper);
+    std::transform(m_stringScheme.begin(), m_stringScheme.end(), m_stringScheme.begin(), tolower);
 
-    index += size + 1 + m_reconstruction.substr(protocolEnd + 1).starts_with("//") * 2;
+    index += size + 1 + m_reconstruction.substr(schemeEnd + 1).starts_with("//") * 2;
 }
 
 void proxy::URL::parseLogin(size_t& index) {
@@ -107,12 +106,26 @@ void proxy::URL::parseHost(size_t& index) {
     const size_t hostEnd = m_reconstruction.find('/', index);
     const size_t size = (hostEnd == std::string::npos ? m_reconstruction.size() : hostEnd) - index;
 
-    m_subDomains = StringStream::of(m_host = m_reconstruction.substr(index, size), '.');
+    m_subDomains = StringStream::split(m_host = m_reconstruction.substr(index, size), '.');
 
     std::string& lastSubDomain = m_subDomains.back();
     const size_t portStart = lastSubDomain.find(':');
 
-    m_port = m_scheme == Protocol::HTTPS ? 443 : 80;
+    switch (m_scheme) {
+        case Scheme::WSS: [[fallthrough]];
+        case Scheme::HTTPS: {
+            m_port = 443;
+        } break;
+        case Scheme::FTP: {
+            m_port = 21;
+        } break;
+        case Scheme::SFTP: {
+            m_port = 22;
+        } break;
+        default: {
+            m_port = 80;
+        }
+    }
 
     if (portStart != std::string::npos) {
         m_port = utils::numFromString<unsigned int>(lastSubDomain.substr(portStart + 1)).unwrapOr(m_port);

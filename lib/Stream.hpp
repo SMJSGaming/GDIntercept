@@ -22,6 +22,37 @@ concept full_lambda = returning_lambda<F, Returns, PrefixArgs..., size_t, Stream
 template<typename F, typename Returns, typename Value, typename ...PrefixArgs>
 concept stream_lambda = basic_lambda<F, Returns, PrefixArgs...> || indexed_lambda<F, Returns, PrefixArgs...> || full_lambda<F, Returns, Value, PrefixArgs...>;
 
+template<typename F, typename ...PrefixArgs>
+concept inferred_basic_lambda = std::invocable<F, PrefixArgs...>;
+
+template<typename F, typename ...PrefixArgs>
+concept inferred_indexed_lambda = std::invocable<F, PrefixArgs..., size_t>;
+
+template<typename F, typename Value, typename ...PrefixArgs>
+concept inferred_full_lambda = std::invocable<F, PrefixArgs..., size_t, Stream<Value>&>;
+
+template<typename F, typename Value, typename ...PrefixArgs>
+concept inferred_stream_lambda = inferred_basic_lambda<F, PrefixArgs...> || inferred_indexed_lambda<F, PrefixArgs...> || inferred_full_lambda<F, Value, PrefixArgs...>;
+
+template<typename F, typename Value, typename... PrefixArgs>
+struct __stream_lambda_return_impl {
+private:
+    template<typename G>
+    static auto test(int) -> std::type_identity<std::invoke_result_t<G, PrefixArgs...>>;
+
+    template<typename G>
+    static auto test(long) -> std::type_identity<std::invoke_result_t<G, PrefixArgs..., size_t>>;
+
+    template<typename G>
+    static auto test(char) -> std::type_identity<std::invoke_result_t<G, PrefixArgs..., size_t, Stream<Value>&>>;
+
+public:
+    using type = typename decltype(test<F>(0))::type;
+};
+
+template<typename F, typename Value, typename ...PrefixArgs>
+using stream_lambda_return = __stream_lambda_return_impl<F, Value, PrefixArgs...>::type;
+
 // NOTE! Non constant versions will consume on each iteration
 template<typename T>
 class Stream : public std::vector<T> {
@@ -142,14 +173,14 @@ public:
         return false;
     }
 
-    template<typename R, stream_lambda<R, T, T&&> F>
-    [[nodiscard]] Stream<R> map(F&& mapper) && {
-        Stream<R> stream;
+    template<inferred_stream_lambda<T, T&&> F>
+    [[nodiscard]] Stream<stream_lambda_return<F, T, T&&>> map(F&& mapper) && {
+        Stream<stream_lambda_return<F, T, T&&>> stream;
 
         for (size_t i = 0; i < this->size(); i++) {
-            if constexpr (basic_lambda<F, R, T&&>) {
+            if constexpr (inferred_basic_lambda<F, T&&>) {
                 stream.emplace_back(mapper(std::move((*this)[i])));
-            } else if constexpr (indexed_lambda<F, R, T&&>) {
+            } else if constexpr (inferred_indexed_lambda<F, T&&>) {
                 stream.emplace_back(mapper(std::move((*this)[i]), i));
             } else {
                 stream.emplace_back(mapper(std::move((*this)[i]), i, *this));
@@ -159,14 +190,14 @@ public:
         return stream;
     }
 
-    template<typename R, stream_lambda<R, T, const T&> F>
-    Stream<R> map(F&& mapper) const& {
-        Stream<R> stream;
+    template<inferred_stream_lambda<T, const T&> F>
+    Stream<stream_lambda_return<F, T, const T&>> map(F&& mapper) const& {
+        Stream<stream_lambda_return<F, T, const T&>> stream;
 
         for (size_t i = 0; i < this->size(); i++) {
-            if constexpr (basic_lambda<F, R, const T&>) {
+            if constexpr (inferred_basic_lambda<F, const T&>) {
                 stream.emplace_back(mapper((*this)[i]));
-            } else if constexpr (indexed_lambda<F, R, const T&>) {
+            } else if constexpr (inferred_indexed_lambda<F, const T&>) {
                 stream.emplace_back(mapper((*this)[i], i));
             } else {
                 stream.emplace_back(mapper((*this)[i], i, *this));
@@ -402,12 +433,12 @@ public:
 
     template<typename R>
     [[nodiscard]] Stream<R> cast() && {
-        return this->map<R>([](T&& element) { return static_cast<R>(element); });
+        return this->map([](T&& element) { return static_cast<R>(element); });
     }
 
     template<typename R>
     Stream<R> cast() const& {
-        return this->map<R>([](const T& element) { return static_cast<R>(element); });
+        return this->map([](const T& element) { return static_cast<R>(element); });
     }
 
     template<std::invocable F>
@@ -455,7 +486,7 @@ public:
 class StringStream : public Stream<std::string> {
     using Stream::Stream;
 public:
-    [[nodiscard]] static StringStream of(const std::string_view input, const char delimiter) {
+    [[nodiscard]] static StringStream split(const std::string_view input, const char delimiter) {
         StringStream stream;
         size_t start = 0;
 
@@ -468,7 +499,7 @@ public:
         return stream;
     }
 
-    [[nodiscard]] static StringStream of(const std::string_view input, const std::string_view delimiter) {
+    [[nodiscard]] static StringStream split(const std::string_view input, const std::string_view delimiter) {
         StringStream stream;
         size_t start = 0;
 
@@ -485,6 +516,20 @@ public:
         stream.emplace_back(input.substr(start));
 
         return stream;
+    }
+
+    static std::string join(const std::vector<std::string>& input, const std::string_view delimiter) {
+        return StringStream(input).reduce([delimiter](std::string&& acc, std::string&& part, const size_t i) {
+            if (i) acc += delimiter;
+
+            acc += part;
+
+            return std::move(acc);
+        }, std::string());
+    }
+
+    static std::string replace(const std::string_view input, const std::string_view delimiter, const std::string_view replacement) {
+        return StringStream::join(StringStream::split(input, delimiter), replacement);
     }
 
     bool includes(const std::string_view value) const {

@@ -37,9 +37,9 @@ bool CaptureCell::init(const size_t index, const CCSize& size) {
     const float menuPositionX = size.width - 20;
     const bool hideBadges = Mod::get()->getSettingValue<bool>("hide-badges");
     const HttpInfo::Request& request = m_info->getRequest();
-    const URL& url = request.getURL();
+    const URL& url = m_info->getURL();
     const std::string& path = url.getPath();
-    std::string requestLabel = request.getMethod();
+    std::string requestLabel = m_info->getRequest().getMethod();
 
     requestLabel.push_back(' ');
     requestLabel.append(path == "/" ? "" : path.substr(path.substr(0, path.size() - 1).find_last_of('/')));
@@ -126,7 +126,7 @@ std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> Capt
         ); break;
     }
 
-    switch (m_info->getRequest().getURL().getOrigin()) {
+    switch (m_info->getURL().getOrigin()) {
         case Origin::GD: badges.push_back(
             this->makeBadgeInfo("Geometry Dash Server Origin", CCSprite::createWithSpriteFrameName("gd.png"_spr))
         ); break;

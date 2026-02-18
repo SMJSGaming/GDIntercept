@@ -26,12 +26,20 @@ class DynamicEnum : public SettingBaseValueV3<DynamicEnumValue> {
 public:
     static Result<std::shared_ptr<SettingV3>> parse(std::string key, std::string modID, const matjson::Value& json);
     static void reloadDynamicEnums(std::string sprSettingKey);
-    static void registerLoader(std::string sprSettingKey, const std::function<void()>& loader);
+
+    template<typename F> requires(std::invocable<F>)
+    static void registerLoader(std::string sprSettingKey, F&& loader) {
+        if (!DynamicEnum::LOADERS.contains(sprSettingKey)) {
+            DynamicEnum::LOADERS[sprSettingKey] = {};
+        }
+
+        DynamicEnum::LOADERS.at(sprSettingKey).emplace_back(std::move(loader));
+    }
 
     SettingNodeV3* createNode(const float width) override;
     std::string getSaveValue() const;
 private:
-    static std::unordered_map<std::string, Stream<std::function<void()>>> LOADERS;
+    static StringMap<Stream<std::function<void()>>> LOADERS;
 
     std::string m_saveValue;
 };

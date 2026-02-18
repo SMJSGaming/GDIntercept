@@ -25,17 +25,18 @@ namespace proxy::enums {
         OTHER
     };
 
-    enum class Protocol {
+    enum class Scheme {
         HTTP,
         HTTPS,
         WS,
         WSS,
         FTP,
+        SFTP,
         FILE,
         STEAM,
         MAIL,
-        // Any other protocols are either custom or make 0 sense in the context of a game
-        UNKNOWN_PROTOCOL
+        // Any other schemes are either custom or make 0 sense in the context of a game
+        UNKNOWN_SCHEME
     };
 
     enum class State {

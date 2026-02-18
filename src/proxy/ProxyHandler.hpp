@@ -45,10 +45,8 @@ namespace proxy {
         std::vector<ListenerHandle> m_proxyListeners;
         CCObject* m_originalTarget;
         SEL_HttpResponse m_originalProxy;
-        std::chrono::time_point<std::chrono::steady_clock> m_start;
         bool m_finished;
 
-        size_t calculateResponseTime();
         void onCocosResponse(CCHttpClient* client, CCHttpResponse* response);
         bool onModResponse(const web::WebResponse& response);
         void onResponse();

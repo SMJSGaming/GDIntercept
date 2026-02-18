@@ -1,5 +1,5 @@
 {
-  "geode": "5.0.0-beta.2",
+  "geode": "5.0.0-beta.3",
   "version": "v0.8.0",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
@@ -235,7 +235,7 @@
         "ios": "Cmd+S"
       }
     },
-    "copy_code_block": {
+    "copy_view": {
       "type": "keybind",
       "name": "Copy View",
       "description": "Copies the contents of the current code in view.",
@@ -244,6 +244,28 @@
         "android": "Ctrl+C",
         "mac": "Cmd+C",
         "ios": "Cmd+C"
+      }
+    },
+    "copy_info": {
+      "type": "keybind",
+      "name": "Copy Info",
+      "description": "Copies the info of the current request in view.",
+      "default": {
+        "win": "Ctrl+Alt+C",
+        "android": "Ctrl+Alt+C",
+        "mac": "Cmd+Alt+C",
+        "ios": "Cmd+Alt+C"
+      }
+    },
+    "copy_curl": {
+      "type": "keybind",
+      "name": "Copy Curl",
+      "description": "Copies the Curl command of the current request in view.",
+      "default": {
+        "win": "Ctrl+Shift+C",
+        "android": "Ctrl+Shift+C",
+        "mac": "Cmd+Shift+C",
+        "ios": "Cmd+Shift+C"
       }
     },
     "resend_packet": {

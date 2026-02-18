@@ -54,7 +54,7 @@ Stream<ProxyHandler*> ProxyHandler::getFilteredProxies() {
         return Stream(ProxyHandler::ALIVE_PROXIES.begin(), ProxyHandler::ALIVE_PROXIES.end());
     } else {
         return Stream(ProxyHandler::ALIVE_PROXIES.begin(), ProxyHandler::ALIVE_PROXIES.end()).filter([&filter](ProxyHandler* proxy) {
-            return proxyTranslations.at(proxy->m_info->getRequest().getURL().getOrigin()) == filter;
+            return proxyTranslations.at(proxy->m_info->getURL().getOrigin()) == filter;
         });
     }
 }
@@ -100,8 +100,7 @@ void ProxyHandler::resumeAll() {
         const std::optional<CCHttpRequest*>& request = proxy->getCocosRequest();
 
         if (!proxy->m_finished && request.has_value()) {
-            proxy->m_start = std::chrono::high_resolution_clock::now();
-
+            proxy->m_info->m_request.resetTime();
             proxy->m_info->resume();
             CCHttpClient::getInstance()->send(request.value());
         }
@@ -158,7 +157,7 @@ m_finished(false) {
     request->setResponseCallback(this, httpresponse_selector(ProxyHandler::onCocosResponse));
 
     if (!m_info->isPaused()) {
-        m_start = std::chrono::high_resolution_clock::now();
+        m_info->m_request.resetTime();
 
         CCHttpClient::getInstance()->send(request);
     }
@@ -171,8 +170,7 @@ m_responseListener(web::IDBasedWebResponseEvent(request.getID()).listen([this](c
 m_info(std::make_shared<HttpInfo>(modID == Mod::get()->getID(), request)),
 m_originalTarget(nullptr),
 m_originalProxy(nullptr),
-m_finished(false),
-m_start(std::chrono::high_resolution_clock::now()) { }
+m_finished(false) { }
 
 ProxyHandler::~ProxyHandler() {
     if (m_cocosRequest.has_value()) {
@@ -184,20 +182,17 @@ std::shared_ptr<HttpInfo> ProxyHandler::getInfo() noexcept {
     return m_info;
 }
 
-size_t ProxyHandler::calculateResponseTime() {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_start).count();
-}
-
 void ProxyHandler::onCocosResponse(CCHttpClient* client, CCHttpResponse* response) {
-    m_info->m_response.emplace(HttpInfo::Response(&m_info->getRequest(), response, this->calculateResponseTime()));
+    m_info->m_response.emplace(HttpInfo::Response(m_info, response));
 
     (m_originalTarget->*m_originalProxy)(client, response);
     this->onResponse();
 }
 
 bool ProxyHandler::onModResponse(const web::WebResponse& response) {
-    m_info->m_response.emplace(HttpInfo::Response(&m_info->getRequest(), response, this->calculateResponseTime()));
+    m_info->m_httpVersion = HttpInfo::translateHttpVersion(m_modRequest->getHttpVersion());
 
+    m_info->m_response.emplace(HttpInfo::Response(m_info, response));
     this->onResponse();
 
     return ListenerResult::Propagate;

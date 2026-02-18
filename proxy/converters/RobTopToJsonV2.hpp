@@ -122,7 +122,7 @@ namespace proxy::converters {
         static const std::unordered_map<std::string, ObjectType> ENDPOINT_MAPPINGS;
 
         inline std::string splitPath(const std::string_view path) const {
-            return StringStream::of(path, "/").back();
+            return StringStream::split(path, "/").back();
         } 
     };
 }

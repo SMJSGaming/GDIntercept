@@ -108,18 +108,19 @@ public:
         return false;
     }
 
-    void insert(const Entry& entry) {
+    void insert(Entry entry) {
         this->erase(entry.first);
-        m_table.push_back(entry);
+
+        m_table.push_back(std::move(entry));
     }
 
-    void insert(const K& key, const V& value) {
-        this->insert(std::make_pair(key, value));
+    void insert(K key, V value) {
+        this->insert(std::make_pair(std::move(key), std::move(value)));
     }
 
-    void insert(const LookupTable<K, V> table) {
-        for (const Entry& entry : table) {
-            this->insert(entry);
+    void insert(LookupTable<K, V> table) {
+        for (Entry& entry : table) {
+            this->insert(std::move(entry));
         }
     }
 

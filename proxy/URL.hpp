@@ -16,10 +16,10 @@ namespace proxy {
         URL& operator=(const URL&) = delete;
     private:
         PROXY_PRIMITIVE_GETTER(enums::Origin, origin, Origin);
+        PROXY_PRIMITIVE_GETTER(enums::Scheme, scheme, Scheme);
         PROXY_GETTER(std::string, original, Original);
         PROXY_GETTER(std::string, reconstruction, Reconstruction);
-        PROXY_PRIMITIVE_GETTER(enums::Protocol, scheme, Scheme);
-        PROXY_GETTER(std::string, protocol, Protocol);
+        PROXY_GETTER(std::string, stringScheme, StringScheme);
         PROXY_GETTER(std::string, username, Username);
         PROXY_GETTER(std::string, password, Password);
         PROXY_GETTER(std::string, domainName, DomainName);
@@ -34,7 +34,7 @@ namespace proxy {
         PROXY_GETTER(nlohmann::ordered_json, query, Query);
 
         void parse();
-        void parseProtocol(size_t& index);
+        void parseScheme(size_t& index);
         void parseLogin(size_t& index);
         void parseHost(size_t& index);
         void parsePath(size_t& index);

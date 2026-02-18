@@ -47,7 +47,7 @@ void CodeLineCell::initRender() {
         .filter([labelLength](const JSONTokenizer::TokenOffset& tokenOffset) { return tokenOffset.offset < labelLength; })
         .forEach([&theme, labelLength, codeLabel](const JSONTokenizer::TokenOffset& tokenOffset) {
             IntStream<size_t>::range(tokenOffset.offset, std::min(labelLength, tokenOffset.offset + tokenOffset.length))
-                .map<CCSprite*>([codeLabel](const int i) { return codeLabel->getChildByIndex<CCSprite>(i); })
+                .map([codeLabel](const int i) { return codeLabel->getChildByIndex<CCSprite>(i); })
                 .forEach([&theme, tokenOffset](CCSprite* character) {
                     switch (tokenOffset.token) {
                         case JSONTokenizer::Token::CORRUPT: theme.code.syntax.error.applyTo(character); break;

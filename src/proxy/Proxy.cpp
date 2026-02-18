@@ -22,7 +22,7 @@ m_origin(enums::OriginFilter::ALL_FILTER),
 m_urlParts(std::move(urlParts)) { };
 
 bool ProxyFilter::validate(const enums::EventState state, std::shared_ptr<HttpInfo> info) const {
-    const URL& url = info->getRequest().getURL();
+    const URL& url = info->getURL();
 
     return m_state == state &&
         (m_origin == enums::OriginFilter::ALL_FILTER || static_cast<int>(m_origin) == static_cast<int>(url.getOrigin())) &&

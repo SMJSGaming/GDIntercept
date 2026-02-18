@@ -327,11 +327,11 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parseObject(const std::s
         return object;
     }
 
-    StringStream::of(original, m_delimiter).forEach([this, &activeKey, &object](std::string&& part, const size_t i) {
+    StringStream::split(original, m_delimiter).forEach([this, &activeKey, &object](std::string&& part, const size_t i) {
         if (i % 2 == 0) {
             activeKey = std::move(part);
-        } else if (m_mappings.contains(activeKey)) {
-            const Object& mapping = this->getObject(m_mappings.at(activeKey));
+        } else if (const Mappings::const_iterator it = m_mappings.find(activeKey); it != m_mappings.end()) {
+            const Object& mapping = this->getObject(it->second);
 
             object[std::move(activeKey)] = mapping.parse(part);
         } else {
@@ -351,7 +351,7 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parseArray(const std::st
         return array;
     }
 
-    StringStream::of(original, m_delimiter).forEach([this, &array](std::string&& part) {
+    StringStream::split(original, m_delimiter).forEach([this, &array](std::string&& part) {
         array.emplace_back(RobTopToJsonV2::PARSERS.at(m_entryType).parse(part));
     });
 
@@ -367,7 +367,7 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parseTuple(const std::st
         return object;
     }
 
-    StringStream::of(original, m_delimiter).forEach([this, tupleSize, &object, &unknownCount](std::string&& part, const size_t i) {
+    StringStream::split(original, m_delimiter).forEach([this, tupleSize, &object, &unknownCount](std::string&& part, const size_t i) {
         const bool withinSize = i < tupleSize;
 
         if (withinSize || (tupleSize && m_tuple.back().vararg)) {

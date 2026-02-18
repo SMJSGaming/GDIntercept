@@ -18,17 +18,13 @@ const SideBar::Categories CodeBlock::ACTIONS {
     } },
     { { "Save Files", "saves.png"_spr }, {
         { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } } },
-        { { "Save", "download.png"_spr, [](CodeBlock* block) { return block->onSave(); } }, [](CodeBlock* block) {
-            return block->m_info != nullptr;
-        } }
+        { { "Save", "download.png"_spr, [](CodeBlock* block) { return block->onSave(); } }, [](CodeBlock* block) { return block->m_info != nullptr; } }
     } },
     { { "Current Request", "link.png"_spr }, {
-        { { "Copy", "copy.png"_spr, [](CodeBlock* block) { return block->onCopy(); } }, [](CodeBlock* block) {
-            return block->m_info != nullptr;
-        } },
-        { { "Resend", "redo.png"_spr, [](CodeBlock* block) { return block->onSend(); } }, [](CodeBlock* block) {
-            return block->m_info != nullptr;
-        } },
+        { { "Copy View", "copy.png"_spr, [](CodeBlock* block) { return block->onCopyView(); } }, [](CodeBlock* block) { return block->m_info != nullptr; } },
+        { { "Copy Info", "copy.png"_spr, [](CodeBlock* block) { return block->onCopyInfo(); } }, [](CodeBlock* block) { return block->m_info != nullptr; } },
+        { { "Copy Curl", "copy.png"_spr, [](CodeBlock* block) { return block->onCopyCurl(); } }, [](CodeBlock* block) { return block->m_info != nullptr; } },
+        { { "Resend", "redo.png"_spr, [](CodeBlock* block) { return block->onSend(); } }, [](CodeBlock* block) { return block->m_info != nullptr; } },
         { { "Cancel", "cancel.png"_spr, [](CodeBlock* block) { return block->onCancel(); } }, [](CodeBlock* block) {
             return block->m_info && block->m_info->getClient() == Client::COCOS && (block->m_info->isInProgress() || block->m_info->isPaused());
         } }
@@ -40,12 +36,8 @@ const SideBar::Categories CodeBlock::ACTIONS {
             [](CodeBlock* block) { return ProxyHandler::isPaused(); }
         },
         { "raw-data", { "Raw", "Formatted" }, { "raw.png"_spr, "simplified.png"_spr }, false, {
-            [](CodeBlock* block, const OriginalCallback& original) {
-                return block->onRaw(original);
-            },
-            [](CodeBlock* block, const OriginalCallback& original) {
-                return block->onFormatted(original);
-            }
+            [](CodeBlock* block, const OriginalCallback& original) { return block->onRaw(original); },
+            [](CodeBlock* block, const OriginalCallback& original) { return block->onFormatted(original); }
         } }
     } }
 };
@@ -62,8 +54,14 @@ void CodeBlock::setup() {
     this->bind("save_packet", [this]() {
         this->onSave();
     });
-    this->bind("copy_code_block", [this]() {
-        this->onCopy();
+    this->bind("copy_view", [this]() {
+        this->onCopyView();
+    });
+    this->bind("copy_info", [this]() {
+        this->onCopyInfo();
+    });
+    this->bind("copy_curl", [this]() {
+        this->onCopyCurl();
     });
     this->bind("resend_packet", [this]() {
         this->onSend();
@@ -123,9 +121,23 @@ void CodeBlock::setup() {
     }, true);
 }
 
-bool CodeBlock::onCopy() {
+bool CodeBlock::onCopyView() {
     utils::clipboard::write(m_code);
-    this->showMessage("Code Copied");
+    this->showMessage("View Copied");
+
+    return true;
+}
+
+bool CodeBlock::onCopyInfo() {
+    utils::clipboard::write(m_info->toString());
+    this->showMessage("Info Copied");
+
+    return true;
+}
+
+bool CodeBlock::onCopyCurl() {
+    utils::clipboard::write(m_info->toCurl());
+    this->showMessage("Command Copied");
 
     return true;
 }
@@ -146,7 +158,7 @@ bool CodeBlock::onSend() {
         }
     }
 
-    m_resendTasks.emplace_back(async::spawn(request.send(method, original.getURL().getReconstruction())));
+    m_resendTasks.emplace_back(async::spawn(request.send(method, m_info->getURL().getReconstruction())));
 
     this->showMessage("Request Resent");
 
@@ -176,7 +188,7 @@ bool CodeBlock::onOpenThemeFiles() {
 
 bool CodeBlock::onSave() {
     Mod* mod = Mod::get();
-    std::string filename = fmt::format("{:%d-%m-%Y %H.%M.%S} - {}.txt", geode::localtime(std::time(nullptr)), m_info->getRequest().getURL().getHost());
+    std::string filename = fmt::format("{:%F %T} - {}.txt", geode::localtime(std::time(nullptr)), m_info->getURL().getHost());
 
     async::spawn(utils::file::pick(file::PickMode::OpenFolder, {
         .defaultPath = mod->getSavedValue("default-path", mod->getSaveDir())
@@ -251,35 +263,7 @@ void CodeBlock::onInfo() {
     if (!m_info) {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     } else {
-        const HttpInfo::Request& request = m_info->getRequest();
-        const std::optional<HttpInfo::Response>& response = m_info->getResponse();
-        const URL& url = request.getURL();
-        StringBuffer info;
-
-        info.append("Client: {}\nMethod: {}\nProtocol: {}\nHost: {}",
-            m_info->getClient() == Client::COCOS ? "Cocos2D-X" : "Geode",
-            request.getMethod(),
-            url.getProtocol(),
-            url.getHost()
-        );
-
-        if (url.getUsername().size() || url.getPassword().size()) {
-            info.append("\nUsername: {}", url.getUsername());
-            info.append("\nPassword: {}", url.getPassword());
-        }
-
-        info.append("\nPath: {}", url.getPath());
-
-        if (url.getHash().size()) {
-            info.append("\nHash: {}", url.getHash());
-        }
-
-        if (m_info->isCompleted()) {
-            info.append("\nStatus Code: {}", response->stringifyStatusCode());
-            info.append("\nResponse Time: {}", fmt::format("{}ms", response->getResponseTime()));
-        }
-
-        this->setCode({ ContentType::UNKNOWN_CONTENT, info.str() });
+        this->setCode({ ContentType::UNKNOWN_CONTENT, m_info->toString(true) });
     }
 }
 
@@ -293,7 +277,7 @@ void CodeBlock::onBody() {
 
 void CodeBlock::onQuery() {
     if (m_info) {
-        this->setCode({ ContentType::JSON, m_info->getRequest().getURL().stringifyQuery(Mod::get()->getSettingValue<bool>("raw-data")) });
+        this->setCode({ ContentType::JSON, m_info->getURL().stringifyQuery(Mod::get()->getSettingValue<bool>("raw-data")) });
     } else {
         this->setCode({ ContentType::UNKNOWN_CONTENT, "" });
     }

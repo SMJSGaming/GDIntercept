@@ -50,8 +50,9 @@ Alpha 6 Todo:
   ✔ @critical Make the RobTop to JSON parser object based rather than URL based @done(26-02-03 20:45)
   ✔ @critical Fix number parsing to support scientific notation and too big numbers @done(26-01-21 22:33)
   ✔ @low Add iOS support @done(26-02-15 16:44)
+  ✔ @low Add a response time field @done(26-02-15 22:22)
+  ☐ @low Add badges for status 5xx, 4xx and 3xx
 Nice To Haves:
   ☐ Add inputs to the JSON code block
   ☐ Add spoofing (response mocking) support
-  ☐ Add a response time field
   ☐ Add a text representation to the binary view
