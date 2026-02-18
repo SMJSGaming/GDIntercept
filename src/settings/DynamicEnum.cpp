@@ -85,10 +85,14 @@ bool DynamicEnumNode::init(const std::shared_ptr<DynamicEnum>& setting, const fl
 
     m_arrowLeftSpr->setFlipX(true);
     m_arrowLeftSpr->setScale(0.4f);
+    m_arrowLeftSpr->setPosition(m_arrowLeftSpr->getScaledContentSize() / 2);
     m_arrowRightSpr->setScale(0.4f);
+    m_arrowRightSpr->setPosition(m_arrowRightSpr->getScaledContentSize() / 2);
     refreshSpr->setScale(0.6f);
     arrowLeftBtn->setTag(-1);
+    arrowLeftBtn->setContentSize(m_arrowLeftSpr->getScaledContentSize());
     arrowRightBtn->setTag(1);
+    arrowRightBtn->setContentSize(m_arrowRightSpr->getScaledContentSize());
 
     menu->addChildAtPosition(m_label, Anchor::Center);
     menu->addChildAtPosition(arrowLeftBtn, Anchor::Left, ccp(5, 0));
