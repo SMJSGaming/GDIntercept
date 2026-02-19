@@ -7,6 +7,7 @@
 - Extensively optimized the mod
 - Created a v2 RobTop response to JSON parser
 - Made the minimized menu setting default false
+- Made Geode proxies less intrusive in the client
 - Added auto decoding for RobTop responses
 - Added a setting for max line size
 - Added better memory management for proxies
@@ -17,7 +18,6 @@
 - Added curl and info copy shortcuts
 - Moved theme buttons to settings
 - Moved keybind settings to the GDIntercept settings
-- Made Geode proxies less intrusive in the client
 - Fixed incompatibilities with other Geode web hooking mods
 - Fixed keyless headers not showing
 - Fixed list headers not showing all values
