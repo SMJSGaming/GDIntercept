@@ -28,12 +28,14 @@ CullingList::~CullingList() {
 }
 
 bool CullingList::init(const CCSize& size) {
+    ESCAPE_WHEN(!HoverNode::init(), false);
     ESCAPE_WHEN(!CCLayerColor::initWithColor(ccc4(0x00, 0x00, 0x00, 0x00), size.width, size.height), false);
 
     m_view = TableView::create(this, this, nullptr, CCRect(0, 0, size.width, size.height));
     m_view->m_peekLimitTop = 0;
     m_view->m_peekLimitBottom = 0;
 
+    m_view->setMouseEnabled(false);
     this->reloadData();
     this->moveToTop();
     this->addChild(m_view);
@@ -154,6 +156,8 @@ void CullingList::horizontalRender(CullingCell* cell) {
 }
 
 void CullingList::update(const float dt) {
+    HoverNode::update(dt);
+
     const size_t size = m_cells.size();
     const CCPoint contentOffset = m_view->m_contentLayer->getPosition();
     const bool moved = contentOffset != m_lastOffset;
@@ -224,4 +228,12 @@ float CullingList::cellHeightForRowAtIndexPath(CCIndexPath& indexPath, TableView
 
 TableViewCell* CullingList::cellForRowAtIndexPath(CCIndexPath& indexPath, TableView* view) {
     return nullptr;
+}
+
+void CullingList::onHover() {
+    m_view->setMouseEnabled(true);
+}
+
+void CullingList::unHover() {
+    m_view->setMouseEnabled(false);
 }

@@ -21,11 +21,9 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
     Stream<ProxyHandler*> proxies = ProxyHandler::getFilteredProxies();
     bool activated = false;
 
+    ESCAPE_WHEN(!HoverNode::init(), false);
     ESCAPE_WHEN(!KeybindNode::init(), false);
     ESCAPE_WHEN(!Border::init(LIGHTER_BROWN_4B, size), false);
-
-    this->setPaddingTop(1);
-    this->setPaddingLeft(1);
 
     for (size_t i = 0; i < proxies.size(); i++) {
         std::shared_ptr<HttpInfo> info = proxies.at(i)->getInfo();
@@ -64,9 +62,9 @@ bool CaptureList::init(const CCSize& size, const float cellHeight, const std::fu
         switchInfo(nullptr);
     }
 
-    // The code block takes priority over the capture list
     list->m_tableView->setMouseEnabled(false);
-
+    this->setPaddingTop(1);
+    this->setPaddingLeft(1);
     this->setNode(list);
 
     return true;

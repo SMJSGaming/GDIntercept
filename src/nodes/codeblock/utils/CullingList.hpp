@@ -2,8 +2,9 @@
 
 #include "../../../include.hpp"
 #include "../cells/CullingCell.hpp"
+#include "../../utils/HoverNode.hpp"
 
-class CullingList : public CCLayerColor, public TableViewDelegate, public TableViewDataSource {
+class CullingList : public HoverNode<CCLayerColor>, public TableViewDelegate, public TableViewDataSource {
 public:
     static CullingList* create(const CCSize& size, const std::vector<CullingCell*>& cells = {});
 
@@ -38,4 +39,6 @@ protected:
     unsigned int numberOfSectionsInTableView(TableView* view) override;
     float cellHeightForRowAtIndexPath(CCIndexPath& indexPath, TableView* view) override;
     TableViewCell* cellForRowAtIndexPath(CCIndexPath& indexPath, TableView* view) override;
+    void onHover() override;
+    void unHover() override;
 };

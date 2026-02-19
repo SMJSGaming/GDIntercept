@@ -25,14 +25,6 @@ protected:
     virtual void unHover() { };
 protected:
     bool m_hovered;
-private:
-    float getRecursiveScale(CCNode* node, const float accumulator) {
-        if (node->getParent()) {
-            return this->getRecursiveScale(node->getParent(), accumulator * node->getScale());
-        } else {
-            return accumulator;
-        }
-    }
 
     void update(float delta) override {
         // Just incase something forcefully schedules an update
@@ -52,6 +44,14 @@ private:
             m_hovered = false;
 
             this->unHover();
+        }
+    }
+private:
+    float getRecursiveScale(CCNode* node, const float accumulator) {
+        if (node->getParent()) {
+            return this->getRecursiveScale(node->getParent(), accumulator * node->getScale());
+        } else {
+            return accumulator;
         }
     }
 };

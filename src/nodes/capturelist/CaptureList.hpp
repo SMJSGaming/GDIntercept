@@ -4,7 +4,7 @@
 #include "cells/CaptureCell.hpp"
 #include "../utils/KeybindNode.hpp"
 
-class CaptureList : public KeybindNode<Border> {
+class CaptureList : public HoverNode<KeybindNode<Border>> {
 public:
     static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<HttpInfo>)>& switchInfo);
 private:
@@ -13,6 +13,8 @@ private:
     CCArrayExt<CaptureCell*> m_cells;
 
     void setup() override;
+    void onHover() override;
+    void unHover() override;
     bool init(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<HttpInfo>)>& switchInfo);
     void tabCell(const bool forward);
 };
