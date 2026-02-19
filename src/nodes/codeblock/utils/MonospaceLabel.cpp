@@ -8,8 +8,7 @@ MonospaceLabel* MonospaceLabel::create(const std::string_view string, const std:
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

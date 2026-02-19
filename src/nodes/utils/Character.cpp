@@ -8,8 +8,7 @@ Character* Character::create(const char character, const std::string_view font, 
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

@@ -6,8 +6,7 @@ CodeLineCell* CodeLineCell::create(const CCSize& size, const size_t lineNumber, 
     if (instance && instance->init()) {
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

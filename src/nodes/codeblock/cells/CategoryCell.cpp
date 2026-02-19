@@ -18,8 +18,7 @@ CategoryCell* CategoryCell::create(const SideBarCategory& view) {
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

@@ -10,8 +10,7 @@ CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, con
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

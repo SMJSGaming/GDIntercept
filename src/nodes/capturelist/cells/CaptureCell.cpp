@@ -8,8 +8,7 @@ CaptureCell* CaptureCell::create(const size_t index, std::shared_ptr<HttpInfo> i
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

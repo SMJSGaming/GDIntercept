@@ -63,8 +63,7 @@ DynamicThemeNode* DynamicThemeNode::create(const std::shared_ptr<DynamicTheme>& 
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

@@ -75,8 +75,7 @@ ActionCell* ActionCell::create(CodeBlock* block, const SideBarAction& action) {
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

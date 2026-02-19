@@ -36,8 +36,7 @@ SideBar* SideBar::create(CodeBlock* block, const float height, const std::vector
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

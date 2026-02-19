@@ -8,8 +8,7 @@ RescalingNode* RescalingNode::create(CCNode* node, const CCSize& size) {
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

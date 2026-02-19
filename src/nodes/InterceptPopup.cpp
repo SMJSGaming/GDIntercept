@@ -30,7 +30,7 @@ void InterceptPopup::scene() {
             instance->autorelease();
             instance->show();
         } else {
-            CC_SAFE_DELETE(instance);
+            delete instance;
         }
     }
 }

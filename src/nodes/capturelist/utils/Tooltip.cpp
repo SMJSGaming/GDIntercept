@@ -8,8 +8,7 @@ Tooltip* Tooltip::create(const std::string_view text, const float scale, const G
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

@@ -1,15 +1,14 @@
 #include "TracklessScrollbar.hpp"
 
 TracklessScrollbar* TracklessScrollbar::create(const bool vertical, const CCSize& size, CCScrollLayerExt* scrollLayer) {
-    TracklessScrollbar* scrollbar = new TracklessScrollbar(vertical);
+    TracklessScrollbar* instance = new TracklessScrollbar(vertical);
 
-    if (scrollbar && scrollbar->init(size, scrollLayer)) {
-        scrollbar->autorelease();
+    if (instance && instance->init(size, scrollLayer)) {
+        instance->autorelease();
 
-        return scrollbar;
+        return instance;
     } else {
-        CC_SAFE_DELETE(scrollbar);
-
+        delete instance;
         return nullptr;
     }
 }

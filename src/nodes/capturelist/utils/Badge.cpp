@@ -8,8 +8,7 @@ Badge* Badge::create(std::string name, CCNode* node, const std::function<void(GL
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }

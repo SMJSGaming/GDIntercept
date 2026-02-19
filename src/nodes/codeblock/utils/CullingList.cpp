@@ -8,8 +8,7 @@ CullingList* CullingList::create(const CCSize& size, const std::vector<CullingCe
 
         return instance;
     } else {
-        CC_SAFE_DELETE(instance);
-
+        delete instance;
         return nullptr;
     }
 }
