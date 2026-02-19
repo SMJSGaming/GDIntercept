@@ -52,7 +52,7 @@ Alpha 6 Todo:
   ✔ @low Add iOS support @done(26-02-15 16:44)
   ✔ @low Add a response time field @done(26-02-15 22:22)
   ✔ @low Add badges for status 5xx, 4xx and 3xx @done(26-02-19 09:15)
-0.9.0 Todo:
+1.0.0 Todo:
   ☐ @low Add a text representation to the binary view
   ☐ @high Add RobTop response format translations
   ☐ @low Move to a full code view
