@@ -1,5 +1,10 @@
 # GDIntercept Changelog
 
+## v1.0.0 Release
+
+- Added hover based scroll focus
+- Fixed horizontal scroll
+
 ## v0.8.0 - GD/Geode Version Migration
 
 - Migrated to Geode V5

@@ -35,6 +35,7 @@ protected:
     void horizontalRender(CullingCell* cell);
     CullingCell* renderCell(const size_t index);
     void update(const float dt) override;
+    void scrollWheel(const float y, const float x) override;
     int numberOfRowsInSection(unsigned int section, TableView* view) override;
     unsigned int numberOfSectionsInTableView(TableView* view) override;
     float cellHeightForRowAtIndexPath(CCIndexPath& indexPath, TableView* view) override;

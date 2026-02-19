@@ -35,6 +35,7 @@ bool CullingList::init(const CCSize& size) {
     m_view->m_peekLimitBottom = 0;
 
     m_view->setMouseEnabled(false);
+    this->setMouseEnabled(false);
     this->reloadData();
     this->moveToTop();
     this->addChild(m_view);
@@ -213,6 +214,13 @@ void CullingList::update(const float dt) {
     m_activeCells = std::move(newActiveCells);
 }
 
+void CullingList::scrollWheel(const float y, const float x) {
+    m_view->m_contentLayer->setPositionX(std::clamp<float>(m_view->m_contentLayer->getPositionX() + x, -(
+        m_view->m_contentLayer->getContentWidth() - m_view->getContentWidth()
+    ), 0));
+    m_view->scrollWheel(y, x);
+}
+
 int CullingList::numberOfRowsInSection(unsigned int section, TableView* view) {
     return 0;
 }
@@ -230,9 +238,9 @@ TableViewCell* CullingList::cellForRowAtIndexPath(CCIndexPath& indexPath, TableV
 }
 
 void CullingList::onHover() {
-    m_view->setMouseEnabled(true);
+    this->setMouseEnabled(true);
 }
 
 void CullingList::unHover() {
-    m_view->setMouseEnabled(false);
+    this->setMouseEnabled(false);
 }
