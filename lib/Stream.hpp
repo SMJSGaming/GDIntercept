@@ -35,19 +35,25 @@ template<typename F, typename Value, typename ...PrefixArgs>
 concept inferred_stream_lambda = inferred_basic_lambda<F, PrefixArgs...> || inferred_indexed_lambda<F, PrefixArgs...> || inferred_full_lambda<F, Value, PrefixArgs...>;
 
 template<typename F, typename Value, typename... PrefixArgs>
-struct __stream_lambda_return_impl {
-private:
-    template<typename G>
-    static auto test(int) -> std::type_identity<std::invoke_result_t<G, PrefixArgs...>>;
+struct __stream_lambda_return_impl;
 
-    template<typename G>
-    static auto test(long) -> std::type_identity<std::invoke_result_t<G, PrefixArgs..., size_t>>;
+template<typename F, typename Value, typename... PrefixArgs> requires(inferred_basic_lambda<F, PrefixArgs...>)
+struct __stream_lambda_return_impl<F, Value, PrefixArgs...> {
+    using type = std::invoke_result_t<F, PrefixArgs...>;
+};
 
-    template<typename G>
-    static auto test(char) -> std::type_identity<std::invoke_result_t<G, PrefixArgs..., size_t, Stream<Value>&>>;
+template<typename F, typename Value, typename... PrefixArgs> requires (!inferred_basic_lambda<F, PrefixArgs...> && inferred_indexed_lambda<F, PrefixArgs...>)
+struct __stream_lambda_return_impl<F, Value, PrefixArgs...> {
+    using type = std::invoke_result_t<F, PrefixArgs..., size_t>;
+};
 
-public:
-    using type = typename decltype(test<F>(0))::type;
+template<typename F, typename Value, typename... PrefixArgs> requires (
+    !inferred_basic_lambda<F, PrefixArgs...> &&
+    !inferred_indexed_lambda<F, PrefixArgs...> &&
+    inferred_stream_lambda<F, Value, PrefixArgs...>
+)
+struct __stream_lambda_return_impl<F, Value, PrefixArgs...> {
+    using type = std::invoke_result_t<F, PrefixArgs..., size_t, Stream<Value>&>;
 };
 
 template<typename F, typename Value, typename ...PrefixArgs>
