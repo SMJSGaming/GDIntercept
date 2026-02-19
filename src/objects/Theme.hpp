@@ -4,7 +4,7 @@
 #include "../macro_utils.hpp"
 #include "../../lib/json.hpp"
 #include "../../lib/LookupTable.hpp"
-#include "../settings/DynamicEnum.hpp"
+#include "../settings/DynamicTheme.hpp"
 
 using namespace nlohmann;
 using namespace geode::prelude;

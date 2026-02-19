@@ -12,10 +12,6 @@ const std::vector<SideBarView> CodeBlock::VIEWS({
 });
 
 const SideBar::Categories CodeBlock::ACTIONS {
-    { { "Themes", "themes.png"_spr }, {
-        { { "Open Theme Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenThemeFiles(); } } },
-        { { "Open Theme Docs", "docs.png"_spr, [](CodeBlock* block) { return block->onDocs(); } } }
-    } },
     { { "Save Files", "saves.png"_spr }, {
         { { "Open Save Files", "folder.png"_spr, [](CodeBlock* block) { return block->onOpenSaveFiles(); } } },
         { { "Save", "download.png"_spr, [](CodeBlock* block) { return block->onSave(); } }, [](CodeBlock* block) { return block->m_info != nullptr; } }
@@ -47,9 +43,6 @@ bool CodeBlock::ACCEPTED_PAUSES = false;
 void CodeBlock::setup() {
     this->bind("open_save_files", [this]() {
         this->onOpenSaveFiles();
-    });
-    this->bind("open_theme_files", [this]() {
-        this->onOpenThemeFiles();
     });
     this->bind("save_packet", [this]() {
         this->onSave();
@@ -180,12 +173,6 @@ bool CodeBlock::onOpenSaveFiles() {
     return true;
 }
 
-bool CodeBlock::onOpenThemeFiles() {
-    utils::file::openFolder(Mod::get()->getConfigDir() / "themes");
-
-    return true;
-}
-
 bool CodeBlock::onSave() {
     Mod* mod = Mod::get();
     std::string filename = fmt::format("{:%F %T} - {}.txt", geode::localtime(std::time(nullptr)), m_info->getURL().getHost());
@@ -251,12 +238,6 @@ bool CodeBlock::onFormatted(const SideBarCell::OriginalCallback& original) {
     this->showMessage("Formatted Data Enabled");
 
     return original();
-}
-
-bool CodeBlock::onDocs() {
-    utils::web::openLinkInBrowser("https://bin.smjsproductions.com/smjs.gdintercept/pages");
-
-    return false;
 }
 
 void CodeBlock::onInfo() {

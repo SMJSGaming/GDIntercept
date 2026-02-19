@@ -225,7 +225,7 @@ Theme::Color Theme::Theme::colorOrDefault(const json& obj, const std::string_vie
 }
 
 const Theme::Theme& Theme::getTheme() {
-    const std::string theme = Mod::get()->getSettingValue<DynamicEnumValue>("theme");
+    const std::string theme = Mod::get()->getSettingValue<DynamicThemeValue>("theme");
 
     if (Theme::CACHED_THEMES.contains(theme)) {
         return Theme::CACHED_THEMES.at(std::move(theme));

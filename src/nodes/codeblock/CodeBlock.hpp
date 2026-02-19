@@ -46,13 +46,11 @@ private:
     bool onSend();
     bool onCancel();
     bool onOpenSaveFiles();
-    bool onOpenThemeFiles();
     bool onSave();
     bool onPause();
     bool onResume();
     bool onRaw(const SideBarCell::OriginalCallback& original);
     bool onFormatted(const SideBarCell::OriginalCallback& original);
-    bool onDocs();
     void onInfo();
     void onBody();
     void onQuery();

@@ -62,7 +62,7 @@
     "theme": {
       "name": "Theme",
       "description": "The theme of the code block.",
-      "type": "custom:dynamic-enum",
+      "type": "custom:dynamic-theme",
       "default": "Dark",
       "save-value": "themes"
     },
@@ -217,12 +217,6 @@
         "mac": "Cmd+O",
         "ios": "Cmd+O"
       }
-    },
-    "open_theme_files": {
-      "type": "keybind",
-      "name": "Open Theme Files",
-      "description": "Opens the theme folder of GDIntercept.",
-      "default": "Alt+O"
     },
     "save_packet": {
       "type": "keybind",

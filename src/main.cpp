@@ -1,6 +1,6 @@
 #include "include.hpp"
 #include "nodes/InterceptPopup.hpp"
-#include "settings/DynamicEnum.hpp"
+#include "settings/DynamicTheme.hpp"
 
 $on_game(Loaded) {
     listenForKeybindSettingPresses("open_capture_menu", [](const Keybind& keybind, const bool down, const bool repeat, const double time) {
@@ -101,9 +101,9 @@ $execute {
 }
 
 $on_game(Loaded) {
-    DynamicEnum::registerLoader("theme"_spr, Theme::Theme::load);
-    DynamicEnum::registerLoader("theme"_spr, []{
+    DynamicTheme::registerLoader("theme"_spr, Theme::Theme::load);
+    DynamicTheme::registerLoader("theme"_spr, []{
         OPT(InterceptPopup::get())->reloadCodeBlock(true);
     });
-    DynamicEnum::reloadDynamicEnums("theme"_spr);
+    DynamicTheme::reloadDynamicThemes("theme"_spr);
 }
