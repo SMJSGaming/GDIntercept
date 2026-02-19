@@ -115,9 +115,28 @@ std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> Capt
         case State::IN_PROGRESS: badges.push_back(
             this->makeBadgeInfo("In Progress", CCSprite::createWithSpriteFrameName("particle_197_001.png"))
         ); break;
-        case State::COMPLETED: badges.push_back(
-            this->makeBadgeInfo("Completed", CCSprite::createWithSpriteFrameName("particle_50_001.png"))
-        ); break;
+        case State::COMPLETED: {
+            const int status = m_info->getResponse()->getStatusCode();
+
+            if (status >= 300 && status < 400) {
+                CCSprite* sprite = CCSprite::createWithSpriteFrameName("particle_12_001.png");
+
+                sprite->setColor({ 0xFF, 0x96, 0x4F });
+                badges.push_back(this->makeBadgeInfo("Redirected", sprite));
+            } else if (status >= 400 && status < 500) {
+                CCSprite* sprite = CCSprite::createWithSpriteFrameName("particle_203_001.png");
+
+                sprite->setColor({ 0xF0, 0x1E, 0x2C });
+                badges.push_back(this->makeBadgeInfo("Client Error", sprite));
+            } else if (status >= 500 && status < 600) {
+                CCSprite* sprite = CCSprite::createWithSpriteFrameName("particle_10_001.png");
+
+                sprite->setColor({ 0xF0, 0x1E, 0x2C });
+                badges.push_back(this->makeBadgeInfo("Server Error", sprite));
+            } else {
+                badges.push_back(this->makeBadgeInfo("Completed", CCSprite::createWithSpriteFrameName("particle_50_001.png")));
+            }
+        } break;
         case State::FAULTY: badges.push_back(
             this->makeBadgeInfo("Faulty", CCSprite::createWithSpriteFrameName("info-alert.png"_spr))
         ); break;
