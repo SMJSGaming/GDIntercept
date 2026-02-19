@@ -52,7 +52,15 @@ Alpha 6 Todo:
   ✔ @low Add iOS support @done(26-02-15 16:44)
   ✔ @low Add a response time field @done(26-02-15 22:22)
   ✔ @low Add badges for status 5xx, 4xx and 3xx @done(26-02-19 09:15)
+0.9.0 Todo:
+  ☐ @low Add a text representation to the binary view
+  ☐ @high Add RobTop response format translations
+  ☐ @low Move to a full code view
+  ☐ @low Add a timeline
+  ☐ @high Add scroll based on cursor position
+  ☐ @high Fix horizontal scroll commands from the mouse
+  ☐ @low Add advanced header parsing
+  ☐ @low Add file content type views
 Nice To Haves:
   ☐ Add inputs to the JSON code block
   ☐ Add spoofing (response mocking) support
-  ☐ Add a text representation to the binary view
