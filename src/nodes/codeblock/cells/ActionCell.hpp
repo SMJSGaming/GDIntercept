@@ -51,14 +51,13 @@ public:
     void hideOpacity(const float dt);
     void enable();
     void disable();
-    bool isEnabled() const;
 private:
     const SideBarCell::SideBarAction m_action;
     RescalingNode* m_icon;
     CCLabelBMFont* m_name;
     CodeBlock* m_block;
-    bool m_enabled;
-    PRIMITIVE_GETTER(bool, state, State);
+    BOOL_GETTER(enabled, Enabled);
+    BOOL_GETTER(state, State);
 
     ActionCell(CodeBlock* block, const SideBarCell::SideBarAction& action);
     bool init() override;

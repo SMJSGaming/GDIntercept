@@ -22,7 +22,7 @@ HttpInfo::Content HttpInfo::getContent(const bool raw, const ContentType origina
 
         if (!raw) {
             return { converter->getResultContentType(), converter->convert(path, original) };
-        } else if (Mod::get()->getSettingValue<bool>("censor-data") && converter->getNeedsSanitization()) {
+        } else if (Mod::get()->getSettingValue<bool>("censor-data") && converter->isNeedsSanitization()) {
             return { originalContentType, converter->toRaw(path, converter->convert(path, original)) };
         }
     }

@@ -19,7 +19,7 @@ namespace proxy::converters {
         virtual bool canConvert(const std::string_view path, const bool isBody, const std::string_view original) const = 0;
         virtual std::string convert(const std::string_view path, const std::string_view original) const = 0;
         virtual std::string toRaw(const std::string_view path, const std::string_view original) const = 0;
-        PRIMITIVE_GETTER(bool, needsSanitization, NeedsSanitization);
+        BOOL_GETTER(needsSanitization, NeedsSanitization);
         PRIMITIVE_GETTER(enums::ContentType, resultContentType, ResultContentType);
     };
 }

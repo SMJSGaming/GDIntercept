@@ -170,7 +170,7 @@ std::vector<std::tuple<std::string, CCNode*, std::function<void(GLubyte)>>> Capt
         ); break;
     }
 
-    if (m_info->getRepeat()) {
+    if (m_info->isRepeat()) {
         badges.push_back(this->makeBadgeInfo("Request Repeat", CCSprite::createWithSpriteFrameName("reset-gold.png"_spr)));
     }
 

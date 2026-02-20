@@ -146,10 +146,6 @@ void ActionCell::hideOpacity(const float dt) {
     this->setOpacity(0);
 }
 
-bool ActionCell::isEnabled() const {
-    return m_enabled;
-}
-
 void ActionCell::enable() {
     const Theme::Theme& theme = Theme::getTheme();
     CCSprite* icon = typeinfo_cast<CCSprite*>(m_icon->getNode());

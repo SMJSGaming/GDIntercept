@@ -31,7 +31,7 @@ void SideBar::executeAction(CCObject* sender) {
 
     ESCAPE_WHEN(!cell->isEnabled(),);
 
-    const bool oldState = cell->getState();
+    const bool oldState = cell->isState();
 
     cell->setState(!oldState);
     cell->setOpacity(255);

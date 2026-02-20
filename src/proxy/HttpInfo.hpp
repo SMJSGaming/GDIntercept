@@ -59,7 +59,7 @@ namespace proxy {
             PRIMITIVE_GETTER(size_t, responseTime, ResponseTime);
             GETTER(std::string, response, Response);
             PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
-            PRIMITIVE_GETTER(bool, received, Received);
+            BOOL_GETTER(received, Received);
             std::string_view m_path;
 
             Response(std::shared_ptr<HttpInfo> info, const int code);
@@ -102,7 +102,7 @@ namespace proxy {
         GETTER(Request, request, Request);
         GETTER(std::optional<Response>, response, Response);
         GETTER(std::string, httpVersion, HttpVersion);
-        PRIMITIVE_GETTER(bool, repeat, Repeat);
+        BOOL_GETTER(repeat, Repeat);
 
         void resume();
 

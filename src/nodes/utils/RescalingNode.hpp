@@ -14,6 +14,6 @@ public:
     void setContentSize(const CCSize& size) override;
 private:
     PRIMITIVE_GETTER(CCNode*, node, Node);
-    PRIMITIVE_GETTER(bool, rescaleWidth, RescaleWidth);
-    PRIMITIVE_GETTER(bool, rescaleHeight, RescaleHeight);
+    BOOL_GETTER(rescaleWidth, RescaleWidth);
+    BOOL_GETTER(rescaleHeight, RescaleHeight);
 };
