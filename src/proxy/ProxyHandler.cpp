@@ -1,6 +1,6 @@
 #include "ProxyHandler.hpp"
 
-using namespace geode::prelude;
+using namespace proxy::prelude;
 
 $on_mod(Loaded) {
     Mod::get()->setSavedValue("paused", Mod::get()->getSettingValue<bool>("pause-between-plays") && Mod::get()->getSavedValue("paused", false));

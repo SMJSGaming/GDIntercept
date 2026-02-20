@@ -1,4 +1,4 @@
-#include "../../proxy/URL.hpp"
+#include "URL.hpp"
 
 using namespace nlohmann;
 using namespace proxy::enums;

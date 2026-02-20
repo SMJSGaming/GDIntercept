@@ -1,5 +1,7 @@
 #include "CodeLineCell.hpp"
 
+using namespace proxy::prelude;
+
 CodeLineCell* CodeLineCell::create(const CCSize& size, const size_t lineNumber, const float lineNumberWidth, const HttpInfo::Content& code, JSONTokenizer& tokenizer) {
     CodeLineCell* instance = new CodeLineCell(size, lineNumber, lineNumberWidth, code, tokenizer);
 

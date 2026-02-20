@@ -1,4 +1,4 @@
-#include "../../../proxy/converters/JsonToJson.hpp"
+#include "JsonToJson.hpp"
 
 using namespace nlohmann;
 

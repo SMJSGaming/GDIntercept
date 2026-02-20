@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Geode/Geode.hpp>
-#include "../BaseProxy.hpp"
+#include "../../include.hpp"
+#include "../Enums.hpp"
 
 namespace proxy::converters {
     bool isInt(const std::string_view str);
@@ -19,7 +19,7 @@ namespace proxy::converters {
         virtual bool canConvert(const std::string_view path, const bool isBody, const std::string_view original) const = 0;
         virtual std::string convert(const std::string_view path, const std::string_view original) const = 0;
         virtual std::string toRaw(const std::string_view path, const std::string_view original) const = 0;
-        PROXY_PRIMITIVE_GETTER(bool, needsSanitization, NeedsSanitization);
-        PROXY_PRIMITIVE_GETTER(enums::ContentType, resultContentType, ResultContentType);
+        PRIMITIVE_GETTER(bool, needsSanitization, NeedsSanitization);
+        PRIMITIVE_GETTER(enums::ContentType, resultContentType, ResultContentType);
     };
 }

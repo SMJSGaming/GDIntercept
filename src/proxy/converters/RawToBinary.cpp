@@ -1,4 +1,4 @@
-#include "../../../proxy/converters/RawToBinary.hpp"
+#include "RawToBinary.hpp"
 
 proxy::converters::RawToBinary::RawToBinary() : Converter(enums::ContentType::BINARY) { };
 

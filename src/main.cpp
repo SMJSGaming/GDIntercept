@@ -2,6 +2,8 @@
 #include "nodes/InterceptPopup.hpp"
 #include "settings/DynamicTheme.hpp"
 
+using namespace proxy::prelude;
+
 $on_game(Loaded) {
     listenForKeybindSettingPresses("open_capture_menu", [](const Keybind& keybind, const bool down, const bool repeat, const double time) {
         if (down && !repeat) {

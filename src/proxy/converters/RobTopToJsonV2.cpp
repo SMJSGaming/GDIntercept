@@ -1,4 +1,4 @@
-#include "../../../proxy/converters/RobTopToJsonV2.hpp"
+#include "RobTopToJsonV2.hpp"
 
 using namespace geode::prelude;
 using namespace nlohmann;

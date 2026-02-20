@@ -1,5 +1,7 @@
 #include "Warning.hpp"
 
+using namespace proxy::prelude;
+
 CCScale9Sprite* Warning::WARNING = nullptr;
 
 void Warning::show() {

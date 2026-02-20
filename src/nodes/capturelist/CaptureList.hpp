@@ -6,7 +6,7 @@
 
 class CaptureList : public HoverNode<KeybindNode<Border>> {
 public:
-    static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<HttpInfo>)>& switchInfo);
+    static CaptureList* create(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<proxy::HttpInfo>)>& switchInfo);
 private:
     static size_t ACTIVE;
 
@@ -15,6 +15,6 @@ private:
     void setup() override;
     void onHover() override;
     void unHover() override;
-    bool init(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<HttpInfo>)>& switchInfo);
+    bool init(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<proxy::HttpInfo>)>& switchInfo);
     void tabCell(const bool forward);
 };

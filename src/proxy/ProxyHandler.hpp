@@ -1,13 +1,8 @@
 #pragma once
 
-#include <Geode/utils/web.hpp>
 #include <shared_mutex>
 #include "../include.hpp"
-#include "../macro_utils.hpp"
-
-using namespace nlohmann;
-using namespace geode::prelude;
-using namespace proxy::prelude;
+#include "Proxy.hpp"
 
 namespace proxy {
     class ProxyHandler : private CCObject {

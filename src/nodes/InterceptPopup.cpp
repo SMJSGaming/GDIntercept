@@ -1,5 +1,7 @@
 #include "InterceptPopup.hpp"
 
+using namespace proxy::prelude;
+
 CCSize InterceptPopup::POPUP_PADDING = { 60, 40 };
 
 float InterceptPopup::UI_PADDING = 2 + PADDING;

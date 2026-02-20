@@ -1,5 +1,7 @@
 #include "CaptureList.hpp"
 
+using namespace proxy::prelude;
+
 size_t CaptureList::ACTIVE = 0;
 
 CaptureList* CaptureList::create(const CCSize& size, const float cellHeight, const std::function<void(std::shared_ptr<HttpInfo>)>& switchInfo) {

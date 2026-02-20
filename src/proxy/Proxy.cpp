@@ -1,4 +1,4 @@
-#include "../../proxy/Proxy.hpp"
+#include "Proxy.hpp"
 
 using namespace proxy::prelude;
 using namespace geode::prelude;

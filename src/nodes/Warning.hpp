@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../include.hpp"
+#include "../proxy/Proxy.hpp"
 
 class Warning {
 public:

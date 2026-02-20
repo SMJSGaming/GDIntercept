@@ -1,5 +1,7 @@
 #include "CodeBlock.hpp"
 
+using namespace proxy::prelude;
+
 CodeBlock* CodeBlock::create(const CCSize& size) {
     CodeBlock* instance = new CodeBlock();
 

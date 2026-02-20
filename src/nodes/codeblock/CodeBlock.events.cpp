@@ -1,6 +1,7 @@
 #include "CodeBlock.hpp"
 
 using namespace SideBarCell;
+using namespace proxy::prelude;
 
 const std::vector<SideBarView> CodeBlock::VIEWS({
     { 'I', [](const auto& icons) { return icons.info; }, "Info", [](CodeBlock* block) { block->onInfo(); } },

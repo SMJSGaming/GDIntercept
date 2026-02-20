@@ -1,5 +1,7 @@
 #include "CaptureCell.hpp"
 
+using namespace proxy::prelude;
+
 CaptureCell* CaptureCell::create(const size_t index, std::shared_ptr<HttpInfo> info, const CCSize& size, const std::function<void(CaptureCell*)>& switchCell) {
     CaptureCell* instance = new CaptureCell(info, size, switchCell);
 

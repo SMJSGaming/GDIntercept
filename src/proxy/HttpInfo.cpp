@@ -1,5 +1,5 @@
-#include "../../proxy/Proxy.hpp"
-#include "../../proxy/HttpInfo.hpp"
+#include "HttpInfo.hpp"
+#include "Proxy.hpp"
 
 using namespace nlohmann;
 using namespace geode::prelude;

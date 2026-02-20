@@ -2,19 +2,16 @@
 
 #include <fmt/chrono.h>
 #include <Geode/Geode.hpp>
+#include <Geode/utils/web.hpp>
 #include "../lib/json.hpp"
 #include "../lib/Stream.hpp"
 #include "../lib/LookupTable.hpp"
 #include "concepts.hpp"
 #include "macro_utils.hpp"
-#include "../proxy/Proxy.hpp"
 #include "objects/Theme.hpp"
-#include "proxy/ProxyHandler.hpp"
 
-using namespace proxy;
 using namespace nlohmann;
 using namespace geode::prelude;
-using namespace proxy::prelude;
 
 #define PADDING 5.0f
 #define FULL_OPACITY 0xFF

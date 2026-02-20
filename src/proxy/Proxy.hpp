@@ -1,8 +1,9 @@
 #pragma once
 
-#include <Geode/Geode.hpp>
-#include <Geode/loader/Event.hpp>
+#include "../include.hpp"
+#include "../macro_utils.hpp"
 #include "HttpInfo.hpp"
+#include "ProxyHandler.hpp"
 
 namespace proxy {
     namespace prelude {

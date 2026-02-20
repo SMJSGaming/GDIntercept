@@ -1,5 +1,7 @@
 #include "MenuLayer.hpp"
 
+using namespace proxy::prelude;
+
 bool ModMenuLayer::init() {
     ESCAPE_WHEN(!MenuLayer::init(), false);
 

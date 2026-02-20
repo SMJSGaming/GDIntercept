@@ -1,8 +1,6 @@
 #pragma once
 
-#include "BaseProxy.hpp"
-#include "../lib/Stream.hpp"
-#include "../lib/LookupTable.hpp"
+#include "../include.hpp"
 #include "converters/Converter.hpp"
 #include "converters/XmlToXml.hpp"
 #include "converters/FormToJson.hpp"
@@ -30,11 +28,11 @@ namespace proxy {
             static size_t getRequestTime();
             static std::string stringifyMethod(const cocos2d::extension::CCHttpRequest::HttpRequestType method);
 
-            PROXY_GETTER(std::string, method, Method);
-            PROXY_GETTER(Headers, headers, Headers);
-            PROXY_GETTER(std::string, body, Body);
-            PROXY_PRIMITIVE_GETTER(size_t, startTime, StartTime);
-            PROXY_PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
+            GETTER(std::string, method, Method);
+            GETTER(Headers, headers, Headers);
+            GETTER(std::string, body, Body);
+            PRIMITIVE_GETTER(size_t, startTime, StartTime);
+            PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
             std::string_view m_path;
 
             Request(const URL& url, cocos2d::extension::CCHttpRequest* request);
@@ -56,12 +54,12 @@ namespace proxy {
         private:
             static size_t calculateResponseTime(std::shared_ptr<HttpInfo> info);
 
-            PROXY_GETTER(Headers, headers, Headers);
-            PROXY_PRIMITIVE_GETTER(int, statusCode, StatusCode);
-            PROXY_PRIMITIVE_GETTER(size_t, responseTime, ResponseTime);
-            PROXY_GETTER(std::string, response, Response);
-            PROXY_PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
-            PROXY_PRIMITIVE_GETTER(bool, received, Received);
+            GETTER(Headers, headers, Headers);
+            PRIMITIVE_GETTER(int, statusCode, StatusCode);
+            PRIMITIVE_GETTER(size_t, responseTime, ResponseTime);
+            GETTER(std::string, response, Response);
+            PRIMITIVE_GETTER(enums::ContentType, contentType, ContentType);
+            PRIMITIVE_GETTER(bool, received, Received);
             std::string_view m_path;
 
             Response(std::shared_ptr<HttpInfo> info, const int code);
@@ -97,20 +95,17 @@ namespace proxy {
         static Headers parseCocosHeaders(const gd::vector<char>* headers);
         static Headers parseCocosHeaders(const gd::vector<gd::string>& headers);
 
-        PROXY_PRIMITIVE_GETTER(size_t, id, ID);
-        PROXY_PRIMITIVE_GETTER(enums::Client, client, Client);
-        PROXY_PRIMITIVE_GETTER(enums::State, state, State);
-        PROXY_GETTER(URL, url, URL);
-        PROXY_GETTER(Request, request, Request);
-        PROXY_GETTER(std::optional<Response>, response, Response);
-        PROXY_GETTER(std::string, httpVersion, HttpVersion);
-        PROXY_PRIMITIVE_GETTER(bool, repeat, Repeat);
+        PRIMITIVE_GETTER(size_t, id, ID);
+        PRIMITIVE_GETTER(enums::Client, client, Client);
+        PRIMITIVE_GETTER(enums::State, state, State);
+        GETTER(URL, url, URL);
+        GETTER(Request, request, Request);
+        GETTER(std::optional<Response>, response, Response);
+        GETTER(std::string, httpVersion, HttpVersion);
+        PRIMITIVE_GETTER(bool, repeat, Repeat);
 
         void resume();
 
         friend class ProxyHandler;
     };
-
-    #undef PROXY_GETTER
-    #undef PROXY_PRIMITIVE_GETTER
 }

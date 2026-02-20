@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Converter.hpp"
 #include <Geode/utils/base64.hpp>
+#include "Converter.hpp"
 
 namespace proxy::converters {
     class RobTopToJsonV2 : public Converter {

@@ -1,4 +1,4 @@
-#include "../../../proxy/converters/Converter.hpp"
+#include "Converter.hpp"
 
 using namespace nlohmann;
 using namespace geode::prelude;

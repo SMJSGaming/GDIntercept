@@ -1,4 +1,4 @@
-#include "../../../proxy/converters/XmlToXml.hpp"
+#include "XmlToXml.hpp"
 
 proxy::converters::XmlToXml::XmlToXml() : Converter(enums::ContentType::XML) { }
 
