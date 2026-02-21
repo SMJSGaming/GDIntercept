@@ -4,6 +4,7 @@
 
 - Added hover based scroll focus
 - Fixed horizontal scroll
+- Fixed 0 size track thumbs on large requests
 
 ## v0.8.0 - GD/Geode Version Migration
 
