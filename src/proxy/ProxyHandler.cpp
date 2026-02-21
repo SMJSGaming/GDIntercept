@@ -167,7 +167,7 @@ ProxyHandler::ProxyHandler(std::string_view modID, web::WebRequest& request) : m
 m_responseListener(web::IDBasedWebResponseEvent(request.getID()).listen([this](const web::WebResponse& response) {
     return this->onModResponse(response);
 }, Priority::First)),
-m_info(std::make_shared<HttpInfo>(modID == Mod::get()->getID(), request)),
+m_info(std::make_shared<HttpInfo>(modID, request)),
 m_originalTarget(nullptr),
 m_originalProxy(nullptr),
 m_finished(false) { }

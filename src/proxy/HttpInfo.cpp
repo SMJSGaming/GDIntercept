@@ -132,10 +132,11 @@ m_httpVersion("HTTP/1.1"),
 m_url(request->getUrl()),
 m_request(m_url, request) { }
 
-HttpInfo::HttpInfo(const bool repeat, const WebRequest& request) : m_id(globalIndexCounter++),
+HttpInfo::HttpInfo(const std::string_view modID, const WebRequest& request) : m_id(globalIndexCounter++),
 m_client(Client::GEODE),
 m_state(State::IN_PROGRESS),
-m_repeat(repeat),
+m_modID(modID),
+m_repeat(modID == Mod::get()->getID()),
 m_httpVersion(HttpInfo::translateHttpVersion(request.getHttpVersion())),
 m_url(request.getUrl(), request),
 m_request(m_url, request) { }
@@ -182,8 +183,13 @@ std::string HttpInfo::toString(const bool cutContent) const {
 
     std::transform(scheme.begin(), scheme.end(), scheme.begin(), toupper);
 
-    info.append("Client: {}\nRequest Time: {}.{}\nHTTP Version: {}\nMethod: {}\nScheme: {}\nHost: {}",
-        m_client == Client::COCOS ? "Cocos2D-X" : "Geode",
+    info.append("Client: {}", m_client == Client::COCOS ? "Cocos2D-X" : "Geode");
+
+    if (m_modID.size()) {
+        info.append("\nMod ID: {}", m_modID);
+    }
+
+    info.append("\nRequest Time: {}.{}\nHTTP Version: {}\nMethod: {}\nScheme: {}\nHost: {}",
         geode::localtime(m_request.m_startTime / 1000),
         m_request.m_startTime % 1000,
         m_httpVersion,

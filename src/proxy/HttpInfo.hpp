@@ -72,7 +72,7 @@ namespace proxy {
         };
 
         HttpInfo(cocos2d::extension::CCHttpRequest* request);
-        HttpInfo(const bool repeat, const geode::utils::web::WebRequest& request);
+        HttpInfo(const std::string_view modID, const geode::utils::web::WebRequest& request);
         HttpInfo(const HttpInfo&) = delete;
         HttpInfo& operator=(const HttpInfo&) = delete;
 
@@ -99,6 +99,7 @@ namespace proxy {
         PRIMITIVE_GETTER(size_t, id, ID);
         PRIMITIVE_GETTER(enums::Client, client, Client);
         PRIMITIVE_GETTER(enums::State, state, State);
+        GETTER(std::string, modID, ModID);
         GETTER(URL, url, URL);
         GETTER(Request, request, Request);
         GETTER(std::optional<Response>, response, Response);

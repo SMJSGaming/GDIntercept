@@ -4,6 +4,7 @@
 
 - Added hover based scroll focus
 - Added header list syntax parsing
+- Added mod ID to the request info
 - Fixed horizontal scroll
 - Fixed 0 size track thumbs on large requests
 
