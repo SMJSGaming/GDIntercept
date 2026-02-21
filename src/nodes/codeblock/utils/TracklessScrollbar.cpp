@@ -79,13 +79,13 @@ void TracklessScrollbar::update(const float dt) {
         const float listDelta = std::max(targetContentSize.height - targetSize.height, 0.0f);
         const float thumbYPercentage = std::min(1.0f, std::max(0.0f, (listDelta + target->m_contentLayer->getPositionY()) / listDelta));
 
-        thumb->setScaledContentSize({ size.width, std::min(targetSize.height / targetContentSize.height * size.height, size.height) });
+        thumb->setScaledContentSize({ size.width, std::max(std::min(targetSize.height / targetContentSize.height * size.height, size.height), 2.0f) });
         thumb->setPositionY(size.height - (size.height - thumbSize.height) * thumbYPercentage);
     } else {
         const float listDelta = std::max(targetContentSize.width - targetSize.width, 0.0f);
         const float thumbXPercentage = std::min(1.0f, std::max(0.0f, (listDelta + target->m_contentLayer->getPositionX()) / listDelta));
 
-        thumb->setScaledContentSize({ std::min(targetSize.width / targetContentSize.width * size.width, size.width), size.height });
+        thumb->setScaledContentSize({ std::max(std::min(targetSize.width / targetContentSize.width * size.width, size.width), 2.0f), size.height });
         thumb->setPositionX(size.width - (size.width - thumbSize.width) * thumbXPercentage);
     }
 }
