@@ -94,6 +94,7 @@ namespace proxy {
         static std::string translateHttpVersion(const geode::utils::web::HttpVersion version);
         static Headers parseCocosHeaders(const gd::vector<char>* headers);
         static Headers parseCocosHeaders(const gd::vector<gd::string>& headers);
+        static Headers parseHeaderListStrings(Headers headers);
 
         PRIMITIVE_GETTER(size_t, id, ID);
         PRIMITIVE_GETTER(enums::Client, client, Client);

@@ -39,7 +39,7 @@ enums::OriginFilter ProxyFilter::getOrigin() const {
     return m_origin;
 }
 
-const StringStream& ProxyFilter::getURLParts() const {
+const StringUtils& ProxyFilter::getURLParts() const {
     return m_urlParts;
 }
 

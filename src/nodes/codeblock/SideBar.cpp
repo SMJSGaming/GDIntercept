@@ -5,7 +5,7 @@ using namespace SideBarCell;
 SideBar::ActionID::ActionID(const std::string_view id) : isOpen(id == "open") {
     ESCAPE_WHEN(isOpen,);
 
-    StringStream::split(id, '-').forEach([this](const std::string_view part, const size_t i) {
+    StringUtils::split(id, '-').forEach([this](const std::string_view part, const size_t i) {
         if (i == 0) {
             category = part;
         } else if (i == 1) {

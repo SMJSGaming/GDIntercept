@@ -97,7 +97,7 @@ void CodeBlock::setCode(const HttpInfo::Content& code) {
     CullingList* list = reinterpret_cast<CullingList*>(this->getNode());
     JSONTokenizer tokenizer;
 
-    Stream<CodeLineCell*> cells = StringStream::split(m_code = code.contents, '\n').map([&](std::string&& line, const size_t i) {
+    Stream<CodeLineCell*> cells = StringUtils::split(m_code = code.contents, '\n').map([&](std::string&& line, const size_t i) {
         const float lineWidth = code.type == ContentType::BINARY ?
             list->getContentWidth() :
             lineNumberWidth + theme.code.paddingCenter + fontSize.width * std::min<size_t>(maxCharacters, line.size()) + theme.code.paddingRight;

@@ -3,6 +3,7 @@
 ## v1.0.0 Release
 
 - Added hover based scroll focus
+- Added header list syntax parsing
 - Fixed horizontal scroll
 - Fixed 0 size track thumbs on large requests
 

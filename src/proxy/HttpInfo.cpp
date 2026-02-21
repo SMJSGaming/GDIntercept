@@ -81,7 +81,7 @@ std::string HttpInfo::translateHttpVersion(const HttpVersion version) {
 }
 
 HttpInfo::Headers HttpInfo::parseCocosHeaders(const gd::vector<char>* headers) {
-    return HttpInfo::parseCocosHeaders(StringStream::split(std::string_view(headers->data(), headers->size()), '\n')
+    return HttpInfo::parseCocosHeaders(StringUtils::split(std::string_view(headers->data(), headers->size()), '\n')
         .map([](std::string&& header) {
             if (header.back() == '\r') {
                 header.pop_back();
@@ -111,6 +111,17 @@ HttpInfo::Headers HttpInfo::parseCocosHeaders(const gd::vector<gd::string>& head
     }
 
     return parsed;
+}
+
+HttpInfo::Headers HttpInfo::parseHeaderListStrings(Headers headers) {
+    for (auto& [key, values] : headers) {
+        headers.at(key) = Stream(values)
+            .map([](std::string&& value) { return StringUtils::split(std::move(value), ';'); })
+            .flat()
+            .map([](std::string&& value) { return StringUtils::trim(std::move(value)); });
+    }
+
+    return headers;
 }
 
 HttpInfo::HttpInfo(CCHttpRequest* request) : m_id(globalIndexCounter++),
@@ -227,13 +238,13 @@ std::string HttpInfo::toCurl() const {
 
     for (const auto& [key, values] : m_request.getHeaders()) {
         command.append(" -H \"{}: {}\"",
-            StringStream::replace(key, "\"", "\\\""),
-            StringStream::replace(StringStream::join(values, "; "), "\"", "\\\"")
+            StringUtils::replace(key, "\"", "\\\""),
+            StringUtils::replace(StringUtils::join(values, "; "), "\"", "\\\"")
         );
     }
 
     if (m_request.m_body.size()) {
-        command.append(" -d \"{}\"", StringStream::replace(m_request.m_body, "\"", "\\\""));
+        command.append(" -d \"{}\"", StringUtils::replace(m_request.m_body, "\"", "\\\""));
     }
 
     return command.str();
@@ -259,14 +270,14 @@ std::string HttpInfo::Request::stringifyMethod(const CCHttpRequest::HttpRequestT
 
 HttpInfo::Request::Request(const URL& url, CCHttpRequest* request) : m_method(Request::stringifyMethod(request->getRequestType())),
 m_path(url.getPath()),
-m_headers(HttpInfo::parseCocosHeaders(request->getHeaders())),
+m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(request->getHeaders()))),
 m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
 m_contentType(HttpInfo::determineContentType(url.getPath(), true, m_body)),
 m_startTime(Request::getRequestTime()) { }
 
 HttpInfo::Request::Request(const URL& url, const WebRequest& request) : m_method(request.getMethod()),
 m_path(url.getPath()),
-m_headers(request.getHeaders()),
+m_headers(HttpInfo::parseHeaderListStrings(request.getHeaders())),
 m_startTime(Request::getRequestTime()) {
     const ByteVector body = request.getBody().value_or(ByteVector());
 
@@ -309,7 +320,7 @@ m_statusCode(code) { };
 HttpInfo::Response::Response(std::shared_ptr<HttpInfo> info, CCHttpResponse* response) : m_received(true),
 m_responseTime(Response::calculateResponseTime(info)),
 m_path(info->m_url.getPath()),
-m_headers(HttpInfo::parseCocosHeaders(response->getResponseHeader())),
+m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(response->getResponseHeader()))),
 m_statusCode(response->getResponseCode()) {
     gd::vector<char>* data = response->getResponseData();
 
@@ -320,13 +331,14 @@ m_statusCode(response->getResponseCode()) {
 HttpInfo::Response::Response(std::shared_ptr<HttpInfo> info, const WebResponse& response) : m_received(true),
 m_responseTime(Response::calculateResponseTime(info)),
 m_path(info->m_url.getPath()),
-m_headers(Headers()),
 m_statusCode(response.code()),
 m_response(response.string().unwrapOrDefault()),
 m_contentType(HttpInfo::determineContentType(info->m_url.getPath(), false, m_response)) {
     for (const std::string_view header : response.headers()) {
         m_headers[std::string(header)] = response.getAllHeadersNamed(header).value_or(std::vector<std::string>());
     }
+
+    m_headers = HttpInfo::parseHeaderListStrings(std::move(m_headers));
 }
 
 std::string HttpInfo::Response::stringifyStatusCode() const {

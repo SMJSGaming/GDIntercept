@@ -22,11 +22,11 @@ namespace proxy {
         bool validate(const enums::EventState state, std::shared_ptr<HttpInfo> info) const;
         enums::EventState getState() const;
         enums::OriginFilter getOrigin() const;
-        const StringStream& getURLParts() const;
+        const StringUtils& getURLParts() const;
     private:
         enums::EventState m_state;
         enums::OriginFilter m_origin;
-        StringStream m_urlParts;
+        StringUtils m_urlParts;
     };
 
     class ProxyEvent : private geode::ThreadSafeEvent<ProxyEvent, bool(const enums::EventState, std::shared_ptr<HttpInfo>)> {

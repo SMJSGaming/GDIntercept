@@ -106,7 +106,7 @@ void proxy::URL::parseHost(size_t& index) {
     const size_t hostEnd = m_reconstruction.find('/', index);
     const size_t size = (hostEnd == std::string::npos ? m_reconstruction.size() : hostEnd) - index;
 
-    m_subDomains = StringStream::split(m_host = m_reconstruction.substr(index, size), '.');
+    m_subDomains = StringUtils::split(m_host = m_reconstruction.substr(index, size), '.');
 
     std::string& lastSubDomain = m_subDomains.back();
     const size_t portStart = lastSubDomain.find(':');

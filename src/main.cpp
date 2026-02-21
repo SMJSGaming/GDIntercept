@@ -58,15 +58,15 @@ $execute {
     }).leak();
 
     listenForAllSettingChanges([](const std::string_view key, std::shared_ptr<SettingV3> setting) {
-        static const StringStream listReloads = {
+        static const StringUtils listReloads = {
             "filter",
             "cache-limit",
             "hide-badges"
         };
-        static const StringStream codeBlockReloads = {
+        static const StringUtils codeBlockReloads = {
             "theme"
         };
-        static const StringStream codeReloads = {
+        static const StringUtils codeReloads = {
             "filter",
             "cache-limit",
             "censor-data",
@@ -74,7 +74,7 @@ $execute {
             "decode-data",
             "max-characters-per-line"
         };
-        static const StringStream sideMenuReloads = {
+        static const StringUtils sideMenuReloads = {
             "minimize-side-menu"
         };
 

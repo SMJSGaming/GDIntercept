@@ -7,6 +7,11 @@
 template<typename T>
 class Stream;
 
+template<typename T>
+concept is_stream = requires(T* stream) {
+    []<typename U>(Stream<U>*) {}(stream);
+}; 
+
 template<typename F, typename Returns, typename ...Args>
 concept returning_lambda = std::invocable<F, Args...> && std::is_convertible_v<std::invoke_result_t<F, Args...>, Returns>;
 
@@ -62,11 +67,6 @@ using stream_lambda_return = __stream_lambda_return_impl<F, Value, PrefixArgs...
 // NOTE! Non constant versions will consume on each iteration
 template<typename T>
 class Stream : public std::vector<T> {
-    template<typename>
-    struct is_stream : std::false_type {};
-
-    template<typename U>
-    struct is_stream<Stream<U>> : std::true_type {};
 public:
     Stream& operator=(Stream&&) noexcept(std::is_nothrow_move_assignable_v<std::vector<T>>) = default;
 
@@ -309,7 +309,7 @@ public:
         return stream;
     }
 
-    [[nodiscard]] auto flat() && requires(is_stream<T>::value) {
+    [[nodiscard]] auto flat() && requires(is_stream<T>) {
         Stream<typename T::value_type> stream;
 
         for (T& element : *this) {
@@ -319,7 +319,7 @@ public:
         return stream;
     }
 
-    auto flat() const& requires(is_stream<T>::value) {
+    auto flat() const& requires(is_stream<T>) {
         Stream<typename T::value_type> stream;
 
         for (const T& element : *this) {
@@ -489,11 +489,13 @@ public:
     }
 };
 
-class StringStream : public Stream<std::string> {
+class StringUtils : public Stream<std::string> {
     using Stream::Stream;
 public:
-    [[nodiscard]] static StringStream split(const std::string_view input, const char delimiter) {
-        StringStream stream;
+    static constexpr auto TRIM_CHARS = "\t\n\r\f\v ";
+
+    [[nodiscard]] static StringUtils split(const std::string_view input, const char delimiter) {
+        StringUtils stream;
         size_t start = 0;
 
         for (size_t end; (end = input.find(delimiter, start)) != std::string_view::npos; start = end + 1) {
@@ -505,8 +507,8 @@ public:
         return stream;
     }
 
-    [[nodiscard]] static StringStream split(const std::string_view input, const std::string_view delimiter) {
-        StringStream stream;
+    [[nodiscard]] static StringUtils split(const std::string_view input, const std::string_view delimiter) {
+        StringUtils stream;
         size_t start = 0;
 
         if (delimiter.empty()) {
@@ -525,7 +527,7 @@ public:
     }
 
     static std::string join(const std::vector<std::string>& input, const std::string_view delimiter) {
-        return StringStream(input).reduce([delimiter](std::string&& acc, std::string&& part, const size_t i) {
+        return StringUtils(input).reduce([delimiter](std::string&& acc, std::string&& part, const size_t i) {
             if (i) acc += delimiter;
 
             acc += part;
@@ -535,7 +537,33 @@ public:
     }
 
     static std::string replace(const std::string_view input, const std::string_view delimiter, const std::string_view replacement) {
-        return StringStream::join(StringStream::split(input, delimiter), replacement);
+        return StringUtils::join(StringUtils::split(input, delimiter), replacement);
+    }
+
+    static std::string_view trim(std::string_view input) {
+        const size_t first = input.find_first_not_of(StringUtils::TRIM_CHARS);
+
+        if (first == std::string_view::npos) {
+            return {};
+        } else {
+            input.remove_suffix(input.size() - input.find_last_not_of(StringUtils::TRIM_CHARS) - 1);
+            input.remove_prefix(first);
+
+            return input;
+        }
+    }
+
+    static std::string trim(std::string&& input) {
+        const size_t first = input.find_first_not_of(StringUtils::TRIM_CHARS);
+
+        if (first == std::string_view::npos) {
+            return {};
+        } else {
+            input.erase(input.find_last_not_of(StringUtils::TRIM_CHARS) + 1);
+            input.erase(0, first);
+
+            return std::move(input);
+        }
     }
 
     bool includes(const std::string_view value) const {
