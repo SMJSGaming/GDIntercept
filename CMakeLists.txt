@@ -10,7 +10,7 @@ else()
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 endif()
 
-project(GDIntercept VERSION 0.7.2)
+project(GDIntercept VERSION 0.8.1)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_library(${PROJECT_NAME} SHARED ${SOURCES})

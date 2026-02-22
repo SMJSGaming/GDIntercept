@@ -1,6 +1,6 @@
 # GDIntercept Changelog
 
-## v1.0.0 Release
+## v0.8.1 Release
 
 - Added hover based scroll focus
 - Added header list syntax parsing

@@ -1,13 +1,13 @@
 {
-  "geode": "5.0.0-beta.3",
-  "version": "v0.8.0",
+  "geode": "5.0.0-beta.4",
+  "version": "v0.8.1",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "developers": [
     "SMJS",
     "RobTop"
   ],
-  "description": "A tool to intercept and modify GD requests.",
+  "description": "A tool to intercept GD & Geode web requests.",
   "links": {
     "community": "https://discord.gg/VqFpjF5mJe",
     "source": "https://github.com/SMJSGaming/GDIntercept"
