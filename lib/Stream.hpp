@@ -439,12 +439,24 @@ public:
 
     template<typename R>
     [[nodiscard]] Stream<R> cast() && {
-        return this->map([](T&& element) { return static_cast<R>(element); });
+        Stream<R> stream;
+
+        for (auto&& value : std::move(*this)) {
+            stream.emplace_back(std::move(value));
+        }
+
+        return stream;
     }
 
     template<typename R>
     Stream<R> cast() const& {
-        return this->map([](const T& element) { return static_cast<R>(element); });
+        Stream<R> stream;
+
+        for (auto& value : *this) {
+            stream.emplace_back(value);
+        }
+
+        return stream;
     }
 
     template<std::invocable F>

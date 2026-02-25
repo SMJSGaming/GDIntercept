@@ -1,6 +1,10 @@
 # GDIntercept Changelog
 
-## v0.8.1 Release
+## v0.8.2 Scroll lock fix
+
+- Fixed y axis scroll lock on narrow lists
+
+## v0.8.1 General QoL
 
 - Added hover based scroll focus
 - Added header list syntax parsing
