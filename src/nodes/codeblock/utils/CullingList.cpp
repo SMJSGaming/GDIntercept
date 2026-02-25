@@ -123,6 +123,13 @@ void CullingList::setContentSize(const CCSize& size) {
     }
 }
 
+void CullingList::scrollWheel(const float y, const float x) {
+    m_view->m_contentLayer->setPositionX(std::clamp<float>(m_view->m_contentLayer->getPositionX() + x, -(
+        std::max<float>(m_view->m_contentLayer->getContentWidth() - m_view->getContentWidth(), 0)
+    ), 0));
+    m_view->scrollWheel(y, x);
+}
+
 bool CullingList::isHorizontalLocked() {
     return m_view->m_disableHorizontal;
 }
@@ -212,13 +219,6 @@ void CullingList::update(const float dt) {
         });
 
     m_activeCells = std::move(newActiveCells);
-}
-
-void CullingList::scrollWheel(const float y, const float x) {
-    m_view->m_contentLayer->setPositionX(std::clamp<float>(m_view->m_contentLayer->getPositionX() + x, -(
-        m_view->m_contentLayer->getContentWidth() - m_view->getContentWidth()
-    ), 0));
-    m_view->scrollWheel(y, x);
 }
 
 int CullingList::numberOfRowsInSection(unsigned int section, TableView* view) {
