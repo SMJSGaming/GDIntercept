@@ -277,12 +277,10 @@ std::string HttpInfo::Request::stringifyMethod(const CCHttpRequest::HttpRequestT
 HttpInfo::Request::Request(const URL& url, CCHttpRequest* request) : m_method(Request::stringifyMethod(request->getRequestType())),
 m_path(url.getPath()),
 m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(request->getHeaders()))),
-m_body(std::string(request->_requestData.data(), request->getRequestDataSize())),
+// TODO: Size is a temp fix, switch back to the old mehtod in the next Geode version
+m_body(std::string(request->getRequestData(), request->_requestData.size())),
 m_contentType(HttpInfo::determineContentType(url.getPath(), true, m_body)),
-m_startTime(Request::getRequestTime()) {
-    log::error("ptr: {}", request->getRequestData());
-    log::error("size: {}", request->getRequestDataSize());
-}
+m_startTime(Request::getRequestTime()) { }
 
 HttpInfo::Request::Request(const URL& url, const WebRequest& request) : m_method(request.getMethod()),
 m_path(url.getPath()),

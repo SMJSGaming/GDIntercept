@@ -1,6 +1,10 @@
 # GDIntercept Changelog
 
-## v0.8.2 Scroll lock fix
+## v0.8.3 Fixing Android Request Bodies
+
+- Fixed request bodies not being shown on Android (thx fod)
+
+## v0.8.2 Scroll Lock Fix
 
 - Fixed y axis scroll lock on narrow lists
 
