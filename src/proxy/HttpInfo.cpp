@@ -279,7 +279,10 @@ m_path(url.getPath()),
 m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(request->getHeaders()))),
 m_body(std::string(request->_requestData.data(), request->getRequestDataSize())),
 m_contentType(HttpInfo::determineContentType(url.getPath(), true, m_body)),
-m_startTime(Request::getRequestTime()) { }
+m_startTime(Request::getRequestTime()) {
+    log::error("ptr: {}", request->getRequestData());
+    log::error("size: {}", request->getRequestDataSize());
+}
 
 HttpInfo::Request::Request(const URL& url, const WebRequest& request) : m_method(request.getMethod()),
 m_path(url.getPath()),
