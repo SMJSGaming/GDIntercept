@@ -277,7 +277,7 @@ std::string HttpInfo::Request::stringifyMethod(const CCHttpRequest::HttpRequestT
 HttpInfo::Request::Request(const URL& url, CCHttpRequest* request) : m_method(Request::stringifyMethod(request->getRequestType())),
 m_path(url.getPath()),
 m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(request->getHeaders()))),
-m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
+m_body(std::string(request->_requestData.data(), request->getRequestDataSize())),
 m_contentType(HttpInfo::determineContentType(url.getPath(), true, m_body)),
 m_startTime(Request::getRequestTime()) { }
 
