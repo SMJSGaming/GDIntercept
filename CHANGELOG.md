@@ -1,5 +1,13 @@
 # GDIntercept Changelog
 
+## v0.8.4 Bug Fixes
+
+- Added sizes to the info block
+- Fixed unexpected formats accidentally being parsed as a form
+- Fixed variable scrolling being rounded to 0
+- Fixed saving files using invalid characters
+- Fixed code smells which could potenttially use deleted memory
+
 ## v0.8.3 Fixing Android Request Bodies
 
 - Fixed request bodies not being shown on Android (thx fod)

@@ -214,17 +214,19 @@ std::string HttpInfo::toString(const bool cutContent) const {
         }
     }
 
+    info.append("\nBody Size: {} Bytes", m_request.getBody().size());
+
     if (m_url.getHash().size()) {
         info.append("\nHash: {}", m_url.getHash());
     }
 
     if (!this->hasResponse() || !this->m_response->m_received) return info.str();
 
-    const Content responseContent = m_response->getResponseContent();
-
     info.append("\nStatus Code: {}\nResponse Time: {}ms", m_response->stringifyStatusCode(), m_response->getResponseTime());
 
     if (!cutContent) {
+        const Content responseContent = m_response->getResponseContent();
+
         info.append("\nResponse Headers: {}\nResponse:", m_response->getHeaderList(false).contents);
 
         if (responseContent.contents.size()) {
@@ -232,7 +234,8 @@ std::string HttpInfo::toString(const bool cutContent) const {
             info.append(responseContent.contents);
         }
     }
-    
+
+    info.append("\nResponse Size: {} Bytes", m_response->getResponse().size());
 
     return info.str();
 }
@@ -277,8 +280,7 @@ std::string HttpInfo::Request::stringifyMethod(const CCHttpRequest::HttpRequestT
 HttpInfo::Request::Request(const URL& url, CCHttpRequest* request) : m_method(Request::stringifyMethod(request->getRequestType())),
 m_path(url.getPath()),
 m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(request->getHeaders()))),
-// TODO: Size is a temp fix, switch back to the old mehtod in the next Geode version
-m_body(std::string(request->getRequestData(), request->_requestData.size())),
+m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
 m_contentType(HttpInfo::determineContentType(url.getPath(), true, m_body)),
 m_startTime(Request::getRequestTime()) { }
 

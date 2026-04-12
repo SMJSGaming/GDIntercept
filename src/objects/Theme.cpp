@@ -94,7 +94,7 @@ void Theme::Theme::load() {
 void Theme::Theme::loadDirectory(const std::filesystem::path& path) {
     const Result<std::vector<std::filesystem::path>> dir = utils::file::readDirectory(path);
 
-    ESCAPE_WHEN(dir.isErr(), log::warn("Failed to read directory {}: {}", path.string(), dir.err().value_or("Unknown error")));
+    ESCAPE_WHEN(dir.isErr(), log::warn("Failed to read directory {}: {}", path, dir.err().value_or("Unknown error")));
 
     for (const auto& file : dir.unwrap()) {
         CONTINUE_WHEN(file.extension() != ".json");
@@ -102,7 +102,7 @@ void Theme::Theme::loadDirectory(const std::filesystem::path& path) {
         const Result<std::string> text = utils::file::readString(file);
 
         if (text.isErr()) {
-            log::warn("Failed to read theme file {}: {}", file.string(), text.err().value_or("Unknown error"));
+            log::warn("Failed to read theme file {}: {}", file, text.err().value_or("Unknown error"));
             continue;
         }
 
@@ -111,9 +111,9 @@ void Theme::Theme::loadDirectory(const std::filesystem::path& path) {
         if (theme.contains("name") && theme.contains("theme")) try {
             Theme::CACHED_THEMES.insert(theme.at("name").get<std::string>(), Theme::createTheme(theme.at("theme")));
         } catch (const json::exception& e) {
-            log::warn("Failed to parse theme file {}: {}", file.string(), e.what());
+            log::warn("Failed to parse theme file {}: {}", file, e.what());
         } else {
-            log::info("Skipped parsing JSON file {}", file.string());
+            log::info("Skipped parsing JSON file {}", file);
         }
     }
 }

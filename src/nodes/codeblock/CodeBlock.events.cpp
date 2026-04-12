@@ -176,7 +176,7 @@ bool CodeBlock::onOpenSaveFiles() {
 
 bool CodeBlock::onSave() {
     Mod* mod = Mod::get();
-    std::string filename = fmt::format("{:%F %T} - {}.txt", geode::localtime(std::time(nullptr)), m_info->getURL().getHost());
+    std::string filename = fmt::format("{:%Y-%m-%d_%H-%M-%S} - {}.txt", geode::localtime(std::time(nullptr)), m_info->getURL().getHost());
 
     async::spawn(utils::file::pick(file::PickMode::OpenFolder, {
         .defaultPath = mod->getSavedValue("default-path", mod->getSaveDir())

@@ -8,7 +8,9 @@ bool proxy::converters::FormToJson::canConvert(const std::string_view path, cons
     bool hasAssignment = false;
 
     for (const char character : original) {
-        if (character == '=') {
+        if (character == '\n') {
+            return false;
+        } else if (character == '=') {
             hasAssignment = true;
         } else if (character == '&') {
             if (!hasAssignment) {
