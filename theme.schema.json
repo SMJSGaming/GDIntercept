@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/resources/themes/theme.schema.json",
+  "$id": "https://raw.githubusercontent.com/SMJSProductions/GDIntercept/main/resources/themes/theme.schema.json",
   "title": "GDIntercept Theme",
   "type": "object",
   "description": "The schema for the GDIntercept themes.",

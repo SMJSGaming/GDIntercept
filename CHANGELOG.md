@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.8.5 Username change
+
+- Refactored my GitHub account name in all references
+
 ## v0.8.4 Bug Fixes
 
 - Added sizes to the info block

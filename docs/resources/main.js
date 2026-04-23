@@ -231,7 +231,7 @@ class SchemaBuilder {
     if (schema) {
         console.log("Schema loaded from cache.");
     } else {
-        sessionStorage.setItem("schema", schema = JSON.stringify(await (await fetch("https://raw.githubusercontent.com/SMJSGaming/GDIntercept/main/theme.schema.json")).json()));
+        sessionStorage.setItem("schema", schema = JSON.stringify(await (await fetch("https://raw.githubusercontent.com/SMJSProductions/GDIntercept/main/theme.schema.json")).json()));
     }
 
     const schemaObj = JSON.parse(schema);

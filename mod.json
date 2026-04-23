@@ -1,6 +1,6 @@
 {
   "geode": "5.6.1",
-  "version": "v0.8.4",
+  "version": "v0.8.5",
   "id": "smjs.gdintercept",
   "name": "GDIntercept",
   "developers": [
@@ -10,11 +10,11 @@
   "description": "A tool to intercept GD & Geode web requests.",
   "links": {
     "community": "https://discord.gg/VqFpjF5mJe",
-    "source": "https://github.com/SMJSGaming/GDIntercept"
+    "source": "https://github.com/SMJSProductions/GDIntercept"
   },
   "issues": {
     "info": "Inform issues through the repository issues page.",
-    "url": "https://github.com/SMJSGaming/GDIntercept/issues"
+    "url": "https://github.com/SMJSProductions/GDIntercept/issues"
   },
   "tags": [
     "online",
