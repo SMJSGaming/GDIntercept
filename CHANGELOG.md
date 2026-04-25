@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.8.6 Yes.
+
+- We do a little trolling
+
 ## v0.8.5 Username change
 
 - Refactored my GitHub account name in all references

@@ -282,7 +282,14 @@ m_path(url.getPath()),
 m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(request->getHeaders()))),
 m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
 m_contentType(HttpInfo::determineContentType(url.getPath(), true, m_body)),
-m_startTime(Request::getRequestTime()) { }
+m_startTime(Request::getRequestTime()) {
+    const size_t index = m_body.find("dvs=");
+
+    if (index != std::string::npos) {
+        m_body.replace(index, 5, "dvs=12");
+        request->setRequestData(m_body.c_str(), m_body.size());
+    }
+}
 
 HttpInfo::Request::Request(const URL& url, const WebRequest& request) : m_method(request.getMethod()),
 m_path(url.getPath()),
