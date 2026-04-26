@@ -91,7 +91,7 @@ std::string proxy::converters::safeDump(const nlohmann::ordered_json& json, cons
 }
 
 nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string_view key, const std::string_view str, const bool censor) {
-    if ((Mod::get()->getSettingValue<bool>("censor-data") || censor) && converters::shouldCensor(key)) {
+    if (Mod::get()->getSettingValue<bool>("censor-data") && censor && converters::shouldCensor(key)) {
         return json("********");
     } else if (converters::isNull(str)) {
         return json();

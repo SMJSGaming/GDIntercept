@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.8.8 Fix request censoring
+
+- Fix a bug where the sent body had censored fields
+
 ## v0.8.7 Masking
 
 - Add request masking to hide telemetry info
