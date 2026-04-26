@@ -62,6 +62,7 @@ Alpha 6 Todo:
   ✔ @high Add scroll based on cursor position @done(26-02-19 15:43)
   ✔ @high Fix horizontal scroll commands from the mouse @done(26-02-19 21:18)
   ✔ @low Add advanced header parsing @done(26-02-21 18:37)
+  ☐ @high Implement the to raw of RobTopToJsonV2
 Nice To Haves:
   ☐ Add inputs to the JSON code block
   ☐ Add spoofing (response mocking) support

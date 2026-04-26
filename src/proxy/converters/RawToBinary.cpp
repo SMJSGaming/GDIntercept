@@ -6,7 +6,7 @@ bool proxy::converters::RawToBinary::canConvert(const std::string_view path, con
     return original.find_first_of('\0') != std::string_view::npos;
 }
 
-std::string proxy::converters::RawToBinary::convert(const std::string_view path, const std::string_view original) const {
+std::string proxy::converters::RawToBinary::convert(const std::string_view path, const std::string_view original, const bool censor) const {
     static constexpr char hex[] = "0123456789ABCDEF";
     std::string result;
 

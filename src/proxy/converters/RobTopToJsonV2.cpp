@@ -276,13 +276,13 @@ m_entryType(ObjectType::AS_IS),
 m_tuple(std::move(tuple)),
 m_decodeStrategy(decodeStrategy) { }
 
-ordered_json proxy::converters::RobTopToJsonV2::Object::parse(std::string_view original) const {
+ordered_json proxy::converters::RobTopToJsonV2::Object::parse(std::string_view original, const bool censor) const {
     // This exists here to give the decoded result a lifetime
     std::string decodedOriginal;
 
     // Escape if it shouldn't decode or is a number like -1 which may result in incorrect parsing for failed responses
     if ((m_decodeStrategy.encodings != Encodings::NONE && !Mod::get()->getSettingValue<bool>("decode-data")) || converters::isNumber(original)) {
-        return converters::getPrimitiveJsonType({}, original);
+        return converters::getPrimitiveJsonType({}, original, censor);
     }
 
     switch (m_decodeStrategy.encodings) {
@@ -312,14 +312,14 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parse(std::string_view o
     }
 
     switch(m_strategy) {
-        case Strategy::PRIMITIVE: return converters::getPrimitiveJsonType({}, original);
-        case Strategy::OBJECT_SPLIT: return this->parseObject(original);
-        case Strategy::ARRAY_SPLIT: return this->parseArray(original);
-        case Strategy::TUPLE_SPLIT: return this->parseTuple(original);
+        case Strategy::PRIMITIVE: return converters::getPrimitiveJsonType({}, original, censor);
+        case Strategy::OBJECT_SPLIT: return this->parseObject(original, censor);
+        case Strategy::ARRAY_SPLIT: return this->parseArray(original, censor);
+        case Strategy::TUPLE_SPLIT: return this->parseTuple(original, censor);
     };
 }
 
-ordered_json proxy::converters::RobTopToJsonV2::Object::parseObject(const std::string_view original) const {
+ordered_json proxy::converters::RobTopToJsonV2::Object::parseObject(const std::string_view original, const bool censor) const {
     ordered_json object = ordered_json::object();
     std::string activeKey;
 
@@ -327,15 +327,15 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parseObject(const std::s
         return object;
     }
 
-    StringUtils::split(original, m_delimiter).forEach([this, &activeKey, &object](std::string&& part, const size_t i) {
+    StringUtils::split(original, m_delimiter).forEach([this, &activeKey, &object, censor](std::string&& part, const size_t i) {
         if (i % 2 == 0) {
             activeKey = std::move(part);
         } else if (const Mappings::const_iterator it = m_mappings.find(activeKey); it != m_mappings.end()) {
             const Object& mapping = this->getObject(it->second);
 
-            object[std::move(activeKey)] = mapping.parse(std::move(part));
+            object[std::move(activeKey)] = mapping.parse(std::move(part), censor);
         } else {
-            nlohmann::json value = converters::getPrimitiveJsonType(activeKey, std::move(part));
+            nlohmann::json value = converters::getPrimitiveJsonType(activeKey, std::move(part), censor);
 
             object[std::move(activeKey)] = std::move(value);
         }
@@ -344,21 +344,21 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parseObject(const std::s
     return object;
 }
 
-ordered_json proxy::converters::RobTopToJsonV2::Object::parseArray(const std::string_view original) const {
+ordered_json proxy::converters::RobTopToJsonV2::Object::parseArray(const std::string_view original, const bool censor) const {
     ordered_json array = ordered_json::array();
 
     if (original.empty()) {
         return array;
     }
 
-    StringUtils::split(original, m_delimiter).forEach([this, &array](std::string&& part) {
-        array.emplace_back(RobTopToJsonV2::PARSERS.at(m_entryType).parse(std::move(part)));
+    StringUtils::split(original, m_delimiter).forEach([this, &array, censor](std::string&& part) {
+        array.emplace_back(RobTopToJsonV2::PARSERS.at(m_entryType).parse(std::move(part), censor));
     });
 
     return array;
 }
 
-ordered_json proxy::converters::RobTopToJsonV2::Object::parseTuple(const std::string_view original) const {
+ordered_json proxy::converters::RobTopToJsonV2::Object::parseTuple(const std::string_view original, const bool censor) const {
     const size_t tupleSize = m_tuple.size();
     ordered_json object = ordered_json::object();
     size_t unknownCount = 0;
@@ -367,12 +367,12 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parseTuple(const std::st
         return object;
     }
 
-    StringUtils::split(original, m_delimiter).forEach([this, tupleSize, &object, &unknownCount](std::string&& part, const size_t i) {
+    StringUtils::split(original, m_delimiter).forEach([this, tupleSize, &object, &unknownCount, censor](std::string&& part, const size_t i) {
         const bool withinSize = i < tupleSize;
 
         if (withinSize || (tupleSize && m_tuple.back().vararg)) {
             const auto& fieldInfo = withinSize ? m_tuple.at(i) : m_tuple.back();
-            ordered_json value = this->getObject(fieldInfo.source).parse(std::move(part));
+            ordered_json value = this->getObject(fieldInfo.source).parse(std::move(part), censor);
             ordered_json& field = object[fieldInfo.key];
 
             if (!fieldInfo.vararg) {
@@ -383,7 +383,7 @@ ordered_json proxy::converters::RobTopToJsonV2::Object::parseTuple(const std::st
                 field = ordered_json::array({ std::move(value) });
             }
         } else {
-            object[fmt::format("unknown-{}", ++unknownCount)] = converters::getPrimitiveJsonType({}, std::move(part));
+            object[fmt::format("unknown-{}", ++unknownCount)] = converters::getPrimitiveJsonType({}, std::move(part), censor);
         }
     });
 
@@ -396,8 +396,8 @@ bool proxy::converters::RobTopToJsonV2::canConvert(const std::string_view path, 
     return !isBody && RobTopToJsonV2::ENDPOINT_MAPPINGS.contains(this->splitPath(path));
 }
 
-std::string proxy::converters::RobTopToJsonV2::convert(const std::string_view path, const std::string_view original) const {
-    return converters::safeDump(RobTopToJsonV2::PARSERS.at(RobTopToJsonV2::ENDPOINT_MAPPINGS.at(this->splitPath(path))).parse(original));
+std::string proxy::converters::RobTopToJsonV2::convert(const std::string_view path, const std::string_view original, const bool censor) const {
+    return converters::safeDump(RobTopToJsonV2::PARSERS.at(RobTopToJsonV2::ENDPOINT_MAPPINGS.at(this->splitPath(path))).parse(original, censor));
 }
 
 std::string proxy::converters::RobTopToJsonV2::toRaw(const std::string_view path, const std::string_view original) const {

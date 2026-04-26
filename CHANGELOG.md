@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.8.7 Masking
+
+- Add request masking to hide telemetry info
+
 ## v0.8.6 Yes.
 
 - We do a little trolling

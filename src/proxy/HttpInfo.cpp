@@ -16,14 +16,20 @@ const LookupTable<ContentType, converters::Converter*> HttpInfo::CONVERTERS({
     { ContentType::FORM, new FormToJson() }
 });
 
-HttpInfo::Content HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string_view path, const std::string_view original) {
+HttpInfo::Content HttpInfo::getContent(const bool raw, const ContentType originalContentType, const std::string_view path, const std::string_view original, const bool censor) {
     if (HttpInfo::CONVERTERS.contains(originalContentType)) {
         const converters::Converter* converter = HttpInfo::CONVERTERS.at(originalContentType);
 
         if (!raw) {
-            return { converter->getResultContentType(), converter->convert(path, original) };
-        } else if (Mod::get()->getSettingValue<bool>("censor-data") && converter->isNeedsSanitization()) {
-            return { originalContentType, converter->toRaw(path, converter->convert(path, original)) };
+            return { converter->getResultContentType(), converter->convert(path, original, censor) };
+        } else if (
+            (
+                (censor && Mod::get()->getSettingValue<bool>("censor-data")) &&
+                converter->isNeedsCensoring()
+            ) ||
+            Mod::get()->getSettingValue<bool>("mask-telemetry") && converter->isNeedsMasking()
+        ) {
+            return { originalContentType, converter->toRaw(path, converter->convert(path, original, censor)) };
         }
     }
 
@@ -283,10 +289,9 @@ m_headers(HttpInfo::parseHeaderListStrings(HttpInfo::parseCocosHeaders(request->
 m_body(std::string(request->getRequestData(), request->getRequestDataSize())),
 m_contentType(HttpInfo::determineContentType(url.getPath(), true, m_body)),
 m_startTime(Request::getRequestTime()) {
-    const size_t index = m_body.find("dvs=");
+    if (Mod::get()->getSettingValue<bool>("mask-telemetry")) {
+        m_body = this->getBodyContent(true, false).contents;
 
-    if (index != std::string::npos) {
-        m_body.replace(index, 5, "dvs=12");
         request->setRequestData(m_body.c_str(), m_body.size());
     }
 }
@@ -315,8 +320,8 @@ std::vector<std::string> HttpInfo::Request::getHeader(const std::string_view key
     }
 }
 
-HttpInfo::Content HttpInfo::Request::getBodyContent(const bool raw) const {
-    return HttpInfo::getContent(raw, m_contentType, m_path, m_body);
+HttpInfo::Content HttpInfo::Request::getBodyContent(const bool raw, const bool censor) const {
+    return HttpInfo::getContent(raw, m_contentType, m_path, m_body, censor);
 }
 
 void HttpInfo::Request::resetTime() {
@@ -371,8 +376,8 @@ HttpInfo::Content HttpInfo::Response::getHeaderList(const bool raw) const {
     return HttpInfo::getHeaders(raw, m_headers);
 }
 
-HttpInfo::Content HttpInfo::Response::getResponseContent(const bool raw) const {
-    return HttpInfo::getContent(raw, m_contentType, m_path, m_response);
+HttpInfo::Content HttpInfo::Response::getResponseContent(const bool raw, const bool censor) const {
+    return HttpInfo::getContent(raw, m_contentType, m_path, m_response, censor);
 }
 
 std::vector<std::string> HttpInfo::Response::getHeader(const std::string_view key) const {

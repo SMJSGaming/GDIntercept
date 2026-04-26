@@ -3,10 +3,9 @@
 using namespace nlohmann;
 using namespace geode::prelude;
 
-proxy::converters::Converter::Converter(const enums::ContentType resultContentType) {
-    m_needsSanitization = resultContentType == enums::ContentType::JSON;
-    m_resultContentType = resultContentType;
-}
+proxy::converters::Converter::Converter(const enums::ContentType resultContentType, const bool needsMasking) : m_needsCensoring(resultContentType == enums::ContentType::JSON),
+m_resultContentType(resultContentType),
+m_needsMasking(needsMasking) { }
 
 bool proxy::converters::isInt(const std::string_view str) {
     if (str.empty()) {
@@ -67,8 +66,8 @@ bool proxy::converters::isString(const std::string_view str) {
     return !isEscaped;
 }
 
-bool proxy::converters::shouldSanitize(const std::string_view key) {
-    static const Stream<std::string> sensitiveKeys = {
+bool proxy::converters::shouldCensor(const std::string_view key) {
+    static const std::vector<std::string> SENSITIVE_KEYS {
         "password",
         "pass",
         "passwd",
@@ -80,7 +79,7 @@ bool proxy::converters::shouldSanitize(const std::string_view key) {
         "gjp2"
     };
 
-    return sensitiveKeys.includes(std::string(key));
+    return std::find(SENSITIVE_KEYS.begin(), SENSITIVE_KEYS.end(), key) != SENSITIVE_KEYS.end();
 }
 
 std::string proxy::converters::safeDump(const nlohmann::ordered_json& json, const size_t indent, const bool quoteless) {
@@ -91,8 +90,8 @@ std::string proxy::converters::safeDump(const nlohmann::ordered_json& json, cons
     }
 }
 
-nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string_view key, const std::string_view str) {
-    if (converters::shouldSanitize(key) && Mod::get()->getSettingValue<bool>("censor-data")) {
+nlohmann::json proxy::converters::getPrimitiveJsonType(const std::string_view key, const std::string_view str, const bool censor) {
+    if ((Mod::get()->getSettingValue<bool>("censor-data") || censor) && converters::shouldCensor(key)) {
         return json("********");
     } else if (converters::isNull(str)) {
         return json();

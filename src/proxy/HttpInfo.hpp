@@ -22,7 +22,7 @@ namespace proxy {
         class Request {
         public:
             Content getHeaderList(const bool raw = false) const;
-            Content getBodyContent(const bool raw = true) const;
+            Content getBodyContent(const bool raw = true, const bool censor = true) const;
             std::vector<std::string> getHeader(const std::string_view key) const;
         private:
             static size_t getRequestTime();
@@ -49,7 +49,7 @@ namespace proxy {
         public:
             std::string stringifyStatusCode() const;
             Content getHeaderList(const bool raw = false) const;
-            Content getResponseContent(const bool raw = true) const;
+            Content getResponseContent(const bool raw = true, const bool censor = true) const;
             std::vector<std::string> getHeader(const std::string_view key) const;
         private:
             static size_t calculateResponseTime(std::shared_ptr<HttpInfo> info);
@@ -88,7 +88,7 @@ namespace proxy {
     private:
         static const LookupTable<enums::ContentType, converters::Converter*> CONVERTERS;
 
-        static Content getContent(const bool raw, const enums::ContentType originalContentType, const std::string_view path, const std::string_view original);
+        static Content getContent(const bool raw, const enums::ContentType originalContentType, const std::string_view path, const std::string_view original, const bool censor);
         static Content getHeaders(const bool raw, const Headers& headers);
         static enums::ContentType determineContentType(const std::string_view path, const bool isBody, const std::string_view content);
         static std::string translateHttpVersion(const geode::utils::web::HttpVersion version);

@@ -84,7 +84,7 @@ namespace proxy::converters {
             Object(std::string delimiter, Mappings mappings = {}, const DecodeStrategy decodeStrategy = Encodings::NONE);
             Object(std::string entryDelimiter, const ObjectType entryType, const DecodeStrategy decodeStrategy = Encodings::NONE);
             Object(std::string entryDelimiter, Tuple tuple, const DecodeStrategy decodeStrategy = Encodings::NONE);
-            nlohmann::ordered_json parse(std::string_view original) const;
+            nlohmann::ordered_json parse(std::string_view original, const bool censor) const;
         private:
             const Strategy m_strategy;
             const std::string m_delimiter;
@@ -93,9 +93,9 @@ namespace proxy::converters {
             const DecodeStrategy m_decodeStrategy;
             const Mappings m_mappings;
 
-            nlohmann::ordered_json parseObject(const std::string_view original) const;
-            nlohmann::ordered_json parseArray(const std::string_view original) const;
-            nlohmann::ordered_json parseTuple(const std::string_view original) const;
+            nlohmann::ordered_json parseObject(const std::string_view original, const bool censor) const;
+            nlohmann::ordered_json parseArray(const std::string_view original, const bool censor) const;
+            nlohmann::ordered_json parseTuple(const std::string_view original, const bool censor) const;
 
             inline const Object& getObject(const ObjectSource& source) const {
                 if (std::holds_alternative<Object>(source)) {
@@ -115,7 +115,7 @@ namespace proxy::converters {
     public:
         RobTopToJsonV2();
         bool canConvert(const std::string_view path, const bool isBody, const std::string_view original) const override;
-        std::string convert(const std::string_view path, const std::string_view original) const override;
+        std::string convert(const std::string_view path, const std::string_view original, const bool censor) const override;
         std::string toRaw(const std::string_view path, const std::string_view original) const override;
     private:
         static const std::unordered_map<ObjectType, Object> PARSERS;

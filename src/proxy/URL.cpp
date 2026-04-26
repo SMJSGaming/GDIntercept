@@ -170,7 +170,7 @@ void proxy::URL::parsePath(size_t& index) {
     }
 
     if (queryStart != std::string::npos && converter.canConvert(m_path, false, m_queryString = fullPath.substr(queryStart + 1))) {
-        m_query = ordered_json::parse(converter.convert(m_path, m_queryString));
+        m_query = ordered_json::parse(converter.convert(m_path, m_queryString, true));
     }
 
     index += size;

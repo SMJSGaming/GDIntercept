@@ -8,7 +8,7 @@ bool proxy::converters::XmlToXml::canConvert(const std::string_view path, const 
         original.starts_with("<html");
 }
 
-std::string proxy::converters::XmlToXml::convert(const std::string_view path, const std::string_view original) const {
+std::string proxy::converters::XmlToXml::convert(const std::string_view path, const std::string_view original, const bool censor) const {
     return std::string(original);
 }
 

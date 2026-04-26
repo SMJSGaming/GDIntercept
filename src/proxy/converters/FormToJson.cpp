@@ -2,7 +2,22 @@
 
 using namespace nlohmann;
 
-proxy::converters::FormToJson::FormToJson() : Converter(enums::ContentType::JSON) { };
+proxy::converters::FormToJson::FormToJson() : Converter(enums::ContentType::JSON, true) { };
+
+bool proxy::converters::FormToJson::shouldMask(const std::string_view key) const {
+    static const std::vector<std::string> MASKED_STRINGS {
+        "dvs",
+        "vkey",
+        "gdw"
+    };
+
+    if (key == "udid" || key == "uuid") {
+        // Don't mask user info if the user is not logged in
+        return GJAccountManager::get()->m_accountID != 0;
+    } else {
+        return std::find(MASKED_STRINGS.begin(), MASKED_STRINGS.end(), key) != MASKED_STRINGS.end();
+    }
+}
 
 bool proxy::converters::FormToJson::canConvert(const std::string_view path, const bool isBody, const std::string_view original) const {
     bool hasAssignment = false;
@@ -24,17 +39,17 @@ bool proxy::converters::FormToJson::canConvert(const std::string_view path, cons
     return hasAssignment;
 }
 
-std::string proxy::converters::FormToJson::convert(const std::string_view path, const std::string_view original) const {
+std::string proxy::converters::FormToJson::convert(const std::string_view path, const std::string_view original, const bool censor) const {
     ordered_json object(ordered_json::object());
 
-    StringUtils::split(original, '&').forEach([&object](const std::string_view section) {
+    StringUtils::split(original, '&').forEach([&object, censor](const std::string_view section) {
         const size_t equalPos = section.find('=');
         const std::string_view key = section.substr(0, equalPos);
 
         if (equalPos == std::string::npos) {
             object[key] = json("");
         } else {
-            object[key] = getPrimitiveJsonType(key, section.substr(equalPos + 1));
+            object[key] = getPrimitiveJsonType(key, section.substr(equalPos + 1), censor);
         }
     });
 
@@ -43,17 +58,19 @@ std::string proxy::converters::FormToJson::convert(const std::string_view path, 
 
 std::string proxy::converters::FormToJson::toRaw(const std::string_view path, const std::string_view original) const {
     const ordered_json object = ordered_json::parse(original);
+    const bool shouldMask = Mod::get()->getSettingValue<bool>("mask-telemetry");
     std::string result;
 
     for (const auto& [key, value] : object.items()) {
-        if (result.size()) {
+        if (!shouldMask || !this->shouldMask(key)) {
+            result.append(key);
+            result.push_back('=');
+            result.append(converters::safeDump(value, 0, true));
             result.push_back('&');
         }
-
-        result.append(key);
-        result.push_back('=');
-        result.append(converters::safeDump(value, 0, true));
     }
+
+    result.pop_back();
 
     return result;
 }
