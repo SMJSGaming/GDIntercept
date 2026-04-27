@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.8.9 Fix user endpoints
+
+- Fix endpoints which for some reason rely on the user IDs
+
 ## v0.8.8 Fix request censoring
 
 - Fix a bug where the sent body had censored fields
