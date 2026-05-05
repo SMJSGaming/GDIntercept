@@ -15,7 +15,8 @@ bool proxy::converters::FormToJson::shouldMask(const std::string_view path, cons
         static const std::vector<std::string> USER_RELIANT_ENDPOINTS {
             "/database/getGJScores20.php",
             "/database/getGJChallenges.php",
-            "/database/getGJRewards.php"
+            "/database/getGJRewards.php",
+            "/database/getGJSecretReward.php"
         };
 
         // Don't mask user info if the user is not logged in & omit endpoints with weird user behavior

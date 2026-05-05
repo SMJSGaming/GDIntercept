@@ -1,5 +1,9 @@
 # GDIntercept Changelog
 
+## v0.8.10 Fix the wraith
+
+- Fix the wraith endpoint which relies on the user ID
+
 ## v0.8.9 Fix user endpoints
 
 - Fix endpoints which for some reason rely on the user IDs
